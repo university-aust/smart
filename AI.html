@@ -99,35 +99,79 @@
             
             const data = await res.json();
             if(loadingDiv) loadingDiv.remove();
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>منصة شهد الخالد | Smart Pulse</title>
+    <style>
+        :root { --cyan: #00e5ff; }
+        body { background: #000; color: white; font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; margin: 0; }
+        #chatBox { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .msg { padding: 12px 18px; border-radius: 15px; max-width: 80%; font-size: 14px; line-height: 1.6; }
+        .user { background: var(--cyan); color: #000; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .ai { background: rgba(255,255,255,0.1); border: 1px solid var(--cyan); align-self: flex-end; border-bottom-right-radius: 2px; }
+        .input-area { background: #0a0b10; padding: 15px; display: flex; gap: 10px; border-top: 1px solid var(--cyan); }
+        input { flex: 1; padding: 12px; background: #111; border: 1px solid var(--cyan); color: white; border-radius: 25px; outline: none; }
+        button { background: var(--cyan); border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 20px; }
+    </style>
+</head>
+<body>
+    <div style="padding: 15px; text-align: center; border-bottom: 1px solid var(--cyan); background: rgba(0,0,0,0.8);">
+        <h3 style="color: var(--cyan); margin: 0;">المهندسة شهد الخالد | AUST</h3>
+    </div>
+    <div id="chatBox"></div>
+    <div class="input-area">
+        <input id="aiInput" type="text" placeholder="اكتبي سؤالكِ هنا..." onkeypress="if(event.key==='Enter') askAI()">
+        <button onclick="askAI()">🚀</button>
+    </div>
 
-            if(data && data.response && data.response !== "undefined") {
-                addMsg(data.response, 'ai-msg');
-                chatHistory.push({ role: "assistant", content: data.response });
+<script>
+    const PROXY = "https://shahed-api-bridge.shahed200632.workers.dev/";
+    let history = [];
+
+    window.onload = () => addMsg("جاهز للعمل يا مهندسة شهد. تفضلي بسؤالي.", "ai");
+
+    async function askAI() {
+        const input = document.getElementById('aiInput');
+        const text = input.value.trim();
+        if(!text) return;
+
+        addMsg(text, "user");
+        history.push({role: "user", content: text});
+        input.value = "";
+        
+        const loading = addMsg("جاري تحليل الطلب... ✨", "ai");
+
+        try {
+            const res = await fetch(PROXY, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ messages: history })
+            });
+            const data = await res.json();
+            loading.remove();
+
+            if(data.response) {
+                addMsg(data.response, "ai");
+                history.push({role: "assistant", content: data.response});
             } else {
-                addMsg("تنبيه: وصل رد فارغ. تأكدي من رصيد xAI.", "ai-msg");
+                addMsg("تنبيه: الجسر لم يرسل نصاً. يرجى مراجعة سجلات Cloudflare.", "ai");
             }
         } catch (e) {
-            if(loadingDiv) loadingDiv.remove();
-            addMsg("فشل الاتصال بالجسر السحابي.", 'ai-msg');
+            loading.innerText = "فشل الاتصال بالجسر السحابي.";
         }
     }
 
     function addMsg(t, c) {
-        const box = document.getElementById('chatBox');
-        const div = document.createElement('div');
-        div.className = `message ${c}`;
-        div.innerText = t;
-        box.appendChild(div);
-        box.scrollTop = box.scrollHeight;
-        return div;
+        const cb = document.getElementById('chatBox');
+        const d = document.createElement('div');
+        d.className = `msg ${c}`;
+        d.innerText = t;
+        cb.appendChild(d);
+        cb.scrollTop = cb.scrollHeight;
+        return d;
     }
-
-    // دوال المؤقت والواجهة
-    let sec=0, tInt=null;
-    function startT() { if(!tInt) tInt=setInterval(()=>{sec++; let h=Math.floor(sec/3600).toString().padStart(2,'0'), m=Math.floor((sec%3600)/60).toString().padStart(2,'0'), s=(sec%60).toString().padStart(2,'0'); document.getElementById('timer').innerText=`${h}:${m}:${s}`;},1000); }
-    function stopT() { clearInterval(tInt); tInt=null; }
-    function resetT() { stopT(); sec=0; document.getElementById('timer').innerText="00:00:00"; }
-    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
 </script>
 </body>
 </html>
