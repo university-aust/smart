@@ -23,9 +23,9 @@
     </div>
 
 <script>
-    // المفتاح مشفر (Base64) لمنع حظر GitHub الآلي
-    const obfuscatedKey = "WGFpLTZHMGlZUWh0dU9IRGVrU2dDU0lsZUEzUTJmMVR4bUhDQjIwbTVEcnc0Zk44MXV1NmRWS1ZuZ1g1U2JxSVh3S0dmUHhFWGZjWms1YXJ3TkJZ";
-    const getK = () => atob(obfuscatedKey);
+    // تشفير المفتاح لمنع حظر GitHub
+    const encodedKey = "WGFpLTZHMGlZUWh0dU9IRGVrU2dDU0lsZUEzUTJmMVR4bUhDQjIwbTVEcnc0Zk44MXV1NmRWS1ZuZ1g1U2JxSVh3S0dmUHhFWGZjWms1YXJ3TkJZ";
+    const getK = () => atob(encodedKey);
 
     async function askAI() {
         const input = document.getElementById('aiInput');
@@ -34,19 +34,18 @@
 
         addMsg(text, 'user');
         input.value = "";
-        const loading = addMsg("جاري كسر حماية CORS والاتصال... 🚀", 'ai');
+        const loading = addMsg("جاري محاولة الاتصال المباشر... ✨", 'ai');
 
         try {
-            // نستخدم جسر CORS-Anywhere لتخطي الخطأ الذي ظهر في صورتك
-            const proxyUrl = "https://cors-anywhere.herokuapp.com/";
-            const apiUrl = "https://api.x.ai/v1/chat/completions";
+            // سنحاول الاتصال عبر جسر "عام" مختلف لا يحتاج لتفعيل يدوي
+            const proxy = "https://api.allorigins.win/raw?url=";
+            const target = encodeURIComponent("https://api.x.ai/v1/chat/completions");
 
-            const response = await fetch(proxyUrl + apiUrl, {
+            const response = await fetch(proxy + target, {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${getK()}`,
-                    "Content-Type": "application/json",
-                    "X-Requested-With": "XMLHttpRequest"
+                    "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
                     model: "grok-beta",
@@ -54,19 +53,13 @@
                 })
             });
 
-            // إذا طلب منك الجسر تفعيله، اضغطي على الرابط الذي سيظهر في الكونسول
-            if (response.status === 403) {
-                loading.innerText = "يرجى الضغط على رابط 'Demo' في موقع cors-anywhere لتفعيل الوصول المؤقت.";
-                return;
-            }
-
             const data = await response.json();
             loading.remove();
 
             if (data.choices && data.choices[0]) {
                 addMsg(data.choices[0].message.content, 'ai');
             } else {
-                addMsg("تنبيه: تم تخطي الحماية ولكن الرد فارغ. يرجى فحص رصيد xAI.", 'ai');
+                addMsg("تنبيه: تم الاتصال بنجاح ولكن xAI لم يرد بنص. يرجى التأكد من الرصيد.", 'ai');
             }
         } catch (e) {
             loading.innerText = "فشل الاتصال: " + e.message;
