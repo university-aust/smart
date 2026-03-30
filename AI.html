@@ -2,38 +2,49 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart AUST | شهد الخالد</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>منصة شهد الخالد | Smart Pulse</title>
     <style>
-        :root { --cyan: #00e5ff; --dark: #0a0b10; }
+        :root { --cyan: #00e5ff; --gold: #f1c40f; --dark: #0a0b10; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #000 url('67260.jpg') no-repeat center center fixed; background-size: cover; color: white; height: 100vh; display: flex; flex-direction: column; }
-        .chat-container { flex: 1; display: flex; flex-direction: column; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); margin: 10px; border-radius: 15px; border: 1px solid var(--cyan); overflow: hidden; }
-        #chatBox { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .msg { max-width: 85%; padding: 12px; border-radius: 12px; font-size: 14px; line-height: 1.5; }
-        .user { align-self: flex-start; background: var(--cyan); color: #000; }
-        .ai { align-self: flex-end; background: rgba(255,255,255,0.1); border: 1px solid var(--cyan); }
-        .input-area { padding: 15px; display: flex; gap: 10px; background: #000; border-top: 1px solid var(--cyan); }
-        input { flex: 1; padding: 12px; background: #111; border: 1px solid var(--cyan); color: white; border-radius: 25px; outline: none; }
+        html, body { height: 100%; overflow: hidden; background: #000; }
+        body { background: url('67260.jpg') no-repeat center center fixed; background-size: cover; display: flex; flex-direction: column; }
+        
+        .top-bar { height: 60px; background: rgba(0,0,0,0.9); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; border-bottom: 1px solid var(--cyan); z-index: 100; }
+        .chat-container { flex: 1; display: flex; flex-direction: column; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); margin: 15px; border-radius: 15px; border: 1px solid var(--cyan); position: relative; overflow: hidden; }
+        #chatBox { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; padding-bottom: 80px; }
+        
+        .msg { max-width: 85%; padding: 12px 18px; border-radius: 15px; font-size: 14px; line-height: 1.6; animation: fadeIn 0.3s ease; }
+        .user { align-self: flex-start; background: var(--cyan); color: #000; border-bottom-left-radius: 2px; }
+        .ai { align-self: flex-end; background: rgba(255,255,255,0.1); border: 1px solid var(--cyan); color: white; border-bottom-right-radius: 2px; }
+        
+        .input-area { position: absolute; bottom: 0; width: 100%; padding: 15px; display: flex; gap: 10px; background: rgba(10,11,16,0.95); border-top: 1px solid var(--cyan); }
+        #aiInput { flex: 1; height: 45px; background: #111; border: 1px solid var(--cyan); border-radius: 25px; color: white; padding: 0 20px; outline: none; }
         button { background: var(--cyan); border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 20px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-<div style="padding: 10px; text-align: center; background: rgba(0,0,0,0.9); border-bottom: 1px solid var(--cyan);">
-    <h3 style="color: var(--cyan);">المهندسة شهد الخالد - Smart Pulse</h3>
+<div class="top-bar">
+    <div style="color: var(--cyan); font-weight: bold;">المهندسة شهد الخالد | AUST SMART PULSE</div>
+    <button onclick="location.reload()" style="background:none; border:none; color:var(--gold); cursor:pointer;">🔄 تحديث</button>
 </div>
 
 <div class="chat-container">
     <div id="chatBox"></div>
     <div class="input-area">
-        <input id="aiInput" type="text" placeholder="اكتبي سؤالك هنا...">
+        <input id="aiInput" type="text" placeholder="اكتبي سؤالك هنا يا شهد..." onkeypress="if(event.key==='Enter') askAI()">
         <button onclick="askAI()">🚀</button>
     </div>
 </div>
 
 <script>
     const PROXY_URL = "https://shahed-api-bridge.shahed200632.workers.dev/";
+
+    window.onload = () => {
+        addMsg("نظام Grok جاهز للعمل بمفتاحكِ الجديد. تفضلي بطرح سؤالكِ.", "ai");
+    };
 
     async function askAI() {
         const input = document.getElementById('aiInput');
@@ -43,8 +54,8 @@
         addMsg(text, 'user');
         input.value = "";
 
-        // إنشاء رسالة انتظار وحفظ المرجع لحذفها
-        const loadingDiv = addMsg("انتظري قليلاً، جاري استدعاء الذكاء... ⏳", 'ai');
+        // عرض رسالة التحميل
+        const loadingDiv = addMsg("جاري الاتصال بالمحرك... ⚡", 'ai');
 
         try {
             const res = await fetch(PROXY_URL, {
@@ -55,18 +66,17 @@
             
             const data = await res.json();
             
-            // حذف رسالة "انتظري" فوراً
+            // حذف رسالة التحميل فوراً
             if(loadingDiv) loadingDiv.remove();
 
-            // فحص الرد بدقة لمنع undefined
-            if(data && data.response && data.response !== "undefined") {
+            if(data && data.response) {
                 addMsg(data.response, 'ai');
             } else {
-                addMsg("تنبيه: الجسر متصل ولكن الرد فارغ. تأكدي من وجود رصيد في حساب xAI.", "ai");
+                addMsg("تنبيه: وصل رد غير مفهوم. تأكدي من حالة الـ Worker.", "ai");
             }
         } catch (e) {
             if(loadingDiv) loadingDiv.remove();
-            addMsg("خطأ: تعذر الوصول للجسر السحابي.", 'ai');
+            addMsg("فشل الاتصال بالجسر السحابي.", 'ai');
         }
     }
 
