@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الطلبات | Shahd & Deaa</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <style>
+        :root {
+            --cyan: #00d4ff;
+            --bg-overlay: rgba(2, 6, 23, 0.95);
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --text-color: #ffffff;
+        }
+
+        body {
+            margin: 0; padding: 0;
+            background: var(--bg-overlay) url('67260.jpg') no-repeat center center fixed;
+            background-size: cover; background-blend-mode: overlay;
+            color: var(--text-color); font-family: 'Segoe UI', sans-serif;
+        }
+
+        .navbar {
+            padding: 15px 5%; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(2, 6, 23, 1); border-bottom: 2px solid var(--cyan);
+            position: sticky; top: 0; z-index: 1000;
+        }
+
+        .container { padding: 30px 5%; max-width: 900px; margin: auto; }
+
+        .request-card {
+            background: var(--card-bg); border-radius: 18px; padding: 20px;
+            margin-bottom: 15px; border: 1px solid rgba(0, 212, 255, 0.1);
+            display: flex; justify-content: space-between; align-items: center;
+            backdrop-filter: blur(10px); transition: 0.3s;
+        }
+
+        .request-card:hover { 
+            border-color: var(--cyan); 
+            background: rgba(255, 255, 255, 0.08);
+            transform: scale(1.01);
+        }
+
+        .info { flex: 1; }
+        .sender { font-size: 0.9rem; color: var(--cyan); margin-bottom: 5px; font-weight: bold; }
+        .url-text { font-size: 0.8rem; opacity: 0.6; color: #fff; text-decoration: none; display: block; margin-top: 5px; }
+        .url-text:hover { text-decoration: underline; opacity: 1; }
+
+        .actions { display: flex; gap: 10px; }
+        .btn { padding: 10px 18px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 0.85rem; }
+        .btn-approve { background: #10ac84; color: white; }
+        .btn-reject { background: #ff4d4d; color: white; }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        #no-data { text-align: center; margin-top: 100px; opacity: 0.5; }
+        
+        .swal-input-custom {
+            background: #1e293b !important;
+            color: white !important;
+            border: 1px solid var(--cyan) !important;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <a href="library.html" style="color:white; font-size:1.2rem;"><i class="fas fa-arrow-right"></i></a>
+            <div style="font-size: 1.2rem; font-weight: 900;">مراجعة المساهمات <span style="color:var(--cyan);">[إدارة]</span></div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="requestList"></div>
+        <div id="no-data" style="display:none;">
+            <i class="fas fa-ghost" style="font-size: 3rem; margin-bottom: 15px; color: var(--cyan);"></i>
+            <h3>لا توجد طلبات جديدة حالياً..</h3>
+        </div>
+    </div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
+        authDomain: "nabd-aust.firebaseapp.com",
+        databaseURL: "https://nabd-aust-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "nabd-aust",
+        storageBucket: "nabd-aust.firebasestorage.app",
+        messagingSenderId: "921777725948",
+        appId: "1:921777725948:web:7b024d0aa101068bef9279"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    
+    // --- نظام الأمان الثلاثي الصارم لصفحة الطلبات ---
+    const admins = [
+        { name: "shahed mamdoh alkhald", id: "20241600060", key: "shjkshjk" },
+        { name: "Deaa amar malaika", id: "20241600086", key: "shahed2006" }
+    ];
+
+    const currentUser = localStorage.getItem("userName");
+    const currentID = localStorage.getItem("universityID");
+    const currentKey = localStorage.getItem("securityKey");
+
+    function isAuthorized() {
+        return admins.some(admin => 
+            admin.name === currentUser && 
+            admin.id === currentID && 
+            admin.key === currentKey
+        );
+    }
+
+    // التحقق الفوري عند تحميل الصفحة
+    if (!isAuthorized()) {
+        document.body.innerHTML = `
+            <div style="text-align:center; margin-top:150px; color:white; font-family: 'Segoe UI', sans-serif;">
+                <i class="fas fa-shield-alt" style="font-size:5rem; color:var(--cyan); margin-bottom:20px;"></i>
+                <h1>منطقة محظورة!</h1>
+                <p>عذراً، لا تملك الصلاحيات الكافية للوصول لهذه الصفحة.</p>
+                <a href="library.html" style="color:var(--cyan); text-decoration:none; font-weight:bold; border:1px solid var(--cyan); padding:10px 20px; border-radius:10px; display:inline-block; margin-top:20px;">العودة للمكتبة</a>
+            </div>`;
+    }
+
+    function loadRequests() {
+        if (!isAuthorized()) return;
+
+        db.ref('suggestions/').on('value', (snap) => {
+            const data = snap.val();
+            const list = document.getElementById('requestList');
+            const noData = document.getElementById('no-data');
+            
+            list.innerHTML = "";
+            if (!data) {
+                noData.style.display = 'block';
+                return;
+            }
+            noData.style.display = 'none';
+
+            Object.keys(data).forEach(id => {
+                const item = data[id];
+                list.innerHTML += `
+                    <div class="request-card">
+                        <div class="info">
+                            <div class="sender"><i class="fas fa-user-circle"></i> من: ${item.sender || 'مساهم مجهول'}</div>
+                            <a href="${item.url}" target="_blank" class="url-text"><i class="fas fa-link"></i> ضغطة للمعاينة: ${item.url.substring(0, 50)}...</a>
+                        </div>
+                        <div class="actions">
+                            <button class="btn btn-approve" onclick="approve('${id}', '${item.url}')">قبول</button>
+                            <button class="btn btn-reject" onclick="reject('${id}')">رفض</button>
+                        </div>
+                    </div>
+                `;
+            });
+        });
+    }
+
+    function approve(id, url) {
+        if (!isAuthorized()) return;
+
+        Swal.fire({
+            title: 'تصنيف الملف الجديد',
+            background: '#0f172a',
+            color: '#fff',
+            confirmButtonColor: '#10ac84',
+            confirmButtonText: 'نشر في المكتبة',
+            html: `
+                <input id="sw-t" class="swal2-input swal-input-custom" placeholder="اسم المادة">
+                <input id="sw-d" class="swal2-input swal-input-custom" placeholder="اسم الدكتور">
+                <select id="sw-c" class="swal2-input swal-input-custom">
+                    <option value="هندسه معلوماتية">هندسه معلوماتية</option>
+                    <option value="هندسه معماريه">هندسه معماريه</option>
+                    <option value="هندسه بترول">هندسه بترول</option>
+                    <option value="هندسه كيميائيه">هندسه كيميائيه</option>
+                    <option value="طب اسنان">طب اسنان</option>
+                    <option value="صيدله">صيدله</option>
+                </select>
+                <select id="sw-y" class="swal2-input swal-input-custom">
+                    <option value="سنة أولى">سنة أولى</option><option value="سنة ثانية">سنة ثانية</option>
+                    <option value="سنة ثالثة">سنة ثالثة</option><option value="سنة رابعة">سنة رابعة</option>
+                    <option value="سنة خامسة">سنة خامسة</option>
+                </select>
+                <select id="sw-tp" class="swal2-input swal-input-custom">
+                    <option value="نظري">نظري</option><option value="عملي">عملي</option>
+                </select>
+            `,
+            preConfirm: () => {
+                const title = document.getElementById('sw-t').value;
+                if (!title) return Swal.showValidationMessage('اسم المادة ضروري!');
+                return {
+                    title: title,
+                    doctor: document.getElementById('sw-d').value || 'غير محدد',
+                    category: document.getElementById('sw-c').value,
+                    year: document.getElementById('sw-y').value,
+                    type: document.getElementById('sw-tp').value,
+                    url: url,
+                    views: 0,
+                    downloads: 0
+                }
+            }
+        }).then(r => {
+            if(r.isConfirmed) {
+                db.ref('official_library/').push(r.value);
+                db.ref('suggestions/' + id).remove();
+                Swal.fire({ icon: 'success', title: 'تم النشر بنجاح!', background: '#0f172a', color: '#fff' });
+            }
+        });
+    }
+
+    function reject(id) {
+        if (!isAuthorized()) return;
+
+        Swal.fire({
+            title: 'هل أنتِ متأكدة؟',
+            text: "سيتم حذف هذا الرابط نهائياً ولن يظهر في الطلبات.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ff4d4d',
+            confirmButtonText: 'نعم، حذف',
+            cancelButtonText: 'إلغاء',
+            background: '#0f172a',
+            color: '#fff'
+        }).then(r => {
+            if(r.isConfirmed) {
+                db.ref('suggestions/' + id).remove();
+            }
+        });
+    }
+
+    window.onload = loadRequests;
+</script>
+</body>
+</html>

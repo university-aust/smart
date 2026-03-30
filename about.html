@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>من نحن | فريق نبض AUST</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        :root {
+            --cyan: #00d4ff;
+            --cyan-glow: rgba(0, 212, 255, 0.4);
+            --insta-grad: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+        }
+
+        /* نظام التنبيهات الزجاجي */
+        .custom-swal-popup {
+            background: rgba(10, 15, 30, 0.9) !important;
+            backdrop-filter: blur(20px) !important;
+            border: 1px solid var(--cyan) !important;
+            border-radius: 25px !important;
+            box-shadow: 0 0 30px var(--cyan-glow) !important;
+        }
+        .custom-swal-title { color: white !important; font-weight: 900 !important; }
+        .custom-swal-content { color: rgba(255, 255, 255, 0.8) !important; font-weight: 600 !important; }
+        .custom-swal-confirm { background: var(--cyan) !important; color: #000 !important; border-radius: 12px !important; padding: 10px 30px !important; font-weight: 900 !important; cursor: pointer; }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: #030712;
+            background: linear-gradient(rgba(3, 7, 18, 0.8), rgba(3, 7, 18, 0.8)), url('67260.jpg'); 
+            background-size: cover; background-position: center; background-attachment: fixed;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+        }
+        
+        .about-container { max-width: 900px; margin: 40px auto; padding: 15px; }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(25px);
+            border-radius: 35px;
+            padding: 40px 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+
+        h1 { font-size: 2.6rem; margin-bottom: 5px; font-weight: 900; text-shadow: 0 0 15px var(--cyan-glow); }
+        .subtitle { color: var(--cyan); margin-bottom: 30px; font-size: 1.1rem; font-weight: bold; }
+
+        .vision-section {
+            text-align: right; max-width: 750px; margin: 20px auto;
+            background: rgba(255, 255, 255, 0.05); padding: 25px;
+            border-radius: 20px; border-right: 6px solid var(--cyan);
+        }
+
+        .team-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px; margin-top: 40px;
+        }
+
+        .member-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px 20px; border-radius: 30px;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative; overflow: hidden;
+        }
+
+        .member-card:hover {
+            transform: translateY(-12px);
+            border-color: var(--cyan);
+            box-shadow: 0 15px 40px var(--cyan-glow);
+        }
+
+        .role-badge {
+            background: var(--cyan); color: #000;
+            padding: 6px 14px; border-radius: 12px;
+            font-size: 0.8rem; font-weight: 900;
+            display: inline-block; margin-bottom: 20px;
+        }
+
+        .member-name { font-size: 1.6rem; margin: 10px 0; font-weight: 900; }
+        .member-desc { font-size: 0.95rem; color: #ccc; line-height: 1.6; margin-bottom: 20px; }
+
+        /* زر إنستغرام الأنيق */
+        .insta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: 0.3s;
+        }
+
+        .insta-btn i {
+            font-size: 1.2rem;
+            background: var(--insta-grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .insta-btn:hover {
+            background: var(--insta-grad);
+            border-color: transparent;
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(220, 39, 67, 0.4);
+        }
+
+        .back-nav {
+            display: inline-flex; align-items: center; gap: 10px;
+            color: #000; text-decoration: none; margin-bottom: 25px;
+            font-weight: 900; background: var(--cyan);
+            padding: 10px 25px; border-radius: 15px; transition: 0.3s;
+        }
+        .back-nav:hover { transform: translateX(-5px); box-shadow: 0 0 15px var(--cyan-glow); }
+    </style>
+</head>
+<body>
+
+    <div class="about-container">
+        <a href="dashboard.html" class="back-nav"><i class="fas fa-arrow-right"></i> العودة للوحة التحكم</a>
+
+        <div class="glass-panel">
+            <h1>نبض <span style="color: var(--cyan);">AUST</span></h1>
+            <p class="subtitle">Software Engineering - الجامعة العربية الخاصة للعلوم والتكنولوجيا</p>
+
+            <div class="vision-section">
+                <h2><i class="fas fa-terminal" style="margin-left: 10px;"></i> رؤيتنا التقنية</h2>
+                <p>تمكين طلابنا بأدوات برمجية ذكية، تجمع بين دقة الأكواد وجمال التصميم، لتسهيل الرحلة الجامعية وتحويل التحديات إلى ابتكارات.</p>
+            </div>
+
+            <div class="team-grid">
+                <div class="member-card">
+                    <span class="role-badge">Lead Developer & Logic Engineer</span>
+                    <div style="font-size: 50px;">⚡</div>
+                    <h3 class="member-name">شهد الخالد</h3>
+                    <p class="member-desc">العقل المدبر لمنطق النظام، المسؤولة عن برمجة الـ JavaScript، إدارة التخزين المحلي، وربط البيانات السحابية بـ Firebase.</p>
+                    <a href="https://www.instagram.com/shahed.alkhald?igsh=dnhocXpoaXk3Nzhn" target="_blank" class="insta-btn">
+                        <i class="fab fa-instagram"></i> تابع شهد على إنستغرام
+                    </a>
+                </div>
+
+                <div class="member-card">
+                    <span class="role-badge">UI/UX Designer & Creative Director</span>
+                    <div style="font-size: 50px;">🎨</div>
+                    <h3 class="member-name">ضياء ملائكة</h3>
+                    <p class="member-desc">المبدعة المسؤولة عن الهوية البصرية، تصميم واجهات المستخدم الاحترافية، وتنسيق تجربة المستخدم لتكون سلسة وجذابة.</p>
+                    <a href="https://www.instagram.com/deaa.malaika?igsh=YXNxN3ZiNnQ0c3Ns" target="_blank" class="insta-btn">
+                        <i class="fab fa-instagram"></i> تابع ضياء على إنستغرام
+                    </a>
+                </div>
+            </div>
+
+            <p style="margin-top: 50px; opacity: 0.4; font-size: 0.85rem; font-weight: bold;">
+                <i class="fas fa-code"></i>تم تطوير الموقع لطلاب ©2026AUST 
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
+            authDomain: "nabd-aust.firebaseapp.com",
+            databaseURL: "https://nabd-aust-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "nabd-aust",
+            storageBucket: "nabd-aust.firebasestorage.app",
+            messagingSenderId: "921777725948",
+            appId: "1:921777725948:web:7b024d0aa101068bef9279"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+        function memberAlert(name, message) {
+            Swal.fire({
+                title: name,
+                text: message,
+                icon: 'info',
+                confirmButtonText: 'حسناً',
+                customClass: {
+                    popup: 'custom-swal-popup',
+                    title: 'custom-swal-title',
+                    htmlContainer: 'custom-swal-content',
+                    confirmButton: 'custom-swal-confirm'
+                },
+                buttonsStyling: false
+            });
+        }
+    </script>
+</body>
+</html>

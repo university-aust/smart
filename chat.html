@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>نبض الحوار الخاص | AUST</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root { --cyan: #00d4ff; --navy-deep: #1e293b; --glass: rgba(10, 15, 30, 0.95); }
+
+        /* تجميد الصفحة بالكامل ومنع الارتداد */
+        html, body { 
+            height: 100%; 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; /* يمنع الصفحة كاملة من التحرك */
+            width: 100%;
+            position: fixed; /* حل نهائي لثبات الخلفية */
+        }
+
+        body {
+            /* تثبيت الخلفية لتكون طبقة تحتية لا تتحرك أبداً */
+            background: linear-gradient(rgba(3, 7, 18, 0.7), rgba(3, 7, 18, 0.7)), url('67260.jpg') no-repeat center center;
+            background-size: cover; 
+            color: white; 
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            display: flex; 
+            flex-direction: column;
+        }
+
+        .chat-header {
+            height: 60px;
+            padding: 0 20px; 
+            background: var(--glass); 
+            backdrop-filter: blur(20px);
+            border-bottom: 2px solid var(--cyan); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            flex-shrink: 0;
+            z-index: 100;
+        }
+
+        /* هذا الجزء الوحيد المسموح له بالحركة */
+        #chatBox { 
+            flex: 1; 
+            padding: 20px; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            /* منع تأثير الارتداد في الآيفون */
+            -webkit-overflow-scrolling: touch; 
+        }
+
+        .msg { max-width: 80%; padding: 12px 18px; border-radius: 20px; font-size: 0.95rem; cursor: pointer; position: relative; word-wrap: break-word; }
+        .my-msg { align-self: flex-start; background: linear-gradient(135deg, var(--cyan), var(--navy-deep)); border-bottom-right-radius: 2px; color: #111; font-weight: 500;}
+        .other-msg { align-self: flex-end; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(0, 212, 255, 0.2); border-bottom-left-radius: 2px; }
+        
+        .user-tag { font-size: 0.75rem; font-weight: 800; color: var(--cyan); margin-bottom: 5px; display: block; }
+        .time { font-size: 0.65rem; opacity: 0.7; }
+
+        .status-bolt-sent { color: #666; font-size: 0.8rem; margin-right: 5px; } 
+        .status-bolt-seen { color: var(--cyan); font-size: 0.8rem; margin-right: 5px; filter: drop-shadow(0 0 3px var(--cyan)); }
+
+        /* شريط الكتابة مثبت في الأسفل */
+        .input-area { 
+            background: var(--glass); 
+            padding: 10px 15px; 
+            display: flex; 
+            gap: 10px; 
+            border-top: 1px solid var(--cyan); 
+            flex-shrink: 0; 
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+        }
+
+        input { 
+            flex: 1; 
+            padding: 12px 20px; 
+            border-radius: 25px; 
+            border: 1px solid rgba(0, 212, 255, 0.3); 
+            outline: none; 
+            font-size: 16px; 
+            background: rgba(255, 255, 255, 0.05); 
+            color: white; 
+        }
+
+        .send-btn { 
+            background: var(--cyan); border: none; width: 45px; height: 45px; 
+            border-radius: 50%; color: #111; display: flex; 
+            align-items: center; justify-content: center; font-size: 1.2rem; 
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-header">
+        <a href="dashboard.html" style="color:var(--cyan); font-size: 1.2rem;"><i class="fas fa-chevron-right"></i></a>
+        <div style="text-align: center;">
+            <h2 id="chatWith" style="margin:0; font-size:1rem;">دردشة</h2>
+            <div id="itemContext" style="font-size:0.7rem; color:var(--cyan);"></div>
+        </div>
+        <button onclick="clearFullChat()" style="background:none; border:none; color:var(--cyan);"><i class="fas fa-trash-alt"></i></button>
+    </div>
+
+    <div id="chatBox"></div>
+
+    <div class="input-area">
+        <input type="text" id="msgInput" placeholder="اكتب رسالتك..." autocomplete="off">
+        <button class="send-btn" onclick="send()"><i class="fas fa-bolt"></i></button>
+    </div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script>
+    // --- إعدادات Firebase (نفس إعداداتك) ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
+        authDomain: "nabd-aust.firebaseapp.com",
+        databaseURL: "https://nabd-aust-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "nabd-aust",
+        storageBucket: "nabd-aust.firebasestorage.app",
+        messagingSenderId: "921777725948",
+        appId: "1:921777725948:web:7b024d0aa101068bef9279",
+        measurementId: "G-HC2TSQ70V2"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const otherUser = urlParams.get('to') || "زميل";
+    const itemName = urlParams.get('item') || "موضوع عام";
+    const currentUser = localStorage.getItem("userName") || "شهد الخالد";
+    const chatId = [currentUser, otherUser].sort().join("_").replace(/\s/g, '');
+
+    document.getElementById('chatWith').innerText = `دردشة مع ${otherUser}`;
+    document.getElementById('itemContext').innerText = `بخصوص: ${itemName}`;
+
+    // --- تحديث الارتفاع بدقة عند ظهور الكيبورد ---
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', () => {
+            // نغير ارتفاع الصفحة ليساوي بالضبط ما يراه المستخدم فوق الكيبورد
+            document.body.style.height = window.visualViewport.height + 'px';
+            document.body.style.top = window.visualViewport.offsetTop + 'px';
+            
+            // تمرير الرسائل للأسفل
+            const chatBox = document.getElementById('chatBox');
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+    }
+
+    function send() {
+        const input = document.getElementById('msgInput');
+        const text = input.value.trim();
+        if (!text) return;
+        
+        database.ref('chats/' + chatId).push({
+            sender: currentUser, text: text, seen: false,
+            time: new Date().toLocaleTimeString('ar-SY', {hour: '2-digit', minute:'2-digit'}),
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        }).then(() => {
+            updateChatIndex(text);
+            input.value = "";
+            input.focus();
+        });
+    }
+
+    function updateChatIndex(lastText) {
+        let chatIndex = JSON.parse(localStorage.getItem("AUST_CHAT_INDEX") || "[]");
+        const chatData = { targetName: otherUser, lastMsg: lastText, item: itemName, chatUrl: window.location.href, time: new Date().toLocaleTimeString('ar-SY', {hour: '2-digit', minute:'2-digit'}) };
+        const existing = chatIndex.findIndex(c => c.targetName === otherUser);
+        if (existing > -1) chatIndex[existing] = chatData; else chatIndex.unshift(chatData);
+        localStorage.setItem("AUST_CHAT_INDEX", JSON.stringify(chatIndex));
+    }
+
+    function markAsSeen() {
+        database.ref('chats/' + chatId).once('value', (snap) => {
+            const messages = snap.val();
+            if (messages) {
+                Object.keys(messages).forEach(key => {
+                    if (messages[key].sender !== currentUser && !messages[key].seen) {
+                        database.ref('chats/' + chatId + '/' + key).update({ seen: true });
+                    }
+                });
+            }
+        });
+    }
+
+    function listenForMessages() {
+        const chatBox = document.getElementById('chatBox');
+        database.ref('chats/' + chatId).on('value', (snap) => {
+            const data = snap.val();
+            chatBox.innerHTML = "";
+            if (data) {
+                Object.keys(data).forEach(k => {
+                    const m = data[k];
+                    const isMe = m.sender === currentUser;
+                    const bolt = `<span class="${m.seen ? 'status-bolt-seen' : 'status-bolt-sent'}"><i class="fas fa-bolt"></i></span>`;
+                    chatBox.innerHTML += `
+                        <div class="msg ${isMe ? 'my-msg' : 'other-msg'}" onclick="deleteSingleMsg('${k}')">
+                            <span class="user-tag">${isMe ? 'أنا' : m.sender}</span>
+                            <div>${m.text}</div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+                                <span class="time">${m.time}</span>
+                                ${isMe ? bolt : ''}
+                            </div>
+                        </div>`;
+                });
+                chatBox.scrollTop = chatBox.scrollHeight;
+                markAsSeen();
+            }
+        });
+    }
+
+    function deleteSingleMsg(msgId) {
+        Swal.fire({ title: 'حذف الرسالة؟', icon: 'warning', showCancelButton: true, confirmButtonText: 'حذف' }).then(r => { if (r.isConfirmed) database.ref('chats/' + chatId + '/' + msgId).remove(); });
+    }
+
+    function clearFullChat() {
+        Swal.fire({ title: 'مسح المحادثة؟', icon: 'warning', showCancelButton: true, confirmButtonText: 'مسح' }).then(r => { if (r.isConfirmed) database.ref('chats/' + chatId).remove(); });
+    }
+
+    document.getElementById('msgInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') send(); });
+    window.onload = listenForMessages;
+</script>
+</body>
+</html>

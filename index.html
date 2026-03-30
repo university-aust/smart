@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AUST Smart Pulse | تسجيل الدخول </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+    :root {
+        --gold: #00d4ff; 
+        --gold-glow: rgba(0, 212, 255, 0.6);
+        --glass: rgba(10, 15, 30, 0.75);
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+
+    body {
+        height: 100vh; display: flex; justify-content: center; align-items: center;
+        background-color: #030712;
+        background-image: url('67260.jpg');
+        background-size: cover; background-position: center; background-attachment: fixed;
+        overflow: hidden; position: relative;
+    }
+
+    body::before { 
+        content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 0; 
+    }
+
+    .glass-container {
+        position: relative; z-index: 1; width: 420px; padding: 35px;
+        background: var(--glass); 
+        backdrop-filter: blur(15px) saturate(160%); 
+        -webkit-backdrop-filter: blur(15px) saturate(160%);
+        border: 1px solid rgba(0, 212, 255, 0.3); 
+        border-radius: 45px;
+        text-align: center; 
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+        transition: all 0.5s ease-in-out;
+    }
+
+    .glass-container:hover {
+        transform: translateY(-10px); 
+        box-shadow: 0 30px 60px rgba(0,0,0,0.4), 0 0 40px var(--gold-glow);
+        border-color: var(--gold);
+    }
+
+    .top-line { width: 60px; height: 4px; background: var(--gold); margin: 0 auto 15px; border-radius: 10px; box-shadow: 0 0 15px var(--gold); }
+    
+    .brand-h1 { 
+        font-size: 2.8rem; margin: 0; 
+        background: linear-gradient(to bottom, #fff 40%, var(--gold)); 
+        -webkit-background-clip: text; background-clip: text;
+        -webkit-text-fill-color: transparent; 
+        font-weight: 900; filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5)); 
+    }
+
+    .wisdom-container { margin: 20px 0; padding: 25px; background: rgba(0, 0, 0, 0.4); border-radius: 25px; border-right: 4px solid var(--gold); }
+    .wisdom-text { font-size: 1.1rem; line-height: 1.6; color: #fff; font-style: italic; text-shadow: 1px 1px 5px rgba(0,0,0,0.5); }
+
+    .main-btn, .submit-btn {
+        display: block; width: 100%; padding: 16px; margin-top: 20px;
+        background: linear-gradient(45deg, var(--gold), #1e293b);
+        color: #fff; border: none; border-radius: 15px; font-weight: 800;
+        font-size: 1.1rem; cursor: pointer; transition: 0.3s;
+        box-shadow: 0 4px 15px var(--gold-glow);
+    }
+
+    .form-group { margin-top: 15px; text-align: right; position: relative; }
+    label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: var(--gold); font-weight: bold; }
+    
+    input { 
+        width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); 
+        background: rgba(255, 255, 255, 0.95); color: #222; font-size: 1rem; outline: none; transition: 0.3s; 
+    }
+    input:focus { transform: translateY(-2px); box-shadow: 0 5px 15px var(--gold-glow); }
+
+    .pass-toggle { position: absolute; left: 12px; bottom: 12px; color: #666; cursor: pointer; }
+    .footer { margin-top: 25px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.75rem; color: #fff; text-shadow: 1px 1px 2px #000; }
+    
+    #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; }
+    .toast { 
+        background: rgba(10, 15, 30, 0.9); backdrop-filter: blur(10px); 
+        color: white; padding: 12px 25px; border-radius: 15px; 
+        border: 1px solid var(--gold); margin-bottom: 10px; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        animation: slideDown 0.4s ease-out;
+    }
+    @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div id="toast-container"></div>
+
+    <div class="glass-container" id="welcomeSection">
+        <div class="top-line"></div>
+        <p style="color: var(--gold); font-weight: 600;">اهلا وسهلا بك في</p>
+        <h1 class="brand-h1">Smart Pulse</h1>
+        <div class="wisdom-container">
+            <p class="wisdom-text">"الطريق طويل، لكن كل خطوة تخطوها اليوم تجعل القمة أقرب."</p>
+        </div>
+        <button class="main-btn" onclick="showAuth()">انطلق نحو مستقبلك</button>
+        <div class="footer">تطوير المهندسة <b>شهد الخالد</b> & المهندسة<b> ضياء ملائكه</b></div>
+    </div>
+
+    <div class="glass-container" id="authSection" style="display:none;">
+        <div class="top-line"></div>
+        <h2 id="mainTitle" style="color:var(--gold); margin-bottom:15px;">تسجيل الدخول</h2>
+        
+        <form id="authForm" onsubmit="event.preventDefault(); handleAction();">
+            <div class="form-group" id="nameGroup" style="display:none;">
+                <label>الاسم الثلاثي</label>
+                <input type="text" id="nameInput" placeholder="الاسم الأب الكنية">
+            </div>
+
+            <div class="form-group">
+                <label>رقم الطالب (ID)</label>
+                <input type="text" id="idInput" placeholder="2026XXXX">
+            </div>
+            
+            <div class="form-group" id="emailGroup" style="display:none;">
+                <label>البريد الإلكتروني (Gmail)</label>
+                <input type="email" id="emailInput" placeholder="name@gmail.com">
+            </div>
+
+            <div class="form-group" id="passGroup">
+                <label>الرمز السري (8 محارف على الأقل)</label>
+                <input type="password" id="passInput" placeholder="أحرف، أرقام، رموز">
+                <i class="fas fa-eye pass-toggle" onclick="togglePass(this)"></i>
+            </div>
+
+            <button type="submit" class="submit-btn" id="btnText">دخول المنصة</button>
+        </form>
+
+        <div style="margin-top:20px; font-size:0.85rem; cursor:pointer; color: #fff;" onclick="toggleMode()" id="toggleTxt">ليس لديك حساب؟ <b>إنشاء حساب جديد</b></div>
+        <div style="margin-top:10px; font-size:0.8rem; color:var(--gold); cursor:pointer; text-decoration:underline;" id="forgotLink" onclick="showForgot()">نسيت كلمة المرور؟</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script>
+    (function() { emailjs.init("m905j3dqOVj_wLxf-"); })();
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
+        authDomain: "nabd-aust.firebaseapp.com",
+        databaseURL: "https://nabd-aust-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "nabd-aust",
+        storageBucket: "nabd-aust.firebasestorage.app",
+        messagingSenderId: "921777725948",
+        appId: "1:921777725948:web:7b024d0aa101068bef9279",
+        measurementId: "G-HC2TSQ70V2"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    let mode = 'login';
+
+    function notify(msg) {
+        const container = document.getElementById('toast-container');
+        if(!container) return; 
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = msg;
+        container.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
+    }
+
+    function showAuth() {
+        document.getElementById('welcomeSection').style.display = 'none';
+        document.getElementById('authSection').style.display = 'block';
+    }
+
+    function togglePass(icon) {
+        const input = document.getElementById('passInput');
+        input.type = (input.type === 'password') ? 'text' : 'password';
+        icon.classList.toggle('fa-eye-slash');
+    }
+
+    function toggleMode() {
+        if (mode === 'login' || mode === 'forgot') {
+            mode = 'register';
+            updateUI("إنشاء حساب", "تأكيد الحساب", "block", "block", "block", "لديك حساب؟ <b>سجل دخولك</b>");
+            document.getElementById('forgotLink').style.display = 'none';
+        } else {
+            mode = 'login';
+            updateUI("تسجيل الدخول", "دخول المنصة", "none", "none", "block", "إنشاء حساب جديد");
+            document.getElementById('forgotLink').style.display = 'block';
+        }
+    }
+
+    function showForgot() {
+        mode = 'forgot';
+        updateUI("استعادة الرمز", "إرسال كود التحقق", "none", "block", "none", "العودة للدخول");
+    }
+
+    function updateUI(t, b, n, e, p, sw) {
+        document.getElementById('mainTitle').innerText = t;
+        document.getElementById('btnText').innerText = b;
+        document.getElementById('nameGroup').style.display = n;
+        document.getElementById('emailGroup').style.display = e;
+        document.getElementById('passGroup').style.display = p;
+        document.getElementById('toggleTxt').innerHTML = sw;
+    }
+
+    function handleAction() {
+        const id = document.getElementById('idInput').value.trim();
+        const pass = document.getElementById('passInput').value;
+        const name = document.getElementById('nameInput').value.trim();
+        const email = document.getElementById('emailInput').value.trim();
+
+        if (!id || isNaN(id)) { notify("رقم الطالب يجب أن يكون أرقاماً"); return; }
+
+        if (mode === 'register') {
+            const nameParts = name.split(/\s+/).filter(p => p.length > 0);
+            if (nameParts.length < 3) { notify("يرجى إدخال الاسم الثلاثي"); return; }
+            if (pass.length < 8) { notify("الرمز 8 محارف على الأقل"); return; }
+            if (!email.toLowerCase().endsWith("@gmail.com")) { notify("Gmail فقط!"); return; }
+
+            notify("جاري التحقق من الرقم الجامعي...");
+
+            database.ref('users/' + id).once('value').then((snapshot) => {
+                if (snapshot.exists()) {
+                    notify("خطأ: هذا الرقم الجامعي مسجل مسبقاً!");
+                } else {
+                    database.ref('users/' + id).set({
+                        id: id,
+                        pass: pass,
+                        name: name,
+                        email: email,
+                        major: "هندسة البرمجيات",
+                        createdAt: new Date().toISOString()
+                    }).then(() => {
+                        notify("تم إنشاء الحساب بنجاح!");
+                        setTimeout(toggleMode, 1500);
+                    });
+                }
+            }).catch(() => notify("خطأ في الاتصال بقاعدة البيانات"));
+        } 
+        else if (mode === 'login') {
+            database.ref('users/' + id).once('value').then((snapshot) => {
+                const data = snapshot.val();
+                
+                if (data && data.pass === pass) {
+                    // --- التعديل المضاف لربط صفحة الذكاء ---
+                    localStorage.setItem("studentName", data.name);
+                    localStorage.setItem("studentMajor", data.major || "هندسة البرمجيات");
+                    localStorage.setItem("studentID", data.id);
+                    
+                    // التخزين الأصلي الخاص بكِ
+                    localStorage.setItem("userName", data.name);
+                    localStorage.setItem("universityID", data.id);
+                    localStorage.setItem("securityKey", data.pass);
+                    localStorage.setItem("userMajor", data.major || "هندسة البرمجيات");
+
+                    notify("مرحباً بك مجدداً: " + data.name);
+                    
+                    setTimeout(() => {
+                        window.location.href = "dashboard.html";
+                    }, 1200);
+                } else { 
+                    notify("البيانات غير صحيحة أو الحساب غير موجود"); 
+                }
+            }).catch((error) => {
+                console.error(error);
+                notify("حدث خطأ في الاتصال بالسيرفر");
+            });
+        }
+        else if (mode === 'forgot') {
+            if (!id || !email) { notify("أدخل الرقم الجامعي والإيميل"); return; }
+            notify("جاري البحث عن حسابك...");
+            
+            database.ref('users/' + id).once('value').then((snapshot) => {
+                const data = snapshot.val();
+                if (data && data.email.toLowerCase() === email.toLowerCase()) {
+                    const code = Math.floor(100000 + Math.random() * 900000);
+                    const templateParams = {
+                        to_name: data.name,
+                        to_email: email,
+                        recovery_code: code
+                    };
+
+                    emailjs.send("service_cgm7d0c", "template_xi6oxl7", templateParams)
+                    .then(() => {
+                        let userCode = prompt("أدخل كود التحقق المرسل لإيميلك " + email + ":");
+                        if (userCode == code) {
+                            let newP = prompt("أدخل الرمز الجديد (8 محارف على الأقل):");
+                            if (newP && newP.length >= 8) {
+                                database.ref('users/' + id).update({pass: newP}).then(() => {
+                                    notify("تم تغيير الرمز بنجاح! سجل دخولك الآن");
+                                    setTimeout(() => location.reload(), 1500);
+                                });
+                            } else { notify("الرمز قصير جداً"); }
+                        } else { notify("الكود الذي أدخلته خاطئ"); }
+                    })
+                    .catch(() => notify("فشل إرسال الإيميل"));
+                } else { 
+                    notify("لم نجد حساباً بهذا الرقم والإيميل"); 
+                }
+            });
+        }
+    }
+
+    document.getElementById('idInput').addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+</script>
+</body>
+</html>

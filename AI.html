@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>منصة شهد الخالد | AUST</title>
+    <style>
+        :root { --cyan: #00e5ff; --gold: #f1c40f; --dark: #0a0b10; --red: #ff4444; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        html, body { height: 100%; overflow: hidden; background: #000; }
+        body { background: url('67260.jpg') no-repeat center center fixed; background-size: cover; display: flex; flex-direction: column; }
+        .top-bar { height: 60px; background: rgba(0,0,0,0.9); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; border-bottom: 1px solid var(--cyan); z-index: 1100; }
+        .dashboard { flex: 1; display: flex; position: relative; overflow: hidden; }
+        .sidebar { width: 280px; background: rgba(10, 11, 16, 0.98); padding: 20px; display: flex; flex-direction: column; gap: 15px; border-left: 1px solid var(--cyan); transition: 0.3s ease; z-index: 1050; height: 100%; }
+        .timer-box { background: rgba(0, 229, 255, 0.05); border: 1px solid var(--cyan); border-radius: 12px; padding: 10px; text-align: center; }
+        #timer { font-family: monospace; color: var(--cyan); font-size: 22px; display: block; }
+        .chat-container { flex: 1; display: flex; flex-direction: column; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); position: relative; }
+        #chatBox { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; padding-bottom: 100px; }
+        .message { max-width: 85%; padding: 12px 16px; border-radius: 15px; font-size: 14px; line-height: 1.6; word-wrap: break-word; }
+        .user-msg { align-self: flex-start; background: var(--cyan); color: #000; border-bottom-left-radius: 2px; }
+        .ai-msg { align-self: flex-end; background: rgba(255,255,255,0.1); border: 1px solid var(--cyan); border-bottom-right-radius: 2px; color: white; }
+        .input-area { position: absolute; bottom: 0; width: 100%; background: #0a0b10; padding: 12px 15px; display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--cyan); }
+        #aiInput { flex: 1; height: 45px; background: rgba(255,255,255,0.05); border: 1px solid var(--cyan); border-radius: 22px; color: white; padding: 10px 18px; outline: none; resize: none; }
+        .btn-send { background: var(--cyan); border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .history-item { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 12px; cursor: pointer; border: 1px solid transparent; }
+        @media (max-width: 768px) { .sidebar { position: absolute; right: -280px; } .sidebar.active { right: 0; } }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <button onclick="toggleSidebar()" style="background:none; border:none; color:var(--cyan); font-size:28px;">☰</button>
+    <div style="color: var(--cyan); font-weight: bold; font-size: 14px;">AUST SMART PULSE</div>
+    <div style="width: 24px;"></div>
+</div>
+
+<div class="dashboard">
+    <aside class="sidebar" id="sidebar">
+        <h2 id="userNameDisplay" style="color:var(--gold); font-size:18px;">شهد الخالد</h2>
+        <div class="timer-box">
+            <span id="timer">00:00:00</span>
+            <div style="margin-top:5px;">
+                <button onclick="startT()" style="color:var(--cyan); background:none; border:none;">▶</button>
+                <button onclick="stopT()" style="color:var(--gold); background:none; border:none; margin:0 10px;">⏸</button>
+                <button onclick="resetT()" style="color:var(--red); background:none; border:none;">🔄</button>
+            </div>
+        </div>
+        <button onclick="startNewChat()" style="width:100%; padding:10px; background:var(--gold); border:none; border-radius:8px; font-weight:bold;">محادثة جديدة</button>
+        <select id="majorSelector" onchange="updateGreetingBySelection()" style="width:100%; padding:10px; background:#000; color:white; border:1px solid var(--cyan); border-radius:8px;">
+            <option>هندسة المعلوماتية</option>
+            <option>هندسة البترول</option>
+            <option>هندسة العمارة</option>
+            <option>طب الأسنان</option>
+            <option>الصيدلة</option>
+        </select>
+        <div id="historyList" style="flex:1; overflow-y:auto;"></div>
+        <a href="dashboard.html" style="text-align:center; color:var(--cyan); text-decoration:none; font-size:11px; padding:10px; border:1px solid var(--cyan); border-radius:8px;">خروج</a>
+    </aside>
+
+    <main class="chat-container">
+        <div id="chatBox"></div>
+        <div class="input-area">
+            <label for="fileInput" style="color:var(--cyan); font-size:24px; cursor:pointer;">📎</label>
+            <input type="file" id="fileInput" style="display:none" onchange="handleFile(this)">
+            <textarea id="aiInput" placeholder="اكتبي سؤالك هنا يا شهد..."></textarea>
+            <button class="btn-send" onclick="processAI()">🚀</button>
+        </div>
+    </main>
+</div>
+
+<script>
+    // رابط الجسر السحابي الخاص بكِ
+    const PROXY_URL = "https://shahed-api-bridge.shahed200632.workers.dev/";
+    const studentID = localStorage.getItem('studentID') || "guest";
+    let currentHistory = [];
+    let tempFileContext = "";
+
+    window.onload = () => {
+        document.getElementById('userNameDisplay').innerText = localStorage.getItem('studentName') || "شهد الخالد";
+        loadHistory();
+        updateGreetingBySelection();
+    };
+
+    function getTitle(m) {
+        if (["طب الأسنان", "الصيدلة"].includes(m)) return "الدكتورة";
+        return "المهندسة";
+    }
+
+    function handleFile(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            tempFileContext = `--- محتوى الملف (${file.name}) ---\n${e.target.result}`;
+            addMsg(`📂 تم استلام ملف: ${file.name}. بانتظار سؤالك عنه...`, 'user-msg');
+        };
+        reader.readAsText(file);
+    }
+
+    async function processAI() {
+        const input = document.getElementById('aiInput');
+        const text = input.value.trim();
+        const major = document.getElementById('majorSelector').value;
+
+        if(!text && !tempFileContext) return;
+
+        let promptToSend = text;
+        if(tempFileContext) {
+            promptToSend = `${tempFileContext}\n\nالسؤال: ${text || "لخص الملف"}`;
+            tempFileContext = "";
+        }
+
+        addMsg(text || "تحليل ملف", 'user-msg');
+        currentHistory.push({ role: "user", content: promptToSend });
+        input.value = "";
+
+        const loadingDiv = addMsg("جاري التفكير عبر الجسر... ✨", 'ai-msg');
+
+        try {
+            const res = await fetch(PROXY_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    messages: [
+                        { role: "system", content: `أنت مساعد أكاديمي لشهد الخالد تخصص ${major}.` },
+                        ...currentHistory
+                    ]
+                })
+            });
+            const data = await res.json();
+            loadingDiv.remove();
+
+            if(data.response) {
+                currentHistory.push({ role: "assistant", content: data.response });
+                typeText(data.response);
+                saveHistory();
+            } else { addMsg("حدث خطأ في استلام الرد.", "ai-msg"); }
+        } catch (e) { addMsg("الجسر لا يستجيب، تأكدي من Cloudflare.", 'ai-msg'); }
+    }
+
+    function addMsg(t, c) {
+        const box = document.getElementById('chatBox');
+        const div = document.createElement('div');
+        div.className = `message ${c}`;
+        div.innerText = t;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+        return div;
+    }
+
+    function typeText(t) {
+        const div = document.createElement('div');
+        div.className = 'message ai-msg';
+        document.getElementById('chatBox').appendChild(div);
+        let i = 0;
+        function type() {
+            if (i < t.length) {
+                div.innerHTML += t.charAt(i) === '\n' ? '<br>' : t.charAt(i);
+                i++;
+                document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
+                setTimeout(type, 10);
+            }
+        }
+        type();
+    }
+
+    // دوال السجل والوقت (كما كانت في كودكِ)
+    function saveHistory() {
+        let logs = JSON.parse(localStorage.getItem(`logs_${studentID}`) || "[]");
+        logs.unshift({ title: currentHistory[0].content.substring(0,20), data: [...currentHistory] });
+        localStorage.setItem(`logs_${studentID}`, JSON.stringify(logs.slice(0, 10)));
+        loadHistory();
+    }
+    function loadHistory() {
+        const list = document.getElementById('historyList');
+        const logs = JSON.parse(localStorage.getItem(`logs_${studentID}`) || "[]");
+        list.innerHTML = '';
+        logs.forEach((log, i) => {
+            const d = document.createElement('div');
+            d.className = 'history-item';
+            d.innerText = log.title;
+            d.onclick = () => { currentHistory = log.data; document.getElementById('chatBox').innerHTML = ''; currentHistory.forEach(m => addMsg(m.content, m.role === 'user' ? 'user-msg' : 'ai-msg')); };
+            list.appendChild(d);
+        });
+    }
+    function updateGreetingBySelection() {
+        const m = document.getElementById('majorSelector').value;
+        document.getElementById('chatBox').innerHTML = `<div class="message ai-msg">مرحباً ${getTitle(m)} شهد. كيف أساعدكِ اليوم؟</div>`;
+        currentHistory = [];
+    }
+    function startNewChat() { updateGreetingBySelection(); }
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
+    
+    let sec = 0, tInt = null;
+    function startT() { if(!tInt) tInt = setInterval(() => { sec++; let h=Math.floor(sec/3600).toString().padStart(2,'0'), m=Math.floor((sec%3600)/60).toString().padStart(2,'0'), s=(sec%60).toString().padStart(2,'0'); document.getElementById('timer').innerText = `${h}:${m}:${s}`; }, 1000); }
+    function stopT() { clearInterval(tInt); tInt = null; }
+    function resetT() { stopT(); sec = 0; document.getElementById('timer').innerText = "00:00:00"; }
+</script>
+</body>
+</html>

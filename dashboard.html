@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Pulse | الداشبورد المتكامل</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --cyan: #00d4ff; 
+            --cyan-glow: rgba(0, 212, 255, 0.5);
+            --navy-deep: #1e293b; 
+            --glass: rgba(10, 15, 30, 0.75); 
+            --input-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        h2, label, .ticker-content, .profile-btn {
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+
+        body {
+            min-height: 100vh;
+            background-color: #030712;
+            background-image: url('67260.jpg'); 
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .pulse-ticker {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            color: var(--cyan);
+            padding: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            border-bottom: 2px solid var(--cyan);
+            font-weight: bold;
+            box-shadow: 0 0 15px var(--cyan-glow);
+        }
+        .ticker-content { 
+            display: inline-block; 
+            animation: marquee-rtl 25s linear infinite; 
+        }
+        @keyframes marquee-rtl { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+        .header-nav {
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+            flex-wrap: wrap; gap: 15px;
+        }
+
+        .nav-links { 
+            display: flex; 
+            gap: 15px; 
+            align-items: center; 
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .profile-container { position: relative; }
+        .notification-dot {
+            position: absolute; top: -5px; right: -5px;
+            width: 14px; height: 14px; background: #ff4d4d;
+            border-radius: 50%; border: 2px solid white;
+            box-shadow: 0 0 15px #ff4d4d;
+            display: none; 
+            animation: pulse-red 1.5s infinite;
+            z-index: 10;
+        }
+        @keyframes pulse-red { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+        .profile-btn {
+            text-decoration: none; color: var(--cyan); padding: 8px 18px; 
+            border-radius: 12px; border: 2px solid var(--cyan); 
+            transition: 0.3s; font-weight: bold;
+            white-space: nowrap;
+        }
+        .profile-btn:hover { background: var(--cyan); color: black; box-shadow: 0 0 20px var(--cyan); }
+
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 35px;
+            padding: 30px;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover { 
+            transform: translateY(-12px); 
+            border-color: var(--cyan); 
+            box-shadow: 0 20px 50px var(--cyan-glow);
+        }
+
+        h2 { 
+            color: var(--cyan); font-size: 1.3rem; margin-bottom: 20px; 
+            border-right: 5px solid var(--cyan); padding-right: 15px; 
+        }
+
+        label { display: block; margin: 10px 0 5px; color: var(--cyan); font-size: 0.85rem; font-weight: bold; }
+
+        select, input {
+            width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1); background: var(--input-bg); 
+            color: #1e293b; font-size: 0.95rem; outline: none; font-weight: 800;
+        }
+
+        .btn-main { 
+            width: 100%; padding: 14px; border: none; border-radius: 15px; 
+            font-weight: 900; cursor: pointer; transition: 0.3s;
+            background: linear-gradient(45deg, var(--cyan), var(--navy-deep));
+            color: #fff; box-shadow: 0 4px 15px var(--cyan-glow);
+            margin-top: auto;
+        }
+        .btn-main:hover { transform: scale(1.02); box-shadow: 0 0 25px var(--cyan); }
+
+        .footer {
+            text-align: center; padding: 40px; background: rgba(0,0,0,0.7);
+            margin-top: 50px; border-top: 2px solid var(--cyan);
+        }
+        .about-footer-btn {
+            display: inline-block; color: var(--cyan); text-decoration: none;
+            padding: 10px 30px; border: 2px solid var(--cyan); border-radius: 25px; 
+            transition: 0.3s; margin-bottom: 20px; font-weight: bold;
+        }
+        .about-footer-btn:hover { background: var(--cyan); color: black; box-shadow: 0 0 20px var(--cyan); }
+
+        @media (max-width: 768px) {
+            .header-nav { flex-direction: column; text-align: center; padding: 20px 2%; }
+            .nav-links { flex-direction: column; width: 100%; gap: 10px; }
+            .card { padding: 20px; border-radius: 25px; margin-bottom: 15px; }
+            div[style*="grid"] { padding: 20px 3% !important; gap: 20px !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="pulse-ticker">
+        <div class="ticker-content"> ✨ تم تحديث كافة الكليات لجامعة AUST • نظام SOS والتبادل والمفقودات يعمل الآن بكفاءة 100%! </div>
+    </div>
+
+    <nav class="header-nav">
+        <h1>AUST <span style="color:var(--cyan)">Smart Pulse</span></h1>
+        <div class="nav-links">
+            <p>مرحباً، <span id="userDisplayName" style="color:var(--cyan); font-weight:bold;">جاري التحميل...</span></p>
+            <div class="profile-container">
+                <div id="notifyDot" class="notification-dot"></div>
+                <a href="profile.html" class="profile-btn"><i class="fas fa-user-graduate"></i> الملف الشخصي</a>
+            </div>
+            <a href="index.html" style="color:#ff4d4d; text-decoration:none; font-weight:bold;">خروج</a>
+        </div>
+    </nav>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; padding: 40px 5%;">
+        
+        <div class="card">
+            <h2>📡 رادار المساعدة (SOS)</h2>
+            <label>الكلية:</label>
+            <select id="collegeSOS" onchange="updateSubjects()">
+                <option value="it">💻 هندسة المعلوماتية</option>
+                <option value="dent">🦷 طب الأسنان</option>
+                <option value="pharm">💊 كلية الصيدلة</option>
+                <option value="chemical">🧪 الكيمياء الصناعية</option>
+                <option value="arch">📐 الهندسة المعمارية</option>
+                <option value="petro">🛢️ هندسة البترول</option>
+                <option value="trans">📖 كلية الترجمة</option>
+            </select>
+
+            <label>السنة الدراسية:</label>
+            <select id="yearSOS" onchange="updateSubjects()">
+                <option value="1">السنة الأولى</option><option value="2">السنة الثانية</option>
+                <option value="3">السنة الثالثة</option><option value="4">السنة الرابعة</option>
+                <option value="5">السنة الخامسة</option>
+            </select>
+
+            <label>المادة:</label>
+            <select id="subjectSelect"></select>
+            <label>أو طلب خاص:</label>
+            <input type="text" id="customSOS" placeholder="مثال: احتاج شرح لمسألة...">
+            
+            <button class="btn-main" style="background: linear-gradient(45deg, #ff4d4d, var(--navy-deep));" onclick="sendSOS()">إرسال نداء SOS 🆘</button>
+        </div>
+
+        <div class="card">
+            <h2>♻️ التبادل والمفقودات</h2>
+            <label>نوع الإعلان:</label>
+            <select id="itemType">
+                <option value="مبادلة">🔄 غرض للمبادلة/الإعارة</option>
+                <option value="مفقود">🔍 مفقودات (أبحث عن...)</option>
+                <option value="موجود">📍 موجودات (وجدت غرضاً...)</option>
+            </select>
+
+            <label>اسم الغرض:</label>
+            <input type="text" id="newToolName" placeholder="مثال: مسطرة T، نظارة، كتاب...">
+            
+            <label>الكلية التابع لها الغرض:</label>
+            <select id="itemCollege">
+                <option value="عام">كل الكليات (عام)</option>
+                <option value="it">هندسة المعلوماتية</option>
+                <option value="dent">طب الأسنان</option>
+                <option value="pharm">كلية الصيدلة</option>
+                <option value="chemical">الكيمياء الصناعية</option>
+                <option value="arch">الهندسة المعمارية</option>
+                <option value="petro">هندسة البترول</option>
+                <option value="trans">كلية الترجمة</option>
+            </select>
+
+            <button class="btn-main" onclick="addNewTool()">نشر في المعرض ✅</button>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px;">
+                <button onclick="location.href='market.html'" style="background:rgba(39, 174, 96, 0.8); color:white; border:1px solid #27ae60; padding:12px; border-radius:10px; cursor:pointer; font-weight:bold;">🌐 المعرض</button>
+                <button onclick="location.href='library.html'" style="background:rgba(41, 128, 185, 0.8); color:white; border:1px solid #2980b9; padding:12px; border-radius:10px; cursor:pointer; font-weight:bold;">📚 المكتبة</button>
+                <button onclick="location.href='AI.html'" style="background:rgba(108, 92, 231, 0.8); color:white; border:1px solid #6c5ce7; padding:12px; border-radius:10px; cursor:pointer; font-weight:bold; grid-column: span 2;">🤖 مساعد الذكاء الاصطناعي</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <a href="about.html" class="about-footer-btn">📖 حول الموقع والقسم</a>
+    </footer>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script>
+    const allAUSTSubjects = {
+        it: { 1: ["البرمجة 1", "الفيزياء 1", "الرياضيات 1", "الرسم الهندسي", "مهارات الحاسوب", "البرمجة 2", "الفيزياء 2", "الرياضيات 2", "الكيمياء الهندسية", "الميكانيك"], 2: ["خوارزميات 1", "برمجة ويب", "رياضيات متقطعة", "احتمالات", "OOP 1", "قواعد بيانات 1", "خوارزميات 2", "هندسة كهربائية", "تحليل عددي", "OOP 2"], 3: ["هندسة برمجيات 1", "تطوير ويب", "معمارية حاسوب", "نظم تشغيل 1", "تحليل نظم", "هندسة برمجيات 2", "نظم معلومات", "قواعد بيانات 2", "ذكاء صنعي"], 4: ["تنقيب بيانات", "رسم حاسوبي", "نظم زمن حقيقي", "شبكات 1", "إدارة قواعد بيانات", "نظم دعم قرار", "نمذجة ومحاكاة", "شبكات 2"], 5: ["مشروع تخرج 1", "إدارة مشاريع", "أنظمة خبيرة", "شبكات عصبونية", "مشروع تخرج 2", "معالجة صور", "أمن معلومات"] },
+        chemical: { 1: ["الرياضيات 1", "الفيزياء", "كيمياء عامة", "رسم هندسي", "ميكانيك هندسي", "رياضيات 2", "كيمياء عضوية 1"], 2: ["برامج حاسوبية", "رياضيات تطبيقية", "كيمياء فيزيائية 1", "تقانات عضوية", "كيمياء تحليلية", "تحليل عددي", "كيمياء فيزيائية 2"], 3: ["جريان موائع", "انتقال حرارة", "ثيرموديناميك", "عمليات موحدة 1", "علم مواد", "إحصاء هندسي"], 4: ["انتقال كتلة", "هندسة تفاعلات 1", "تقانة أسمدة", "أصباغ ودهانات", "ألياف", "تفاعلات 2"], 5: ["ديناميك وتحكم", "تصميم أجهزة", "هندسة بيئية", "مشروع 1", "صناعات تكرير", "أمن صناعي"] },
+        dent: { 1: ["كيمياء عامة", "تشريح عام 1", "بيولوجيا", "فيزيولوجيا", "كيمياء حيوية", "فيزياء", "إحصاء حيوي"], 2: ["تعويضات ثابتة 1", "مواد ترميمية", "تشريح ونحت أسنان", "رأس وعنق", "أحياء دقيقة", "تعويضات متحركة 1"], 3: ["تعويضات متحركة 2", "ترميمية 2", "أدوية", "باطنة وجلدية", "تشريح مرضي", "ثابتة 2", "أطفال"], 4: ["ثابتة 3", "تقويم 1", "مداواة لبية 1", "أمراض فم 1", "تخدير وقلع 1", "أطفال 1", "مداواة لبية 2"], 5: ["ثابتة 5", "زرع أسنان", "أطفال 2", "مداواة لبية 3", "تخدير وقلع 3", "جراحة فم وفكين"] },
+        pharm: { 1: ["تشريح", "فيزياء طبية", "بيولوجيا خلية", "فيزيولوجيا 1", "كيمياء عامة", "إحصاء حيوي"], 2: ["صيدلانيات 1", "كيمياء تحليلية", "كيمياء فيزيائية", "علم الأمراض", "عضوية 2", "صيدلانيات 2"], 3: ["تكنولوجيا صيدلانية", "عقاقير 2", "أحياء دقيقة 1", "فارماكولوجيا 1", "تحليل آلي", "فارماكولوجيا 2"], 4: ["صيدلة صناعية 1", "سموم", "مناعة", "فارماكولوجيا 3", "صناعية 2", "سريرية"], 5: ["إسعاف أولي", "مشروع تخرج", "حيوية سريرية", "كيمياء دوائية", "رقابة", "تغذية"] },
+        arch: { 1: ["رسم هندسي", "رسم حر 1", "رياضيات وميكانيك", "تصميم 1", "تاريخ عمارة 1", "رسم حاسوبي 1"], 2: ["تصميم معماري 1", "تنفيذ مباني", "ظل ومنظور 1", "عمارة وسطى", "تصميم 2", "فيزياء بناء"], 3: ["تصميم معماري 3", "تصميمات تنفيذية", "تجهيزات 1", "تخطيط مدن", "تجهيزات 2", "مساحة"], 4: ["تصميم معماري 5", "أبنية سكنية", "تخطيط تجمعات", "بيتون مسلح", "عمارة داخلية", "تصميم 6"], 5: ["إحياء أثري", "تصميم معماري 7", "برنامج تخرج", "مشروع التخرج النهائي"] },
+        petro: { 1: ["لغة إنكليزية 1", "رياضيات 1", "رسم هندسي", "كيمياء", "فيزياء", "جيولوجيا", "كيمياء هيدروكربون"], 2: ["برامج حاسوبية", "رياضيات تطبيقية", "كيمياء نفط", "عناصر آلات", "تحليل عددي", "صخور"], 3: ["جريان موائع", "جيولوجيا بترول", "ثيرموديناميك", "فيزياء طبقة", "هيدروليك", "انتقال حرارة"], 4: ["إنتاج نفط", "حفر 1", "مسح اهتزازي", "مخزون 1", "معدات حفر", "إنتاج غاز"], 5: ["ديناميك عمليات", "نقل وتخزين", "هندسة بيئية", "حفر موجه", "تآكل", "مشروع 2"] },
+        trans: { 1: ["صوتيات", "قراءة وكتابة 1", "استماع وتحدث 1", "قواعد 1", "ترجمة 1", "مقدمة أدب"], 2: ["مسرح نهضة", "شعر نهضة", "ترجمة 2", "مناهج بحث", "رواية قرن 18", "قصة قصيرة"], 3: ["مقالة نقدية", "مسرح حديث", "شعر حديث", "ترجمة 3", "نظام صوتي", "رواية قرن 19"], 4: ["مسرح عصر حديث", "شعر عصر حديث", "ترجمة 4", "نقد أدبي", "مشروع تخرج", "رواية حديثة"] }
+    };
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
+        authDomain: "nabd-aust.firebaseapp.com",
+        databaseURL: "https://nabd-aust-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "nabd-aust",
+        storageBucket: "nabd-aust.firebasestorage.app",
+        messagingSenderId: "921777725948",
+        appId: "1:921777725948:web:7b024d0aa101068bef9279"
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // جلب البيانات الأساسية من التخزين المحلي
+    const currentUserName = localStorage.getItem("userName") || "شهد الخالد";
+    const currentUserID = localStorage.getItem("userID") || "20241600060";
+
+    function monitorNewMessages() {
+        const cleanName = currentUserName.replace(/\s/g, '');
+        database.ref('chats').on('value', (snap) => {
+            let unread = false;
+            const data = snap.val();
+            if(data) {
+                Object.keys(data).forEach(id => {
+                    if(id.includes(cleanName)) {
+                        Object.keys(data[id]).forEach(m => {
+                            if(data[id][m].sender !== currentUserName && !data[id][m].seen) unread = true;
+                        });
+                    }
+                });
+            }
+            document.getElementById('notifyDot').style.display = unread ? 'block' : 'none';
+        });
+    }
+
+    function updateSubjects() {
+        const college = document.getElementById('collegeSOS').value;
+        const year = document.getElementById('yearSOS').value;
+        const select = document.getElementById('subjectSelect');
+        const subjects = allAUSTSubjects[college] ? allAUSTSubjects[college][year] : [];
+        select.innerHTML = subjects.map(s => `<option value="${s}">${s}</option>`).join('') || `<option value="">لا توجد مواد</option>`;
+    }
+
+    function sendSOS() {
+        const subject = document.getElementById('customSOS').value.trim() || document.getElementById('subjectSelect').value;
+        if(!subject) return Swal.fire('تنبيه', 'يرجى اختيار مادة', 'warning');
+        
+        Swal.showLoading();
+
+        database.ref('globalMarket/').push({ 
+            name: `🆘 SOS: ${subject}`, 
+            college: document.getElementById('collegeSOS').value, 
+            owner: currentUserName, 
+            studentId: currentUserID, // مهم لقواعد الحماية
+            date: new Date().toLocaleDateString('ar-EG'), 
+            isSOS: true 
+        })
+        .then(() => { 
+            Swal.fire({ icon: 'success', title: 'تم الإرسال', text: 'نداء الاستغاثة نشط الآن في المعرض', timer: 2000 }); 
+            document.getElementById('customSOS').value = ""; 
+        })
+        .catch(err => Swal.fire('خطأ', 'تأكد من إعدادات الأمان في Firebase', 'error'));
+    }
+
+    function addNewTool() {
+        const name = document.getElementById('newToolName').value.trim();
+        const college = document.getElementById('itemCollege').value;
+        const type = document.getElementById('itemType').value;
+        if (!name) return Swal.fire('خطأ', 'يرجى كتابة اسم الغرض', 'error');
+        
+        Swal.showLoading();
+
+        database.ref('globalMarket/').push({ 
+            name: `${type}: ${name}`, 
+            college: college, 
+            owner: currentUserName, 
+            studentId: currentUserID, // مهم لقواعد الحماية
+            date: new Date().toLocaleDateString('ar-EG'), 
+            isSOS: false 
+        })
+        .then(() => { 
+            Swal.fire({ icon: 'success', title: 'تم النشر بنجاح', text: 'إعلانك متاح الآن للجميع في المعرض', timer: 2000 }); 
+            document.getElementById('newToolName').value = ""; 
+        })
+        .catch(err => Swal.fire('خطأ', 'حدثت مشكلة أثناء النشر', 'error'));
+    }
+
+    window.onload = function() {
+        document.getElementById("userDisplayName").innerText = currentUserName;
+        updateSubjects();
+        monitorNewMessages();
+    };
+</script>
+</body>
+</html>
