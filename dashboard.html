@@ -203,9 +203,6 @@
                 <option value="موجود">📍 موجودات (وجدت غرضاً...)</option>
             </select>
 
-            <label>اسم الغرض:</label>
-            <input type="text" id="newToolName" placeholder="مثال: مسطرة T، نظارة، كتاب...">
-            
             <label>الكلية التابع لها الغرض:</label>
             <select id="itemCollege">
                 <option value="عام">كل الكليات (عام)</option>
@@ -217,6 +214,9 @@
                 <option value="petro">هندسة البترول</option>
                 <option value="trans">كلية الترجمة</option>
             </select>
+
+            <label>اسم الغرض:</label>
+            <input type="text" id="newToolName" placeholder="مثال: مسطرة T، نظارة، كتاب...">
 
             <button class="btn-main" onclick="addNewTool()">نشر في المعرض ✅</button>
             
@@ -297,7 +297,6 @@
         
         Swal.showLoading();
 
-        // دمج اسم المادة مع الجزء المطلوب شرحه في عنوان الإعلان
         const sosTitle = `🆘 SOS: ${selectedSubject} (${details})`;
 
         database.ref('globalMarket/').push({ 
