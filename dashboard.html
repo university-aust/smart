@@ -343,5 +343,32 @@
         monitorNewMessages();
     };
 </script>
+    <script type="module">
+  // هذا الكود يخبر المتصفح أن يطلب إذن الإشعارات من الزائر
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
+
+  const firebaseConfig = {
+    apiKey: "ضعي_هنا_API_KEY_الخاص_بكِ",
+    authDomain: "nabd-aust.firebaseapp.com",
+    projectId: "nabd-aust",
+    messagingSenderId: "ضعي_هنا_SENDER_ID",
+    appId: "ضعي_هنا_APP_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const messaging = getMessaging(app);
+
+  // طلب الإذن باستخدام مفتاحك الذي استخرجتيه
+  Notification.requestPermission().then((permission) => {
+    if (permission === 'granted') {
+      getToken(messaging, { 
+        vapidKey: 'BEVvr0epV8DML0pVUjBpJadwBSMjPBs6c8YZEGYEnyErbpJhMNQyy7tpTNdrjf_SK_4ChMnpWp8pmf3ZcQxWi5Q' 
+      }).then((token) => {
+        console.log("تم تفعيل الإشعارات بنجاح! التوكن الخاص بك هو: ", token);
+      });
+    }
+  });
+</script>
 </body>
 </html>
