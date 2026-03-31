@@ -343,29 +343,33 @@
         monitorNewMessages();
     };
 </script>
-    <script type="module">
-  // هذا الكود يخبر المتصفح أن يطلب إذن الإشعارات من الزائر
+  <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
   const firebaseConfig = {
-    apiKey: "ضعي_هنا_API_KEY_الخاص_بكِ",
+    apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx00Mo",
     authDomain: "nabd-aust.firebaseapp.com",
+    databaseURL: "https://nabd-aust-default-rtdb.europe-west1.firebasedatabase.app",
     projectId: "nabd-aust",
-    messagingSenderId: "ضعي_هنا_SENDER_ID",
-    appId: "ضعي_هنا_APP_ID"
+    storageBucket: "nabd-aust.firebasestorage.app",
+    messagingSenderId: "92177725948",
+    appId: "1:92177725948:web:7b024d0aa101068bef9279"
   };
 
   const app = initializeApp(firebaseConfig);
   const messaging = getMessaging(app);
 
-  // طلب الإذن باستخدام مفتاحك الذي استخرجتيه
+  // طلب إذن الإشعارات واستخراج التوكن
   Notification.requestPermission().then((permission) => {
     if (permission === 'granted') {
       getToken(messaging, { 
         vapidKey: 'BEVvr0epV8DML0pVUjBpJadwBSMjPBs6c8YZEGYEnyErbpJhMNQyy7tpTNdrjf_SK_4ChMnpWp8pmf3ZcQxWi5Q' 
-      }).then((token) => {
-        console.log("تم تفعيل الإشعارات بنجاح! التوكن الخاص بك هو: ", token);
+      }).then((currentToken) => {
+        if (currentToken) {
+          console.log("تم تفعيل الإشعارات بنجاح! التوكن الخاص بك هو:");
+          console.log(currentToken);
+        }
       });
     }
   });
