@@ -291,7 +291,17 @@
         .then(() => { 
             Swal.fire({ icon: 'success', title: 'تم الإرسال', timer: 2000 }); 
             document.getElementById('customSOS').value = ""; 
-        });
+            
+        })
+        // داخل وظيفة sendSOS() أو addNewTool() في الداشبورد:
+const now = new Date();
+const fullTime = now.toLocaleDateString('ar-EG') + " | " + now.toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'});
+
+database.ref('globalMarket/').push({
+    // ... البيانات الأخرى ...
+    fullTime: fullTime, // هذا هو الحقل الجديد للوقت والتاريخ معاً
+    date: now.toLocaleDateString('ar-EG')
+});
     }
 
     function addNewTool() {
@@ -312,7 +322,16 @@
         .then(() => { 
             Swal.fire({ icon: 'success', title: 'تم النشر بنجاح', timer: 2000 }); 
             document.getElementById('newToolName').value = ""; 
-        });
+        })
+        // داخل وظيفة sendSOS() أو addNewTool() في الداشبورد:
+const now = new Date();
+const fullTime = now.toLocaleDateString('ar-EG') + " | " + now.toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'});
+
+database.ref('globalMarket/').push({
+    // ... البيانات الأخرى ...
+    fullTime: fullTime, // هذا هو الحقل الجديد للوقت والتاريخ معاً
+    date: now.toLocaleDateString('ar-EG')
+});
     }
 
     window.onload = function() {
