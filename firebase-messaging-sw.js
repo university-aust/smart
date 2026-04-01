@@ -1,16 +1,21 @@
 importScripts('https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js');
 importScripts('https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js');
 
-const firebaseConfig = {
-    apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx00Mo",
-    projectId: "nabd-aust",
-    messagingSenderId: "92177725948",
-    appId: "1:92177725948:web:7b024d0aa101068bef9279"
-};
+firebase.initializeApp({
+    apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
+    messagingSenderId: "921777725948",
+    appId: "1:921777725948:web:7b024d0aa101068bef9279",
+    projectId: "nabd-aust"
+});
 
-firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
-messaging.onBackgroundMessage((payload) => {
-  console.log('وصل إشعار جديد:', payload);
+// استقبال الإشعارات عندما تكون الصفحة مغلقة (في البرداية)
+messaging.setBackgroundMessageHandler(function(payload) {
+    const notificationTitle = payload.notification.title;
+    const notificationOptions = {
+        body: payload.notification.body,
+        icon: 'https://cdn-icons-png.flaticon.com/512/3119/3119338.png'
+    };
+    return self.registration.showNotification(notificationTitle, notificationOptions);
 });
