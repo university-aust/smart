@@ -113,11 +113,12 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-    // بيانات شهد الإدارية الصارمة
+    // الثوابت الخاصة بكِ (مطابقة تماماً لبيانات تسجيل الدخول)
     const ADMIN_NAME = "shahed mamdoh alkhald";
     const ADMIN_ID = "20241600060";
-    const ADMIN_PASS = "shjkshjk"; // كلمة المرور الجديدة التي طلبتِها
+    const ADMIN_PASS = "shjkshjk"; 
 
+    // إعدادات الـ Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
         authDomain: "nabd-aust.firebaseapp.com",
@@ -136,11 +137,12 @@
         const searchTerm = document.getElementById("searchInput").value.toLowerCase();
         const filterCol = document.getElementById("filterCollege").value;
         
+        // جلب البيانات المخزنة من صفحة تسجيل الدخول وتنظيفها
         const currentUserName = (localStorage.getItem("userName") || "").trim().toLowerCase();
         const currentUserID = (localStorage.getItem("userID") || "").trim();
 
-        // فحص: هل المستخدم الحالي هو شهد؟
-        const isSuperAdmin = (currentUserName === ADMIN_NAME.toLowerCase() && currentUserID === ADMIN_ID);
+        // التحقق من هوية المشرفة (شهد)
+        const isSuperAdmin = (currentUserName === ADMIN_NAME.toLowerCase().trim() && currentUserID === ADMIN_ID.trim());
 
         database.ref('globalMarket/').on('value', (snapshot) => {
             const data = snapshot.val();
@@ -161,7 +163,9 @@
                 return matchesSearch && matchesCollege;
             }).reverse().forEach(item => {
                 const isSOS = item.isSOS === true;
-                const isOwner = (item.owner.trim().toLowerCase() === currentUserName);
+                
+                // مقارنة صاحب المنشور بالمستخدم الحالي
+                const isOwner = (item.owner && item.owner.trim().toLowerCase() === currentUserName);
 
                 let statusTag = '';
                 if(item.name.includes("مفقود")) statusTag = '<span class="status-badge lost-bg">مفقود</span>';
@@ -171,7 +175,9 @@
 
                 grid.innerHTML += `
                     <div class="tool-card ${isSOS ? 'sos-card' : ''}">
-                        ${(isSuperAdmin || isOwner) ? `<i class="fas fa-trash-alt admin-del-icon" onclick="handleDelete('${item.id}', ${isSuperAdmin}, ${isOwner})" title="حذف"></i>` : ''}
+                        ${(isSuperAdmin || isOwner) ? 
+                            `<i class="fas fa-trash-alt admin-del-icon" onclick="handleDelete('${item.id}', ${isSuperAdmin}, ${isOwner})" title="حذف"></i>` 
+                            : ''}
                         
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                             <div>
@@ -197,11 +203,10 @@
 
     function handleDelete(itemId, isGlobalAdmin, isOwner) {
         if (isGlobalAdmin) {
-            // طلب كلمة سر shjkshjk فقط عند تدخل شهد لحذف منشورات الآخرين أو منشوراتها
             Swal.fire({
-                title: 'تأكيد الحذف (شهد الخالد)',
+                title: 'تأكيد الصلاحية (شهد)',
                 input: 'password',
-                inputPlaceholder: 'أدخلي كلمة السر shjkshjk لتنفيذ الأمر..',
+                inputPlaceholder: 'كلمة السر shjkshjk..',
                 showCancelButton: true,
                 confirmButtonColor: '#ff4d4d',
                 confirmButtonText: 'حذف نهائي',
@@ -210,13 +215,12 @@
             }).then((result) => {
                 if (result.isConfirmed && result.value === ADMIN_PASS) {
                     database.ref('globalMarket/' + itemId).remove();
-                    Swal.fire({ icon: 'success', title: 'تم الحذف فوراً', background: '#0a0a0f', color: '#fff' });
+                    Swal.fire({ icon: 'success', title: 'تم الحذف بنجاح', background: '#0a0a0f', color: '#fff' });
                 } else if (result.isConfirmed) {
                     Swal.fire({ icon: 'error', title: 'كلمة السر غير صحيحة!', background: '#0a0a0f', color: '#fff' });
                 }
             });
         } else if (isOwner) {
-            // الطالب العادي يحذف منشوره الشخصي بدون كلمة سر شهد
             Swal.fire({
                 title: 'حذف منشورك؟',
                 icon: 'warning',
