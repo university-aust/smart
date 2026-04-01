@@ -263,31 +263,6 @@
     const currentUserName = localStorage.getItem("userName") || "شهد الخالد";
     const currentUserID = localStorage.getItem("userID") || "20241600060";
     
-function triggerNotification(title, body) {
-    // بدلاً من إرسال طلب للمتصفح، سنكتب الطلب في قاعدة البيانات فقط
-    database.ref('notifications_queue').push({
-        title: title,
-        body: body,
-        timestamp: firebase.database.ServerValue.TIMESTAMP
-    }).then(() => {
-        console.log("تم تسجيل طلب الإشعار في السيرفر بنجاح!");
-    }).catch((err) => {
-        console.error("خطأ في تسجيل الطلب: ", err);
-    });
-}
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                console.log("تم إرسال الإشعار بنجاح للتوكن: ", id);
-            })
-            .catch(e => {
-                console.error("فشل الإرسال المباشر، المتصفح يمنع الطلب (CORS):", e);
-                // هنا نعرف يقيناً أن المشكلة من أمن المتصفح وليس من الكود
-            });
-        }
-    } catch (e) { 
-        console.error("خطأ في جلب التوكنات:", e); 
-    }
-}
     function monitorNewMessages() {
         const cleanName = currentUserName.replace(/\s/g, '');
         database.ref('chats').on('value', (snap) => {
@@ -330,7 +305,6 @@ function triggerNotification(title, body) {
             isSOS: true 
         })
         .then(() => { 
-            triggerNotification("نداء استغاثة جديد 🆘", `الطالب ${currentUserName} يطلب المساعدة في مادة ${selectedSubject}`);
             Swal.fire({ icon: 'success', title: 'تم الإرسال', timer: 2000 }); 
             document.getElementById('customSOS').value = ""; 
         });
@@ -350,7 +324,6 @@ function triggerNotification(title, body) {
             isSOS: false 
         })
         .then(() => { 
-            triggerNotification("إعلان جديد 📚", `${currentUserName} قام بنشر ${type}: ${name}`);
             Swal.fire({ icon: 'success', title: 'تم النشر', timer: 2000 }); 
             document.getElementById('newToolName').value = ""; 
         });
@@ -361,42 +334,6 @@ function triggerNotification(title, body) {
         updateSubjects();
         monitorNewMessages();
     };
-</script>
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
-    authDomain: "nabd-aust.firebaseapp.com",
-    databaseURL: "https://nabd-aust-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "nabd-aust",
-    storageBucket: "nabd-aust.firebasestorage.app",
-    messagingSenderId: "921777725948",
-   appId: "1:921777725948:web:7b024d0aa101068bef9279"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const messaging = getMessaging(app);
-
-  document.addEventListener('click', () => {
-      Notification.requestPermission().then((permission) => {
-        if (permission === 'granted') {
-          // --- التعديل الجوهري هنا يا شهد (إضافة /smart/) ---
-          navigator.serviceWorker.register('/smart/firebase-messaging-sw.js').then((registration) => {
-              getToken(messaging, { 
-                vapidKey: 'BEVvr0epV8DML0pVUjBpJadwBSMjPBs6c8YZEGYEnyErbpJhMNQyy7tpTNdrjf_SK_4ChMnpWp8pmf3ZcQxWi5Q',
-                serviceWorkerRegistration: registration
-              }).then((currentToken) => {
-                if (currentToken) {
-                   firebase.database().ref('fcmTokens/' + localStorage.getItem("userID")).set(currentToken);
-                }
-              });
-          });
-        }
-      });
-  }, { once: true });
 </script>
 </body>
 </html>
