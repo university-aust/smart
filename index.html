@@ -247,18 +247,22 @@
                 const data = snapshot.val();
                 
                 if (data && data.pass === pass) {
-                    // --- التعديل المضاف لربط صفحة الذكاء ---
-                    localStorage.setItem("studentName", data.name);
-                    localStorage.setItem("studentMajor", data.major || "هندسة البرمجيات");
-                    localStorage.setItem("studentID", data.id);
-                    
-                    // التخزين الأصلي الخاص بكِ
-                    localStorage.setItem("userName", data.name);
-                    localStorage.setItem("universityID", data.id);
+                    // التخزين في LocalStorage مع تنظيف البيانات لضمان تطابقها في المعرض
+                    const cleanName = data.name.trim();
+                    const cleanID = data.id.trim();
+
+                    localStorage.setItem("userName", cleanName);
+                    localStorage.setItem("userID", cleanID); // مفتاح موحد لصفحة المعرض
+                    localStorage.setItem("universityID", cleanID);
                     localStorage.setItem("securityKey", data.pass);
                     localStorage.setItem("userMajor", data.major || "هندسة البرمجيات");
+                    
+                    // لربط صفحة الذكاء
+                    localStorage.setItem("studentName", cleanName);
+                    localStorage.setItem("studentMajor", data.major || "هندسة البرمجيات");
+                    localStorage.setItem("studentID", cleanID);
 
-                    notify("مرحباً بك مجدداً: " + data.name);
+                    notify("مرحباً بك مجدداً: " + cleanName);
                     
                     setTimeout(() => {
                         window.location.href = "dashboard.html";
