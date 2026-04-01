@@ -50,7 +50,7 @@
             padding: 20px 5%; display: flex; gap: 10px; flex-wrap: wrap; background: rgba(0,0,0,0.2);
         }
         .search-input { 
-            flex: 1; min-width: 200px; padding: 12px 15px; border-radius: 15px; 
+            flex: 1; min-width: 150px; padding: 12px 15px; border-radius: 15px; 
             border: 1px solid var(--cyan-glow); background: rgba(0, 0, 0, 0.5); 
             color: white; outline: none; transition: 0.3s; font-size: 0.9rem;
         }
@@ -104,15 +104,15 @@
 
     <div class="search-container">
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث عن مادة، أداة، مفقودات..." oninput="renderMarket()">
-        <select id="filterCollege" class="search-input" style="flex: 0; min-width: 160px;" onchange="renderMarket()">
+        <select id="filterCollege" class="search-input" style="flex: 0; min-width: 140px;" onchange="renderMarket()">
             <option value="all">جميع الكليات</option>
-            <option value="كلية الهندسة المعلوماتية">الهندسة المعلوماتية</option>
-            <option value="كلية طب الأسنان">طب الأسنان</option>
-            <option value="كلية الصيدلة">الصيدلة</option>
-            <option value="كلية الهندسة المعمارية">الهندسة المعمارية</option>
-            <option value="كلية الهندسة الكيميائية">الهندسة الكيميائية</option>
-            <option value="كلية الهندسة البترولية">الهندسة البترولية</option>
-            <option value="كلية الترجمة واللغات">الترجمة واللغات</option>
+            <option value="it">هندسة المعلوماتية</option>
+            <option value="dent">طب الأسنان</option>
+            <option value="pharm">الصيدلة</option>
+            <option value="arch">الهندسة المعمارية</option>
+            <option value="chemical">الكيمياء الصناعية</option>
+            <option value="petro">هندسة البترول</option>
+            <option value="trans">الترجمة واللغات</option>
             <option value="lost">🔍 المفقودات</option>
         </select>
     </div>
@@ -140,13 +140,26 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
+    // قاموس لتحويل الاختصارات لأسماء مفهومة عند العرض
+    const collegeMap = {
+        'it': 'المعلوماتية',
+        'dent': 'طب الأسنان',
+        'pharm': 'الصيدلة',
+        'arch': 'العمارة',
+        'chemical': 'الكيمياء',
+        'petro': 'البترول',
+        'trans': 'الترجمة',
+        'عام': 'عام'
+    };
+
     function renderMarket() {
         const grid = document.getElementById("marketGrid");
         const searchTerm = document.getElementById("searchInput").value.toLowerCase();
         const filterCol = document.getElementById("filterCollege").value;
         
+        // جلب البيانات من الـ Dashboard (استخدام userID لضمان التوافق)
         const currentUserName = (localStorage.getItem("userName") || "").trim().toLowerCase();
-        const currentUserID = (localStorage.getItem("universityID") || "").trim(); // تأكدي من المسمى هنا
+        const currentUserID = (localStorage.getItem("userID") || "").trim(); 
 
         const isSuperAdmin = (currentUserName === ADMIN_NAME.toLowerCase().trim() && currentUserID === ADMIN_ID.trim());
 
@@ -163,7 +176,7 @@
             marketArray.filter(item => {
                 const itemName = (item.name || "").toLowerCase();
                 const itemOwner = (item.owner || "").toLowerCase();
-                const itemCollege = (item.college || "").trim();
+                const itemCollege = (item.college || "").toLowerCase();
                 
                 const matchesSearch = itemName.includes(searchTerm) || itemOwner.includes(searchTerm);
                 
@@ -171,10 +184,10 @@
                 if (filterCol === "all") {
                     matchesCollege = true;
                 } else if (filterCol === "lost") {
-                    matchesCollege = itemName.includes("مفقود") || itemName.includes("ضائع");
+                    matchesCollege = itemName.includes("مفقود") || itemName.includes("موجود") || itemName.includes("لقيت");
                 } else {
-                    // مقارنة دقيقة أو جزئية لتفادي مشكلة الاختصارات
-                    matchesCollege = (itemCollege === filterCol || filterCol.includes(itemCollege));
+                    // التحقق من الاختصار القادم من الداشبورد
+                    matchesCollege = (itemCollege === filterCol);
                 }
                 
                 return matchesSearch && matchesCollege;
@@ -196,7 +209,7 @@
                         
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                             <div>
-                                <span class="category-tag">${(item.college || 'عام').replace('كلية ', '')}</span>
+                                <span class="category-tag">${collegeMap[item.college] || item.college || 'AUST'}</span>
                                 ${statusTag}
                             </div>
                             ${isSOS ? '<span style="background:var(--red); color:white; padding:4px 8px; border-radius:10px; font-size:10px; font-weight:bold;">SOS 📡</span>' : ''}
@@ -218,40 +231,35 @@
     }
 
     function handleDelete(itemId, isGlobalAdmin, isOwner) {
-        let title = isGlobalAdmin ? 'حذف إداري (شهد)' : 'حذف المنشور؟';
-        
-        Swal.fire({
-            title: title,
-            text: isGlobalAdmin ? "سيتم الحذف نهائياً بصفتكِ المشرفة" : "هل أنت متأكد من حذف منشورك؟",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ff4d4d',
-            confirmButtonText: 'نعم، احذف',
-            cancelButtonText: 'إلغاء',
-            background: '#0a0a0f',
-            color: '#fff'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                if (isGlobalAdmin) {
-                    // طلب كلمة السر لشهد فقط للتأكيد الإضافي
-                    Swal.fire({
-                        title: 'تأكيد كلمة السر',
-                        input: 'password',
-                        inputPlaceholder: 'كلمة سر الحذف..',
-                        background: '#0a0a0f', color: '#fff'
-                    }).then(passResult => {
-                        if (passResult.value === ADMIN_PASS) {
-                            database.ref('globalMarket/' + itemId).remove();
-                            Swal.fire({icon: 'success', title: 'تم الحذف', background: '#0a0a0f', color: '#fff'});
-                        } else {
-                            Swal.fire({icon: 'error', title: 'خطأ في كلمة السر', background: '#0a0a0f', color: '#fff'});
-                        }
-                    });
-                } else {
+        if (isGlobalAdmin) {
+            Swal.fire({
+                title: 'حذف إداري (شهد)',
+                input: 'password',
+                inputPlaceholder: 'كلمة السر shjkshjk..',
+                showCancelButton: true,
+                confirmButtonColor: '#ff4d4d',
+                confirmButtonText: 'حذف نهائي',
+                background: '#0a0a0f',
+                color: '#fff'
+            }).then((result) => {
+                if (result.isConfirmed && result.value === ADMIN_PASS) {
                     database.ref('globalMarket/' + itemId).remove();
+                    Swal.fire({ icon: 'success', title: 'تم الحذف بنجاح', background: '#0a0a0f', color: '#fff' });
+                } else if (result.isConfirmed) {
+                    Swal.fire({ icon: 'error', title: 'كلمة السر خطأ!', background: '#0a0a0f', color: '#fff' });
                 }
-            }
-        });
+            });
+        } else if (isOwner) {
+            Swal.fire({
+                title: 'هل تريد حذف منشورك؟',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'نعم، احذف',
+                background: '#0a0a0f', color: '#fff'
+            }).then((res) => {
+                if (res.isConfirmed) database.ref('globalMarket/' + itemId).remove();
+            });
+        }
     }
 
     function goToChat(owner, itemName) {
