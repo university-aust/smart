@@ -247,7 +247,7 @@
         trans: { 1: ["صوتيات", "قراءة وكتابة 1", "استماع وتحدث 1", "قواعد 1", "ترجمة 1", "مقدمة أدب"], 2: ["مسرح نهضة", "شعر نهضة", "ترجمة 2", "مناهج بحث", "رواية قرن 18", "قصة قصيرة"], 3: ["مقالة نقدية", "مسرح حديث", "شعر حديث", "ترجمة 3", "نظام صوتي", "رواية قرن 19"], 4: ["مسرح عصر حديث", "شعر عصر حديث", "ترجمة 4", "نقد أدبي", "مشروع تخرج", "رواية حديثة"] }
     };
 
-    // إعدادات Firebase
+    // إعدادات Firebase الخاصة بمشروعك
     const firebaseConfig = {
         apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
         authDomain: "nabd-aust.firebaseapp.com",
@@ -264,7 +264,7 @@
     const currentUserName = localStorage.getItem("userName") || "شهد الخالد";
     const currentUserID = localStorage.getItem("userID") || "20241600060";
 
-    // --- وظيفة إرسال الإشعار لجميع الأجهزة المسجلة باستخدام الـ API Key الجديد ---
+    // --- وظيفة إرسال الإشعار باستخدام المفتاح الذي استخرجناه ---
     async function triggerNotification(title, body) {
         database.ref('fcmTokens').once('value', async (snapshot) => {
             const tokens = snapshot.val();
@@ -277,7 +277,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            // تم وضع المفتاح الذي استخرجتيه من صفحة Credentials هنا
+                            // استخدام الـ Browser Key المعتمد في تطبيقك
                             'Authorization': 'key=AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo' 
                         },
                         body: JSON.stringify({
@@ -286,8 +286,9 @@
                                 "title": title,
                                 "body": body,
                                 "icon": "https://cdn-icons-png.flaticon.com/512/3119/3119338.png",
-                                "click_action": "https://university-aust.github.io/" // رابط موقعك
-                            }
+                                "click_action": window.location.origin
+                            },
+                            "priority": "high"
                         })
                     });
                 } catch (e) { console.log("خطأ في الإرسال للتوكن:", id); }
@@ -295,7 +296,7 @@
         });
     }
 
-    // وظائف اللوحة
+    // وظائف تحديث المواد والـ SOS
     function updateSubjects() {
         const college = document.getElementById('collegeSOS').value;
         const year = document.getElementById('yearSOS').value;
@@ -323,23 +324,6 @@
         });
     }
 
-    function addNewTool() {
-        const name = document.getElementById('newToolName').value.trim();
-        if (!name) return Swal.fire('خطأ', 'اكتب اسم الغرض', 'error');
-        
-        database.ref('globalMarket/').push({ 
-            name: `${document.getElementById('itemType').value}: ${name}`, 
-            college: document.getElementById('itemCollege').value, 
-            owner: currentUserName, 
-            date: new Date().toLocaleDateString('ar-EG'), 
-            isSOS: false 
-        }).then(() => { 
-            triggerNotification("إعلان جديد ♻️", `${currentUserName} نشر: ${name}`);
-            Swal.fire({ icon: 'success', title: 'تم النشر', timer: 2000 });
-            document.getElementById('newToolName').value = "";
-        });
-    }
-
     window.onload = () => {
         if(document.getElementById("userDisplayName")) document.getElementById("userDisplayName").innerText = currentUserName;
         updateSubjects();
@@ -359,7 +343,7 @@
   });
   const messaging = getMessaging(app);
 
-  // طلب الإذن عند أول ضغطة للمستخدم لحل الخطأ الوردي (مهم جداً لزملائك)
+  // حل "الخطأ الوردي": طلب الإذن فقط عند قيام المستخدم بلمس الشاشة
   document.addEventListener('click', () => {
     Notification.requestPermission().then((permission) => {
         if (permission === 'granted') {
@@ -367,11 +351,11 @@
                 vapidKey: 'BEVvr0epV8DML0pVUjBpJadwBSMjPBs6c8YZEGYEnyErbpJhMNQyy7tpTNdrjf_SK_4ChMnpWp8pmf3ZcQxWi5Q' 
             }).then((currentToken) => {
                 if (currentToken) {
-                    // تسجيل التوكن في قاعدة البيانات لضمان وصول الإشعارات لهذا الجهاز
-                    firebase.database().ref('fcmTokens/' + (localStorage.getItem("userID") || 'guest')).set(currentToken);
+                    // حفظ التوكن في قاعدة البيانات لضمان وصول الإشعارات لهذا المستخدم
+                    firebase.database().ref('fcmTokens/' + currentUserID).set(currentToken);
                 }
             }).catch((err) => {
-                console.log('حدث خطأ أثناء الحصول على التوكن: ', err);
+                console.log('حدث خطأ في جلب التوكن: ', err);
             });
         }
     });
