@@ -113,9 +113,10 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
+    // بيانات شهد الإدارية الصارمة
     const ADMIN_NAME = "shahed mamdoh alkhald";
     const ADMIN_ID = "20241600060";
-    const ADMIN_PASS = "Shahed_AUST_2026";
+    const ADMIN_PASS = "shjkshjk"; // كلمة المرور الجديدة التي طلبتِها
 
     const firebaseConfig = {
         apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
@@ -137,6 +138,8 @@
         
         const currentUserName = (localStorage.getItem("userName") || "").trim().toLowerCase();
         const currentUserID = (localStorage.getItem("userID") || "").trim();
+
+        // فحص: هل المستخدم الحالي هو شهد؟
         const isSuperAdmin = (currentUserName === ADMIN_NAME.toLowerCase() && currentUserID === ADMIN_ID);
 
         database.ref('globalMarket/').on('value', (snapshot) => {
@@ -159,6 +162,7 @@
             }).reverse().forEach(item => {
                 const isSOS = item.isSOS === true;
                 const isOwner = (item.owner.trim().toLowerCase() === currentUserName);
+
                 let statusTag = '';
                 if(item.name.includes("مفقود")) statusTag = '<span class="status-badge lost-bg">مفقود</span>';
                 if(item.name.includes("موجود")) statusTag = '<span class="status-badge found-bg">موجود</span>';
@@ -167,7 +171,7 @@
 
                 grid.innerHTML += `
                     <div class="tool-card ${isSOS ? 'sos-card' : ''}">
-                        ${(isSuperAdmin || isOwner) ? `<i class="fas fa-trash-alt admin-del-icon" onclick="handleDelete('${item.id}', ${isSuperAdmin})" title="حذف"></i>` : ''}
+                        ${(isSuperAdmin || isOwner) ? `<i class="fas fa-trash-alt admin-del-icon" onclick="handleDelete('${item.id}', ${isSuperAdmin}, ${isOwner})" title="حذف"></i>` : ''}
                         
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                             <div>
@@ -191,12 +195,13 @@
         });
     }
 
-    function handleDelete(itemId, isGlobalAdmin) {
+    function handleDelete(itemId, isGlobalAdmin, isOwner) {
         if (isGlobalAdmin) {
+            // طلب كلمة سر shjkshjk فقط عند تدخل شهد لحذف منشورات الآخرين أو منشوراتها
             Swal.fire({
-                title: 'تأكيد الهوية الإدارية',
+                title: 'تأكيد الحذف (شهد الخالد)',
                 input: 'password',
-                inputPlaceholder: 'أدخلي كلمة السر الخاصة بكِ..',
+                inputPlaceholder: 'أدخلي كلمة السر shjkshjk لتنفيذ الأمر..',
                 showCancelButton: true,
                 confirmButtonColor: '#ff4d4d',
                 confirmButtonText: 'حذف نهائي',
@@ -205,12 +210,13 @@
             }).then((result) => {
                 if (result.isConfirmed && result.value === ADMIN_PASS) {
                     database.ref('globalMarket/' + itemId).remove();
-                    Swal.fire({ icon: 'success', title: 'تم الحذف', background: '#0a0a0f', color: '#fff' });
+                    Swal.fire({ icon: 'success', title: 'تم الحذف فوراً', background: '#0a0a0f', color: '#fff' });
                 } else if (result.isConfirmed) {
-                    Swal.fire({ icon: 'error', title: 'كلمة سر خاطئة!', background: '#0a0a0f', color: '#fff' });
+                    Swal.fire({ icon: 'error', title: 'كلمة السر غير صحيحة!', background: '#0a0a0f', color: '#fff' });
                 }
             });
-        } else {
+        } else if (isOwner) {
+            // الطالب العادي يحذف منشوره الشخصي بدون كلمة سر شهد
             Swal.fire({
                 title: 'حذف منشورك؟',
                 icon: 'warning',
