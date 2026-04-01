@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Pulse | الداشبورد المتكامل</title>
+    <link rel="icon" href="data:,">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
@@ -127,7 +128,7 @@
         }
         .btn-main:hover { transform: scale(1.02); box-shadow: 0 0 25px var(--cyan); }
 
-        .btn-market-sos {
+        .btn-market {
             background: rgba(39, 174, 96, 0.9);
             border: 1px solid #27ae60;
         }
@@ -197,7 +198,7 @@
             <input type="text" id="customSOS" placeholder="مثال: احتاج شرح لمسألة...">
             
             <button class="btn-main" style="background: linear-gradient(45deg, #ff4d4d, var(--navy-deep));" onclick="sendSOS()">إرسال نداء SOS 🆘</button>
-            <button class="btn-main btn-market-sos" onclick="location.href='market.html'">🌐 دخول المعرض العام</button>
+            <button class="btn-main btn-market" onclick="location.href='market.html'"><i class="fas fa-store"></i> دخول المعرض العام</button>
         </div>
 
         <div class="card">
@@ -225,6 +226,7 @@
             <input type="text" id="newToolName" placeholder="مثال: مسطرة T، نظارة، كتاب...">
 
             <button class="btn-main" onclick="addNewTool()">نشر في المعرض ✅</button>
+            <button class="btn-main btn-market" onclick="location.href='market.html'"><i class="fas fa-store"></i> دخول المعرض العام</button>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px;">
                 <button onclick="location.href='library.html'" style="background:rgba(41, 128, 185, 0.8); color:white; border:1px solid #2980b9; padding:12px; border-radius:10px; cursor:pointer; font-weight:bold;">📚 المكتبة</button>
@@ -307,10 +309,9 @@
             isSOS: true 
         })
         .then(() => { 
-            Swal.fire({ icon: 'success', title: 'تم الإرسال', text: 'نداء الاستغاثة نشط الآن في المعرض', timer: 2000 }); 
+            Swal.fire({ icon: 'success', title: 'تم الإرسال', timer: 2000 }); 
             document.getElementById('customSOS').value = ""; 
-        })
-        .catch(err => Swal.fire('خطأ', 'حدث خطأ في الاتصال', 'error'));
+        });
     }
 
     function addNewTool() {
@@ -329,10 +330,9 @@
             isSOS: false 
         })
         .then(() => { 
-            Swal.fire({ icon: 'success', title: 'تم النشر بنجاح', text: 'إعلانك متاح الآن في المعرض', timer: 2000 }); 
+            Swal.fire({ icon: 'success', title: 'تم النشر بنجاح', timer: 2000 }); 
             document.getElementById('newToolName').value = ""; 
-        })
-        .catch(err => Swal.fire('خطأ', 'حدثت مشكلة أثناء النشر', 'error'));
+        });
     }
 
     window.onload = function() {
