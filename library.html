@@ -37,133 +37,138 @@
 
         .navbar {
             backdrop-filter: blur(20px); background: var(--nav-bg);
-            padding: 12px 5%; display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 4%; display: flex; justify-content: space-between; align-items: center;
             border-bottom: 2px solid var(--cyan); position: sticky; top: 0; z-index: 1000;
         }
 
-        .nav-controls { display: flex; gap: 15px; align-items: center; }
+        .nav-controls { display: flex; gap: 10px; align-items: center; }
         
         .btn-nav {
-            padding: 8px 15px; border-radius: 10px; font-weight: bold; cursor: pointer; border: none; font-size: 0.85rem;
+            padding: 8px 12px; border-radius: 10px; font-weight: bold; cursor: pointer; border: none; font-size: 0.8rem;
         }
         .btn-add { background: var(--cyan); color: #000; }
         .btn-share { background: transparent; border: 1px solid var(--cyan); color: var(--cyan); }
 
         .filter-section {
-            padding: 15px 5%; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px;
+            padding: 15px 4%; display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px;
             background: rgba(0,0,0,0.2); backdrop-filter: blur(10px);
         }
 
-        /* تنسيق شريط البحث الجديد */
         .search-wrapper {
             position: relative;
-            grid-column: 1 / -1; /* يأخذ العرض كاملاً في الشبكة */
-            margin-bottom: 10px;
+            grid-column: 1 / -1; 
+            margin-bottom: 5px;
         }
         .search-input {
             width: 100%;
-            padding: 14px 45px 14px 15px;
-            border-radius: 15px;
+            padding: 12px 40px 12px 12px;
+            border-radius: 12px;
             border: 1px solid rgba(0, 212, 255, 0.4);
             background: rgba(15, 23, 42, 0.8);
             color: white;
             outline: none;
-            font-size: 0.95rem;
-            transition: 0.3s;
-        }
-        .search-input:focus {
-            border-color: var(--cyan);
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+            font-size: 0.9rem;
+            box-sizing: border-box;
         }
         .search-icon {
             position: absolute;
-            right: 15px;
+            right: 12px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--cyan);
         }
 
         .m-select {
-            padding: 12px; border-radius: 12px; border: 1px solid rgba(0, 212, 255, 0.3);
-            background: rgba(15, 23, 42, 0.6); color: white; outline: none; transition: 0.3s;
+            padding: 10px; border-radius: 10px; border: 1px solid rgba(0, 212, 255, 0.3);
+            background: rgba(15, 23, 42, 0.6); color: white; outline: none; font-size: 0.85rem;
         }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; padding: 30px 5%; }
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 20px; 
+            padding: 20px 4%; 
+        }
+
+        /* تعديل للهواتف الصغيرة جداً لتملأ الشاشة */
+        @media (max-width: 480px) {
+            .grid { grid-template-columns: 1fr; padding: 15px 4%; }
+            .navbar { padding: 10px 3%; }
+            .filter-section { grid-template-columns: 1fr 1fr; }
+            .search-wrapper { grid-column: 1 / span 2; }
+        }
 
         .card {
-            background: var(--card-bg); border-radius: 22px; padding: 25px;
+            background: var(--card-bg); border-radius: 20px; padding: 20px;
             position: relative; border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            min-height: 240px; display: flex; flex-direction: column; justify-content: space-between;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            min-height: 220px; display: flex; flex-direction: column; justify-content: space-between;
+            transition: 0.3s;
         }
 
         .card:hover { 
-            transform: translateY(-8px); 
+            transform: translateY(-5px); 
             border-color: var(--cyan);
-            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.25);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.2);
         }
 
         .badge {
-            position: absolute; top: 15px; left: 15px;
-            padding: 5px 14px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; color: #fff;
+            position: absolute; top: 12px; left: 12px;
+            padding: 4px 12px; border-radius: 15px; font-size: 0.65rem; font-weight: bold; color: #fff;
         }
-        .theory { background: var(--theory); box-shadow: 0 0 10px var(--theory); }
-        .practical { background: var(--practical); box-shadow: 0 0 10px var(--practical); }
+        .theory { background: var(--theory); }
+        .practical { background: var(--practical); }
 
-        .doc-name { font-size: 0.85rem; color: var(--cyan); margin-top: 5px; font-weight: bold; }
+        .doc-name { font-size: 0.8rem; color: var(--cyan); margin-top: 4px; font-weight: bold; }
+        .stats-bar { display: flex; gap: 10px; font-size: 0.7rem; margin-top: 8px; opacity: 0.8; }
 
-        .stats-bar { display: flex; gap: 12px; font-size: 0.75rem; margin-top: 10px; opacity: 0.8; }
+        .btn-group { display: flex; gap: 8px; margin-top: 12px; }
+        .btn-card-main { flex: 2; padding: 10px; border-radius: 10px; border: none; background: var(--cyan); color: #000; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
+        .btn-card-dl { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--cyan); color: var(--cyan); text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; }
 
-        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-card-main { flex: 2; padding: 11px; border-radius: 12px; border: none; background: var(--cyan); color: #000; font-weight: bold; cursor: pointer; }
-        .btn-card-dl { flex: 1; padding: 11px; border-radius: 12px; border: 1px solid var(--cyan); color: var(--cyan); text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; }
-
-        .del-icon { position: absolute; top: 15px; right: 15px; color: #ff4d4d; cursor: pointer; display: none; font-size: 1.1rem; }
+        .del-icon { position: absolute; top: 12px; right: 12px; color: #ff4d4d; cursor: pointer; font-size: 1rem; }
 
         .fab-mode {
-            position: fixed; bottom: 25px; right: 25px; width: 55px; height: 55px;
-            border-radius: 50%; background: var(--cyan); border: none; cursor: pointer; z-index: 1001; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            position: fixed; bottom: 20px; left: 20px; width: 50px; height: 50px;
+            border-radius: 50%; background: var(--cyan); border: none; cursor: pointer; z-index: 1001;
         }
-
-        @media (max-width: 600px) { .filter-section { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body id="appBody">
 
     <nav class="navbar">
-        <div style="display:flex; align-items:center; gap:12px;">
-            <a href="dashboard.html" style="color:var(--text-color); font-size:1.3rem;"><i class="fas fa-arrow-right"></i></a>
-            <div style="font-size: 1.4rem; font-weight: 900; color: var(--cyan);">NABD AUST</div>
+        <div style="display:flex; align-items:center; gap:8px;">
+            <a href="dashboard.html" style="color:var(--text-color); font-size:1.1rem;"><i class="fas fa-arrow-right"></i></a>
+            <div style="font-size: 1.2rem; font-weight: 900; color: var(--cyan);">NABD AUST</div>
         </div>
         
         <div class="nav-controls">
-            <div id="adminPanel" style="display:none; align-items: center; gap: 15px;">
-                <a href="requests.html" style="position: relative; color: var(--text-color); font-size: 1.2rem; text-decoration: none;">
+            <div id="adminPanel" style="display:none; align-items: center; gap: 10px;">
+                <a href="requests.html" style="position: relative; color: var(--text-color); font-size: 1.1rem;">
                     <i class="fas fa-bell"></i>
-                    <span id="reqCount" style="display:none; position: absolute; top: -8px; right: -8px; background: #ff4d4d; color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 50%; font-weight: bold;">0</span>
+                    <span id="reqCount" style="display:none; position: absolute; top: -5px; right: -5px; background: #ff4d4d; color: white; font-size: 0.55rem; padding: 2px 5px; border-radius: 50%;">0</span>
                 </a>
                 <button onclick="addNewItem()" class="btn-nav btn-add">إضافة</button>
             </div>
-            
-            <button onclick="studentShare()" class="btn-nav btn-share">شارك ملفك</button>
+            <button onclick="studentShare()" class="btn-nav btn-share">شارك</button>
         </div>
     </nav>
 
     <div class="filter-section">
         <div class="search-wrapper">
             <i class="fas fa-search search-icon"></i>
-            <input type="text" id="smartSearch" class="search-input" placeholder="ابحث عن مادة، دكتور، أو موضوع..." onkeyup="runFilter()">
+            <input type="text" id="smartSearch" class="search-input" placeholder="بحث مادة، دكتور..." onkeyup="runFilter()">
         </div>
 
         <select id="f_fac" class="m-select" onchange="runFilter()">
             <option value="الكل">جميع الكليات</option>
-            <option value="هندسه معلوماتية">هندسه معلوماتية</option>
-            <option value="هندسه معماريه">هندسه معماريه</option>
-            <option value="هندسه بترول">هندسه بترول</option>
-            <option value="هندسه كيميائيه">هندسه كيميائيه</option>
-            <option value="طب اسنان">طب اسنان</option>
-            <option value="صيدله">صيدله</option>
+            <option value="كلية الهندسة المعلوماتية">كلية الهندسة المعلوماتية</option>
+            <option value="كلية الهندسة المعمارية">كلية الهندسة المعمارية</option>
+            <option value="كلية الهندسة الكيميائية">كلية الهندسة الكيميائية</option>
+            <option value="كلية الهندسة البترولية">كلية الهندسة البترولية</option>
+            <option value="كلية طب الأسنان">كلية طب الأسنان</option>
+            <option value="كلية الصيدلة">كلية الصيدلة</option>
+            <option value="كلية الترجمة واللغات">كلية الترجمة واللغات</option>
         </select>
         <select id="f_year" class="m-select" onchange="runFilter()">
             <option value="الكل">جميع السنوات</option>
@@ -172,7 +177,7 @@
             <option value="سنة خامسة">سنة خامسة</option>
         </select>
         <select id="f_type" class="m-select" onchange="runFilter()">
-            <option value="الكل">نظري + عملي</option>
+            <option value="الكل">الكل</option>
             <option value="نظري">نظري</option>
             <option value="عملي">عملي</option>
         </select>
@@ -244,7 +249,7 @@
         const fac = document.getElementById('f_fac').value;
         const yea = document.getElementById('f_year').value;
         const typ = document.getElementById('f_type').value;
-        const query = document.getElementById('smartSearch').value.toLowerCase(); // جلب نص البحث
+        const query = document.getElementById('smartSearch').value.toLowerCase();
         const container = document.getElementById('mainGrid');
         container.innerHTML = "";
         
@@ -253,12 +258,10 @@
         if(yea !== 'الكل') list = list.filter(i => i.year === yea);
         if(typ !== 'الكل') list = list.filter(i => i.type === typ);
 
-        // منطق البحث الذكي (يبحث في العنوان واسم الدكتور والكلية)
         if(query !== "") {
             list = list.filter(i => 
                 (i.title && i.title.toLowerCase().includes(query)) || 
-                (i.doctor && i.doctor.toLowerCase().includes(query)) ||
-                (i.category && i.category.toLowerCase().includes(query))
+                (i.doctor && i.doctor.toLowerCase().includes(query))
             );
         }
 
@@ -273,13 +276,13 @@
                        style="${hasAdminAccess ? 'display:block' : 'display:none'}" 
                        onclick="deleteItem('${item.id}')"></i>
                     <div>
-                        <h3 style="margin:25px 0 5px 0; font-size:1.1rem;">${item.title}</h3>
+                        <h3 style="margin:20px 0 3px 0; font-size:1rem; line-height:1.2;">${item.title}</h3>
                         <div class="doc-name">د. ${item.doctor || 'غير محدد'}</div>
                         <div class="stats-bar">
                             <span><i class="fas fa-eye" style="color:var(--cyan)"></i> ${item.views || 0}</span>
                             <span><i class="fas fa-download" style="color:#10ac84"></i> ${item.downloads || 0}</span>
                         </div>
-                        <p style="font-size:0.75rem; opacity:0.6; margin-top:12px;">${item.category} | ${item.year}</p>
+                        <p style="font-size:0.7rem; opacity:0.6; margin-top:8px;">${item.category} | ${item.year}</p>
                     </div>
                     <div class="btn-group">
                         <button class="btn-card-main" onclick="handleView('${item.id}', '${item.url}', '${item.title}')">فتح</button>
@@ -303,7 +306,7 @@
     function viewPdf(url, title) {
         Swal.fire({
             title: title,
-            html: `<iframe src="https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true" style="width:100%; height:450px; border:none; border-radius:10px;"></iframe>`,
+            html: `<iframe src="https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true" style="width:100%; height:400px; border:none; border-radius:10px;"></iframe>`,
             width: '95%', background: '#0f172a', color: '#fff'
         });
     }
@@ -311,26 +314,27 @@
     function addNewItem() {
         if (!isAuthorized()) return;
         Swal.fire({
-            title: 'إضافة محاضرة رسمية',
+            title: 'إضافة محاضرة',
             background: '#0f172a', color: '#fff',
             html: `
-                <input id="in-t" class="swal2-input" style="color:white" placeholder="اسم المادة">
-                <input id="in-d" class="swal2-input" style="color:white" placeholder="اسم الدكتور">
-                <input id="in-u" class="swal2-input" style="color:white" placeholder="رابط الملف">
-                <select id="in-c" class="swal2-input" style="color:black">
-                    <option value="هندسه معلوماتية">هندسه معلوماتية</option>
-                    <option value="هندسه معماريه">هندسه معماريه</option>
-                    <option value="هندسه بترول">هندسه بترول</option>
-                    <option value="هندسه كيميائيه">هندسه كيميائيه</option>
-                    <option value="طب اسنان">طب اسنان</option>
-                    <option value="صيدله">صيدله</option>
+                <input id="in-t" class="swal2-input" placeholder="اسم المادة">
+                <input id="in-d" class="swal2-input" placeholder="اسم الدكتور">
+                <input id="in-u" class="swal2-input" placeholder="رابط الملف">
+                <select id="in-c" class="swal2-input">
+                    <option value="كلية الهندسة المعلوماتية">كلية الهندسة المعلوماتية</option>
+                    <option value="كلية الهندسة المعمارية">كلية الهندسة المعمارية</option>
+                    <option value="كلية الهندسة الكيميائية">كلية الهندسة الكيميائية</option>
+                    <option value="كلية الهندسة البترولية">كلية الهندسة البترولية</option>
+                    <option value="كلية طب الأسنان">كلية طب الأسنان</option>
+                    <option value="كلية الصيدلة">كلية الصيدلة</option>
+                    <option value="كلية الترجمة واللغات">كلية الترجمة واللغات</option>
                 </select>
-                <select id="in-y" class="swal2-input" style="color:black">
+                <select id="in-y" class="swal2-input">
                     <option value="سنة أولى">سنة أولى</option><option value="سنة ثانية">سنة ثانية</option>
                     <option value="سنة ثالثة">سنة ثالثة</option><option value="سنة رابعة">سنة رابعة</option>
                     <option value="سنة خامسة">سنة خامسة</option>
                 </select>
-                <select id="in-tp" class="swal2-input" style="color:black">
+                <select id="in-tp" class="swal2-input">
                     <option value="نظري">نظري</option><option value="عملي">عملي</option>
                 </select>`,
             preConfirm: () => ({
@@ -348,13 +352,13 @@
     function studentShare() {
         Swal.fire({
             title: 'مساهمة الطلاب',
-            text: 'أدخل رابط الملف لمراجعته من قبل الإدارة',
+            text: 'أدخل رابط الملف لمراجعته',
             input: 'url', inputPlaceholder: 'رابط الملف هنا',
             showCancelButton: true, confirmButtonText: 'إرسال'
         }).then(r => {
             if(r.isConfirmed && r.value) {
                 db.ref('suggestions/').push({ url: r.value, sender: currentUser || 'مجهول' });
-                Swal.fire('تم الإرسال', 'شكراً لمساهمتك! سيتم مراجعته قريباً.', 'success');
+                Swal.fire('تم الإرسال', 'شكراً لمساهمتك!', 'success');
             }
         });
     }
