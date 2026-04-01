@@ -232,14 +232,13 @@
         <a href="about.html" class="about-footer-btn">📖 حول الموقع والقسم</a>
     </footer>
 
-<script type="module">
-    // 1. استيراد المكتبات الحديثة لـ Firebase
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-    // 2. قاعدة بيانات المواد الدراسية لجامعة AUST (كاملة كما هي)
-    window.allAUSTSubjects = {
-        it: { 1: ["البرمجة 1", "الفيزياء 1", "الرياضيات 1", "الرسم الهندسي", "مهارات الحاسوب", "البرمجة 2", "الفيزياء 2", "الرياضيات 2", "الكيمياء الهندسية", "الميكانيك"], 2: ["خوارزميات 1", "برمجة ويب", "رياضيات متقطعة", "احتمالات", "OOP 1", "قواعد بيانات 1", "خوارزميات 2", "هندسة كهربائية", "تحليل عددي", "OOP 2"], 3: ["هندسة برمجيات 1", "تطوير ويب", "معمارية حاسوب", "نظم تشغيل 1", "تحليل نظم", "هندسة برمجيات 2", "نظم معلومات", "قواعد بيانات 2", "ذكاء صنعي"], 4: ["تنقيب بيانات", "رسم حاسوبي", "نظم زمن حقيقي", "شبكات 1", "إدارة قواعد بيانات", "نظم دعم قرار", "نمذجة ومحاكاة", "شبكات 2"], 5: ["مشروع تخرج 1", "إدارة مشاريع", "أنظمة خبيرة", "شبكات عصبونية", "مشروع تخرج 2", "معالجة صور", "أمن معلومات"] },
+<script>
+    // --- بيانات المواد الدراسية (لم يتم لمسها) ---
+    const allAUSTSubjects = {
+        it: { 1: ["البرمجة 1", "الفيزياء 1", "الرياضيات 1", "الرسم الهندسي", "مهارات الحاسوب", "البرمجة 2", "الفيزياء 2", "الرياضيات 2", "الكيمياء الهندسية", "الميكانيك"], 2: ["خوارزميات 1", "برمجة ويب", "رياضيات متتقطعة", "احتمالات", "OOP 1", "قواعد بيانات 1", "خوارزميات 2", "هندسة كهربائية", "تحليل عددي", "OOP 2"], 3: ["هندسة برمجيات 1", "تطوير ويب", "معمارية حاسوب", "نظم تشغيل 1", "تحليل نظم", "هندسة برمجيات 2", "نظم معلومات", "قواعد بيانات 2", "ذكاء صنعي"], 4: ["تنقيب بيانات", "رسم حاسوبي", "نظم زمن حقيقي", "شبكات 1", "إدارة قواعد بيانات", "نظم دعم قرار", "نمذجة ومحاكاة", "شبكات 2"], 5: ["مشروع تخرج 1", "إدارة مشاريع", "أنظمة خبيرة", "شبكات عصبونية", "مشروع تخرج 2", "معالجة صور", "أمن معلومات"] },
         chemical: { 1: ["الرياضيات 1", "الفيزياء", "كيمياء عامة", "رسم هندسي", "ميكانيك هندسي", "رياضيات 2", "كيمياء عضوية 1"], 2: ["برامج حاسوبية", "رياضيات تطبيقية", "كيمياء فيزيائية 1", "تقانات عضوية", "كيمياء تحليلية", "تحليل عددي", "كيمياء فيزيائية 2"], 3: ["جريان موائع", "انتقال حرارة", "ثيرموديناميك", "عمليات موحدة 1", "علم مواد", "إحصاء هندسي"], 4: ["انتقال كتلة", "هندسة تفاعلات 1", "تقانة أسمدة", "أصباغ ودهانات", "ألياف", "تفاعلات 2"], 5: ["ديناميك وتحكم", "تصميم أجهزة", "هندسة بيئية", "مشروع 1", "صناعات تكرير", "أمن صناعي"] },
         dent: { 1: ["كيمياء عامة", "تشريح عام 1", "بيولوجيا", "فيزيولوجيا", "كيمياء حيوية", "فيزياء", "إحصاء حيوي"], 2: ["تعويضات ثابتة 1", "مواد ترميمية", "تشريح ونحت أسنان", "رأس وعنق", "أحياء دقيقة", "تعويضات متحركة 1"], 3: ["تعويضات متحركة 2", "ترميمية 2", "أدوية", "باطنة وجلدية", "تشريح مرضي", "ثابتة 2", "أطفال"], 4: ["ثابتة 3", "تقويم 1", "مداواة لبية 1", "أمراض فم 1", "تخدير وقلع 1", "أطفال 1", "مداواة لبية 2"], 5: ["ثابتة 5", "زرع أسنان", "أطفال 2", "مداواة لبية 3", "تخدير وقلع 3", "جراحة فم وفكين"] },
         pharm: { 1: ["تشريح", "فيزياء طبية", "بيولوجيا خلية", "فيزيولوجيا 1", "كيمياء عامة", "إحصاء حيوي"], 2: ["صيدلانيات 1", "كيمياء تحليلية", "كيمياء فيزيائية", "علم الأمراض", "عضوية 2", "صيدلانيات 2"], 3: ["تكنولوجيا صيدلانية", "عقاقير 2", "أحياء دقيقة 1", "فارماكولوجيا 1", "تحليل آلي", "فارماكولوجيا 2"], 4: ["صيدلة صناعية 1", "سموم", "مناعة", "فارماكولوجيا 3", "صناعية 2", "سريرية"], 5: ["إسعاف أولي", "مشروع تخرج", "حيوية سريرية", "كيمياء دوائية", "رقابة", "تغذية"] },
@@ -248,7 +247,6 @@
         trans: { 1: ["صوتيات", "قراءة وكتابة 1", "استماع وتحدث 1", "قواعد 1", "ترجمة 1", "مقدمة أدب"], 2: ["مسرح نهضة", "شعر نهضة", "ترجمة 2", "مناهج بحث", "رواية قرن 18", "قصة قصيرة"], 3: ["مقالة نقدية", "مسرح حديث", "شعر حديث", "ترجمة 3", "نظام صوتي", "رواية قرن 19"], 4: ["مسرح عصر حديث", "شعر عصر حديث", "ترجمة 4", "نقد أدبي", "مشروع تخرج", "رواية حديثة"] }
     };
 
-    // 3. إعدادات Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
         authDomain: "nabd-aust.firebaseapp.com",
@@ -259,91 +257,166 @@
         appId: "1:921777725948:web:7b024d0aa101068bef9279"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const messaging = getMessaging(app);
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
     const currentUserName = localStorage.getItem("userName") || "شهد الخالد";
     const currentUserID = localStorage.getItem("userID") || "20241600060";
 
-    // --- وظيفة الإشعارات (CORS Proxy) ---
+    // --- وظيفة إرسال الإشعار التلقائي المحدثة (ترسل لكل التوكنات المخزنة) ---
     async function triggerNotification(title, body) {
-        const snapshot = await database.ref('fcmTokens').once('value');
-        const tokens = snapshot.val();
-        if (!tokens) return;
-        const proxyUrl = "https://cors-anywhere.herokuapp.com/";
-        const fcmUrl = "https://fcm.googleapis.com/fcm/send";
-        for (let id in tokens) {
-            fetch(proxyUrl + fcmUrl, { 
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'key=AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({
-                    "to": tokens[id],
-                    "notification": { "title": title, "body": body, "icon": "https://cdn-icons-png.flaticon.com/512/3119/3119338.png" }
-                })
-            }).catch(err => console.log("خطأ إرسال: ", err));
-        }
-    }
-
-    // --- تسجيل التوكن عند الضغط ---
-    document.addEventListener('click', async () => {
         try {
-            const permission = await Notification.requestPermission();
-            if (permission === 'granted') {
-                const reg = await navigator.serviceWorker.register('/smart/firebase-messaging-sw.js');
-                const tok = await getToken(messaging, { vapidKey: 'BEVvr0epV8DML0pVUjBpJadwBSMjPBs6c8YZEGYEnyErbpJhMNQyy7tpTNdrjf_SK_4ChMnpWp8pmf3ZcQxWi5Q', serviceWorkerRegistration: reg });
-                if (tok) database.ref('fcmTokens/' + currentUserID).set(tok);
+            // جلب كل التوكنات من قاعدة البيانات
+            const snapshot = await database.ref('fcmTokens').once('value');
+            const tokens = snapshot.val();
+            if (!tokens) return;
+
+            const proxyUrl = "https://cors-anywhere.herokuapp.com/"; // لتجاوز مشكلة CORS
+            const fcmUrl = "https://fcm.googleapis.com/fcm/send";
+
+            for (let id in tokens) {
+                fetch(proxyUrl + fcmUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'key=AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo', // مفتاح السيرفر الخاص بكِ
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        "to": tokens[id],
+                        "notification": {
+                            "title": title,
+                            "body": body,
+                            "icon": "https://cdn-icons-png.flaticon.com/512/3119/3119338.png",
+                            "click_action": "https://university-aust.github.io/smart/dashboard.html"
+                        }
+                    })
+                }).catch(e => console.log("خطأ في إرسال توكن معين:", e));
             }
-        } catch (e) { console.log("خطأ توكن:", e); }
-    }, { once: true });
+        } catch (e) { console.log("خطأ في جلب التوكنات:", e); }
+    }
 
-    // --- وظيفة SOS ---
-    window.sendSOS = function() {
-        const subject = document.getElementById('subjectSelect').value;
-        const details = document.getElementById('customSOS').value.trim();
-        if(!subject || !details) return Swal.fire('تنبيه', 'أكمل البيانات', 'warning');
-        database.ref('globalMarket/').push({
-            name: `🆘 SOS: ${subject} (${details})`, owner: currentUserName, studentId: currentUserID, date: new Date().toLocaleDateString('ar-EG'), isSOS: true
-        }).then(() => {
-            triggerNotification("نداء استغاثة جديد 🆘", `${currentUserName} يحتاج مساعدة في ${subject}`);
-            Swal.fire('تم الإرسال', 'وصل نداءك لزملائك', 'success');
-            document.getElementById('customSOS').value = "";
+    function monitorNewMessages() {
+        const cleanName = currentUserName.replace(/\s/g, '');
+        database.ref('chats').on('value', (snap) => {
+            let unread = false;
+            const data = snap.val();
+            if(data) {
+                Object.keys(data).forEach(id => {
+                    if(id.includes(cleanName)) {
+                        Object.keys(data[id]).forEach(m => {
+                            if(data[id][m].sender !== currentUserName && !data[id][m].seen) unread = true;
+                        });
+                    }
+                });
+            }
+            const dot = document.getElementById('notifyDot');
+            if(dot) dot.style.display = unread ? 'block' : 'none';
         });
     }
 
-    // --- وظيفة نشر المصادر (المعرض) ---
-    window.publishToGallery = function() {
-        const itemName = document.getElementById('itemName').value?.trim();
-        const itemDesc = document.getElementById('itemDesc').value?.trim();
-        if(!itemName || !itemDesc) return Swal.fire('تنبيه', 'يرجى كتابة اسم المادة والوصف', 'warning');
-        database.ref('globalMarket/').push({
-            name: itemName, description: itemDesc, owner: currentUserName, studentId: currentUserID, date: new Date().toLocaleDateString('ar-EG'), isSOS: false
-        }).then(() => {
-            triggerNotification("مصدر دراسي جديد 📚", `قام زميلك ${currentUserName} بنشر مصدر لـ: ${itemName}`);
-            Swal.fire('تم النشر', 'تمت إضافة المصدر بنجاح', 'success');
-            document.getElementById('itemName').value = "";
-            document.getElementById('itemDesc').value = "";
-        });
-    }
-
-    // --- وظائف المساعدة والواجهة ---
-    window.updateSubjects = function() {
+    function updateSubjects() {
         const college = document.getElementById('collegeSOS').value;
         const year = document.getElementById('yearSOS').value;
         const select = document.getElementById('subjectSelect');
-        const subjects = window.allAUSTSubjects[college] ? window.allAUSTSubjects[college][year] : [];
+        const subjects = allAUSTSubjects[college] ? allAUSTSubjects[college][year] : [];
         select.innerHTML = subjects.map(s => `<option value="${s}">${s}</option>`).join('') || `<option value="">لا توجد مواد</option>`;
     }
 
+    function sendSOS() {
+        const selectedSubject = document.getElementById('subjectSelect').value;
+        const details = document.getElementById('customSOS').value.trim();
+        
+        if(!selectedSubject) return Swal.fire('تنبيه', 'يرجى اختيار مادة من القائمة أولاً', 'warning');
+        if(!details) return Swal.fire('تنبيه', 'يرجى توضيح الجزء الذي تحتاج شرحه', 'warning');
+        
+        Swal.showLoading();
+        const sosTitle = `🆘 SOS: ${selectedSubject} (${details})`;
+
+        database.ref('globalMarket/').push({ 
+            name: sosTitle, 
+            college: document.getElementById('collegeSOS').value, 
+            owner: currentUserName, 
+            studentId: currentUserID,
+            date: new Date().toLocaleDateString('ar-EG'), 
+            isSOS: true 
+        })
+        .then(() => { 
+            triggerNotification("نداء استغاثة جديد 🆘", `الطالب ${currentUserName} يطلب المساعدة في مادة ${selectedSubject}`);
+            Swal.fire({ icon: 'success', title: 'تم الإرسال', text: 'سيصل تنبيه لجميع زملائك الآن', timer: 2000 }); 
+            document.getElementById('customSOS').value = ""; 
+        })
+        .catch(err => Swal.fire('خطأ', 'حدث خطأ أثناء الإرسال', 'error'));
+    }
+
+    function addNewTool() {
+        const name = document.getElementById('newToolName').value.trim();
+        const college = document.getElementById('itemCollege').value;
+        const type = document.getElementById('itemType').value;
+        if (!name) return Swal.fire('خطأ', 'يرجى كتابة اسم الغرض', 'error');
+        
+        Swal.showLoading();
+        database.ref('globalMarket/').push({ 
+            name: `${type}: ${name}`, 
+            college: college, 
+            owner: currentUserName, 
+            studentId: currentUserID,
+            date: new Date().toLocaleDateString('ar-EG'), 
+            isSOS: false 
+        })
+        .then(() => { 
+            triggerNotification("إعلان جديد في المعرض 📚", `${currentUserName} قام بنشر ${type}: ${name}`);
+            Swal.fire({ icon: 'success', title: 'تم النشر', text: 'تم إخطار زملائك بنجاح', timer: 2000 }); 
+            document.getElementById('newToolName').value = ""; 
+        })
+        .catch(err => Swal.fire('خطأ', 'حدثت مشكلة أثناء النشر', 'error'));
+    }
+
     window.onload = function() {
-        if(document.getElementById("userDisplayName")) document.getElementById("userDisplayName").innerText = currentUserName;
+        const display = document.getElementById("userDisplayName");
+        if(display) display.innerText = currentUserName;
         updateSubjects();
+        monitorNewMessages();
     };
+</script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
+
+  // تم تعديل الإعدادات لتطابق مشروعك بدقة
+  const firebaseConfig = {
+    apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
+    authDomain: "nabd-aust.firebaseapp.com",
+    databaseURL: "https://nabd-aust-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "nabd-aust",
+    storageBucket: "nabd-aust.firebasestorage.app",
+    messagingSenderId: "921777725948",
+    appId: "1:921777725948:web:7b024d0aa101068bef9279"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const messaging = getMessaging(app);
+
+  // طلب الإذن عند الضغط لضمان عملها في المتصفحات الحديثة
+  document.addEventListener('click', () => {
+      Notification.requestPermission().then((permission) => {
+        if (permission === 'granted') {
+          // تسجيل الـ Service Worker لضمان ظهور الإشعارات في البرداية
+          navigator.serviceWorker.register('/smart/firebase-messaging-sw.js').then((registration) => {
+              getToken(messaging, { 
+                vapidKey: 'BEVvr0epV8DML0pVUjBpJadwBSMjPBs6c8YZEGYEnyErbpJhMNQyy7tpTNdrjf_SK_4ChMnpWp8pmf3ZcQxWi5Q',
+                serviceWorkerRegistration: registration
+              }).then((currentToken) => {
+                if (currentToken) {
+                   // حفظ التوكن في قاعدة البيانات لكي يتمكن الآخرون من إرسال إشعارات لكِ
+                   firebase.database().ref('fcmTokens/' + localStorage.getItem("userID")).set(currentToken);
+                }
+              });
+          });
+        }
+      });
+  }, { once: true }); // تعمل مرة واحدة فقط عند أول نقرة
 </script>
 </body>
 </html>
