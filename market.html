@@ -59,7 +59,7 @@
             background: var(--deep-dark); padding: 25px; border-radius: 25px;
             border: 1px solid var(--cyan-glow); position: relative; 
             transition: 0.4s ease; backdrop-filter: blur(15px);
-            display: flex; flex-direction: column; min-height: 220px;
+            display: flex; flex-direction: column; min-height: 250px;
         }
         .tool-card:hover { transform: translateY(-8px); border-color: var(--cyan-neon); box-shadow: 0 0 20px var(--cyan-glow); }
 
@@ -74,9 +74,10 @@
         .lost-bg { background: #f1c40f; color: #000; }
         .found-bg { background: #2ecc71; color: #000; }
 
+        .post-time { font-size: 11px; color: #aaa; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+
         .contact-btn { width: 100%; margin-top: auto; padding: 12px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; }
 
-        /* أيقونة الحذف الإداري */
         .admin-del-icon {
             position: absolute; top: 15px; left: 15px; color: var(--red);
             cursor: pointer; opacity: 0.6; transition: 0.3s; font-size: 19px; z-index: 10;
@@ -112,10 +113,9 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-    // بياناتكِ الإدارية الثابتة
     const ADMIN_NAME = "shahed mamdoh alkhald";
     const ADMIN_ID = "20241600060";
-    const ADMIN_PASS = "Shahed_AUST_2026"; // كلمة السر الإدارية
+    const ADMIN_PASS = "Shahed_AUST_2026";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
@@ -135,11 +135,8 @@
         const searchTerm = document.getElementById("searchInput").value.toLowerCase();
         const filterCol = document.getElementById("filterCollege").value;
         
-        // جلب وتنظيف بيانات المستخدم الحالي
         const currentUserName = (localStorage.getItem("userName") || "").trim().toLowerCase();
         const currentUserID = (localStorage.getItem("userID") || "").trim();
-
-        // التحقق: هل أنتِ شهد؟
         const isSuperAdmin = (currentUserName === ADMIN_NAME.toLowerCase() && currentUserID === ADMIN_ID);
 
         database.ref('globalMarket/').on('value', (snapshot) => {
@@ -162,10 +159,11 @@
             }).reverse().forEach(item => {
                 const isSOS = item.isSOS === true;
                 const isOwner = (item.owner.trim().toLowerCase() === currentUserName);
-
                 let statusTag = '';
                 if(item.name.includes("مفقود")) statusTag = '<span class="status-badge lost-bg">مفقود</span>';
                 if(item.name.includes("موجود")) statusTag = '<span class="status-badge found-bg">موجود</span>';
+
+                const displayTime = item.fullTime ? item.fullTime : (item.date || "غير محدد");
 
                 grid.innerHTML += `
                     <div class="tool-card ${isSOS ? 'sos-card' : ''}">
@@ -178,6 +176,9 @@
                             </div>
                             ${isSOS ? '<span style="background:var(--red); color:white; padding:4px 8px; border-radius:10px; font-size:10px; font-weight:bold;">SOS 📡</span>' : ''}
                         </div>
+
+                        <div class="post-time"><i class="far fa-clock"></i> ${displayTime}</div>
+
                         <div style="color:var(--cyan-neon); font-size:13px; font-weight:bold;">👤 الناشر: ${item.owner}</div>
                         <h3 style="margin:10px 0; font-size: 1.1rem; color: #fff;">${item.name}</h3>
                         <button onclick="goToChat('${item.owner}', '${item.name}')" 
@@ -192,7 +193,6 @@
 
     function handleDelete(itemId, isGlobalAdmin) {
         if (isGlobalAdmin) {
-            // طلب كلمة السر إذا كنتِ تحذفين منشورات الآخرين
             Swal.fire({
                 title: 'تأكيد الهوية الإدارية',
                 input: 'password',
@@ -211,7 +211,6 @@
                 }
             });
         } else {
-            // حذف الطالب لمنشوره الشخصي (بدون كلمة سر إدارية)
             Swal.fire({
                 title: 'حذف منشورك؟',
                 icon: 'warning',
