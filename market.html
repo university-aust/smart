@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>المعرض العام | نبض AUST</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -23,12 +24,13 @@
 
         .header-nav { 
             display: flex; justify-content: space-between; align-items: center; 
-            padding: 25px 5%; background: rgba(0,0,0,0.5); 
+            padding: 15px 5%; background: rgba(0,0,0,0.5); 
             border-bottom: 1px solid var(--cyan-glow); backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 1000;
         }
         
         .header-nav h1 {
-            font-size: 24px;
+            font-size: clamp(18px, 4vw, 24px);
             background: linear-gradient(to bottom, #fff, var(--cyan-neon));
            -webkit-background-clip: text;
             background-clip: text; 
@@ -38,30 +40,34 @@
 
         .btn-back { 
             background: rgba(0, 229, 255, 0.1); border: 1px solid var(--cyan-neon); 
-            color: var(--cyan-neon); padding: 10px 20px; border-radius: 12px; 
+            color: var(--cyan-neon); padding: 8px 15px; border-radius: 12px; 
             cursor: pointer; text-decoration: none; font-weight: bold; transition: 0.3s;
-            display: flex; align-items: center; gap: 8px;
+            display: flex; align-items: center; gap: 8px; font-size: 0.9rem;
         }
         .btn-back:hover { background: var(--cyan-neon); color: black; box-shadow: 0 0 15px var(--cyan-glow); }
 
         .search-container { 
-            padding: 20px 5%; display: flex; gap: 15px; flex-wrap: wrap; background: rgba(0,0,0,0.2);
+            padding: 20px 5%; display: flex; gap: 10px; flex-wrap: wrap; background: rgba(0,0,0,0.2);
         }
         .search-input { 
-            flex: 1; min-width: 250px; padding: 12px 20px; border-radius: 15px; 
+            flex: 1; min-width: 200px; padding: 12px 15px; border-radius: 15px; 
             border: 1px solid var(--cyan-glow); background: rgba(0, 0, 0, 0.5); 
-            color: white; outline: none; transition: 0.3s;
+            color: white; outline: none; transition: 0.3s; font-size: 0.9rem;
         }
 
-        .market-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; padding: 40px 5%; }
-        
+        .market-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 20px; padding: 20px 5%; 
+        }
+
         .tool-card {
-            background: var(--deep-dark); padding: 25px; border-radius: 25px;
+            background: var(--deep-dark); padding: 20px; border-radius: 22px;
             border: 1px solid var(--cyan-glow); position: relative; 
             transition: 0.4s ease; backdrop-filter: blur(15px);
-            display: flex; flex-direction: column; min-height: 250px;
+            display: flex; flex-direction: column; min-height: 240px;
         }
-        .tool-card:hover { transform: translateY(-8px); border-color: var(--cyan-neon); box-shadow: 0 0 20px var(--cyan-glow); }
+        .tool-card:hover { transform: translateY(-5px); border-color: var(--cyan-neon); box-shadow: 0 0 20px var(--cyan-glow); }
 
         .sos-card { border: 2px solid var(--red) !important; background: rgba(255, 77, 77, 0.1) !important; animation: pulse-red 1.5s infinite; }
         @keyframes pulse-red {
@@ -69,40 +75,44 @@
             50% { box-shadow: 0 0 15px rgba(255, 77, 77, 0.5); }
         }
 
-        .category-tag { background: var(--cyan-neon); color: black; padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: bold; }
+        .category-tag { background: var(--cyan-neon); color: black; padding: 3px 10px; border-radius: 8px; font-size: 10px; font-weight: bold; }
         .status-badge { font-size: 10px; padding: 2px 8px; border-radius: 5px; font-weight: bold; margin-right: 5px; }
         .lost-bg { background: #f1c40f; color: #000; }
         .found-bg { background: #2ecc71; color: #000; }
 
-        .post-time { font-size: 11px; color: #aaa; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
-
+        .post-time { font-size: 10px; color: #aaa; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
         .contact-btn { width: 100%; margin-top: auto; padding: 12px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; }
 
         .admin-del-icon {
             position: absolute; top: 15px; left: 15px; color: var(--red);
-            cursor: pointer; opacity: 0.6; transition: 0.3s; font-size: 19px; z-index: 10;
+            cursor: pointer; opacity: 0.6; transition: 0.3s; font-size: 18px; z-index: 10;
         }
-        .admin-del-icon:hover { opacity: 1; transform: scale(1.3); color: #fff; }
+        .admin-del-icon:hover { opacity: 1; transform: scale(1.2); }
+
+        @media (max-width: 600px) {
+            .market-grid { grid-template-columns: 1fr; }
+            .search-input { min-width: 100%; }
+        }
     </style>
 </head>
 <body>
 
     <div class="header-nav">
         <h1>🌐 معرض <span style="color:var(--cyan-neon)">AUST</span> العام</h1>
-        <a href="dashboard.html" class="btn-back"><i class="fas fa-home"></i> العودة للرئيسية</a>
+        <a href="dashboard.html" class="btn-back"><i class="fas fa-home"></i> الرئيسية</a>
     </div>
 
     <div class="search-container">
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث عن مادة، أداة، مفقودات..." oninput="renderMarket()">
-        <select id="filterCollege" class="search-input" style="flex: 0; min-width: 180px;" onchange="renderMarket()">
-            <option value="all">كل الكليات</option>
-            <option value="it">هندسة المعلوماتية</option>
-            <option value="dent">طب الأسنان</option>
-            <option value="pharm">الصيدلة</option>
-            <option value="arch">العمارة</option>
-            <option value="chemical">الكيمياء</option>
-            <option value="petro">البترول</option>
-            <option value="trans">الترجمة</option>
+        <select id="filterCollege" class="search-input" style="flex: 0; min-width: 160px;" onchange="renderMarket()">
+            <option value="all">جميع الكليات</option>
+            <option value="كلية الهندسة المعلوماتية">الهندسة المعلوماتية</option>
+            <option value="كلية طب الأسنان">طب الأسنان</option>
+            <option value="كلية الصيدلة">الصيدلة</option>
+            <option value="كلية الهندسة المعمارية">الهندسة المعمارية</option>
+            <option value="كلية الهندسة الكيميائية">الهندسة الكيميائية</option>
+            <option value="كلية الهندسة البترولية">الهندسة البترولية</option>
+            <option value="كلية الترجمة واللغات">الترجمة واللغات</option>
             <option value="lost">🔍 المفقودات</option>
         </select>
     </div>
@@ -113,12 +123,10 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-    // الثوابت الخاصة بكِ (مطابقة تماماً لبيانات تسجيل الدخول)
     const ADMIN_NAME = "shahed mamdoh alkhald";
     const ADMIN_ID = "20241600060";
     const ADMIN_PASS = "shjkshjk"; 
 
-    // إعدادات الـ Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
         authDomain: "nabd-aust.firebaseapp.com",
@@ -137,11 +145,9 @@
         const searchTerm = document.getElementById("searchInput").value.toLowerCase();
         const filterCol = document.getElementById("filterCollege").value;
         
-        // جلب البيانات المخزنة من صفحة تسجيل الدخول وتنظيفها
         const currentUserName = (localStorage.getItem("userName") || "").trim().toLowerCase();
-        const currentUserID = (localStorage.getItem("userID") || "").trim();
+        const currentUserID = (localStorage.getItem("universityID") || "").trim(); // تأكدي من المسمى هنا
 
-        // التحقق من هوية المشرفة (شهد)
         const isSuperAdmin = (currentUserName === ADMIN_NAME.toLowerCase().trim() && currentUserID === ADMIN_ID.trim());
 
         database.ref('globalMarket/').on('value', (snapshot) => {
@@ -157,21 +163,30 @@
             marketArray.filter(item => {
                 const itemName = (item.name || "").toLowerCase();
                 const itemOwner = (item.owner || "").toLowerCase();
+                const itemCollege = (item.college || "").trim();
+                
                 const matchesSearch = itemName.includes(searchTerm) || itemOwner.includes(searchTerm);
-                let matchesCollege = (filterCol === "all" || item.college === filterCol);
-                if(filterCol === "lost") matchesCollege = itemName.includes("مفقود");
+                
+                let matchesCollege = false;
+                if (filterCol === "all") {
+                    matchesCollege = true;
+                } else if (filterCol === "lost") {
+                    matchesCollege = itemName.includes("مفقود") || itemName.includes("ضائع");
+                } else {
+                    // مقارنة دقيقة أو جزئية لتفادي مشكلة الاختصارات
+                    matchesCollege = (itemCollege === filterCol || filterCol.includes(itemCollege));
+                }
+                
                 return matchesSearch && matchesCollege;
             }).reverse().forEach(item => {
                 const isSOS = item.isSOS === true;
-                
-                // مقارنة صاحب المنشور بالمستخدم الحالي
                 const isOwner = (item.owner && item.owner.trim().toLowerCase() === currentUserName);
 
                 let statusTag = '';
                 if(item.name.includes("مفقود")) statusTag = '<span class="status-badge lost-bg">مفقود</span>';
-                if(item.name.includes("موجود")) statusTag = '<span class="status-badge found-bg">موجود</span>';
+                if(item.name.includes("موجود") || item.name.includes("لقيت")) statusTag = '<span class="status-badge found-bg">موجود</span>';
 
-                const displayTime = item.fullTime ? item.fullTime : (item.date || "غير محدد");
+                const displayTime = item.fullTime || item.date || "الآن";
 
                 grid.innerHTML += `
                     <div class="tool-card ${isSOS ? 'sos-card' : ''}">
@@ -181,7 +196,7 @@
                         
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                             <div>
-                                <span class="category-tag">${(item.college || 'AUST').toUpperCase()}</span>
+                                <span class="category-tag">${(item.college || 'عام').replace('كلية ', '')}</span>
                                 ${statusTag}
                             </div>
                             ${isSOS ? '<span style="background:var(--red); color:white; padding:4px 8px; border-radius:10px; font-size:10px; font-weight:bold;">SOS 📡</span>' : ''}
@@ -189,8 +204,9 @@
 
                         <div class="post-time"><i class="far fa-clock"></i> ${displayTime}</div>
 
-                        <div style="color:var(--cyan-neon); font-size:13px; font-weight:bold;">👤 الناشر: ${item.owner}</div>
-                        <h3 style="margin:10px 0; font-size: 1.1rem; color: #fff;">${item.name}</h3>
+                        <div style="color:var(--cyan-neon); font-size:13px; font-weight:bold;">👤 ${item.owner}</div>
+                        <h3 style="margin:10px 0; font-size: 1.05rem; color: #fff; line-height:1.4;">${item.name}</h3>
+                        
                         <button onclick="goToChat('${item.owner}', '${item.name}')" 
                                 class="contact-btn"
                                 style="background:${isSOS ? 'var(--red)' : 'var(--cyan-neon)'}; color:${isSOS ? 'white' : 'black'};">
@@ -202,35 +218,40 @@
     }
 
     function handleDelete(itemId, isGlobalAdmin, isOwner) {
-        if (isGlobalAdmin) {
-            Swal.fire({
-                title: 'تأكيد الصلاحية (شهد)',
-                input: 'password',
-                inputPlaceholder: 'كلمة السر shjkshjk..',
-                showCancelButton: true,
-                confirmButtonColor: '#ff4d4d',
-                confirmButtonText: 'حذف نهائي',
-                background: '#0a0a0f',
-                color: '#fff'
-            }).then((result) => {
-                if (result.isConfirmed && result.value === ADMIN_PASS) {
+        let title = isGlobalAdmin ? 'حذف إداري (شهد)' : 'حذف المنشور؟';
+        
+        Swal.fire({
+            title: title,
+            text: isGlobalAdmin ? "سيتم الحذف نهائياً بصفتكِ المشرفة" : "هل أنت متأكد من حذف منشورك؟",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ff4d4d',
+            confirmButtonText: 'نعم، احذف',
+            cancelButtonText: 'إلغاء',
+            background: '#0a0a0f',
+            color: '#fff'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                if (isGlobalAdmin) {
+                    // طلب كلمة السر لشهد فقط للتأكيد الإضافي
+                    Swal.fire({
+                        title: 'تأكيد كلمة السر',
+                        input: 'password',
+                        inputPlaceholder: 'كلمة سر الحذف..',
+                        background: '#0a0a0f', color: '#fff'
+                    }).then(passResult => {
+                        if (passResult.value === ADMIN_PASS) {
+                            database.ref('globalMarket/' + itemId).remove();
+                            Swal.fire({icon: 'success', title: 'تم الحذف', background: '#0a0a0f', color: '#fff'});
+                        } else {
+                            Swal.fire({icon: 'error', title: 'خطأ في كلمة السر', background: '#0a0a0f', color: '#fff'});
+                        }
+                    });
+                } else {
                     database.ref('globalMarket/' + itemId).remove();
-                    Swal.fire({ icon: 'success', title: 'تم الحذف بنجاح', background: '#0a0a0f', color: '#fff' });
-                } else if (result.isConfirmed) {
-                    Swal.fire({ icon: 'error', title: 'كلمة السر غير صحيحة!', background: '#0a0a0f', color: '#fff' });
                 }
-            });
-        } else if (isOwner) {
-            Swal.fire({
-                title: 'حذف منشورك؟',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'نعم، احذف',
-                background: '#0a0a0f', color: '#fff'
-            }).then((res) => {
-                if (res.isConfirmed) database.ref('globalMarket/' + itemId).remove();
-            });
-        }
+            }
+        });
     }
 
     function goToChat(owner, itemName) {
