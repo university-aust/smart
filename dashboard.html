@@ -262,37 +262,19 @@
 
     const currentUserName = localStorage.getItem("userName") || "شهد الخالد";
     const currentUserID = localStorage.getItem("userID") || "20241600060";
-
-  async function triggerNotification(title, body) {
-    try {
-        const snapshot = await database.ref('fcmTokens').once('value');
-        const tokens = snapshot.val();
-        if (!tokens) {
-            console.log("لا يوجد مستخدمون مسجلون لاستلام الإشعارات");
-            return;
-        }
-
-        // ملاحظة: قمنا بإزالة الوسيط واستخدام الرابط المباشر
-        const fcmUrl = "https://fcm.googleapis.com/fcm/send";
-        const serverKey = "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo"; // مفتاحك الحالي من الصور
-
-        for (let id in tokens) {
-            fetch(fcmUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'key=' + serverKey
-                },
-                body: JSON.stringify({
-                    "to": tokens[id],
-                    "notification": {
-                        "title": title,
-                        "body": body,
-                        "icon": "https://cdn-icons-png.flaticon.com/512/3119/3119338.png",
-                        "click_action": window.location.href
-                    }
-                })
-            })
+    
+function triggerNotification(title, body) {
+    // بدلاً من إرسال طلب للمتصفح، سنكتب الطلب في قاعدة البيانات فقط
+    database.ref('notifications_queue').push({
+        title: title,
+        body: body,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+    }).then(() => {
+        console.log("تم تسجيل طلب الإشعار في السيرفر بنجاح!");
+    }).catch((err) => {
+        console.error("خطأ في تسجيل الطلب: ", err);
+    });
+}
             .then(response => {
                 if (!response.ok) throw new Error('Network response was not ok');
                 console.log("تم إرسال الإشعار بنجاح للتوكن: ", id);
