@@ -247,7 +247,7 @@
         trans: { 1: ["صوتيات", "قراءة وكتابة 1", "استماع وتحدث 1", "قواعد 1", "ترجمة 1", "مقدمة أدب"], 2: ["مسرح نهضة", "شعر نهضة", "ترجمة 2", "مناهج بحث", "رواية قرن 18", "قصة قصيرة"], 3: ["مقالة نقدية", "مسرح حديث", "شعر حديث", "ترجمة 3", "نظام صوتي", "رواية قرن 19"], 4: ["مسرح عصر حديث", "شعر عصر حديث", "ترجمة 4", "نقد أدبي", "مشروع تخرج", "رواية حديثة"] }
     };
 
-    // إعدادات Firebase من الصور المرفقة
+    // إعدادات Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
         authDomain: "nabd-aust.firebaseapp.com",
@@ -264,9 +264,8 @@
     const currentUserName = localStorage.getItem("userName") || "شهد الخالد";
     const currentUserID = localStorage.getItem("userID") || "20241600060";
 
-    // --- وظيفة إرسال الإشعار لجميع الأجهزة المسجلة ---
+    // --- وظيفة إرسال الإشعار لجميع الأجهزة المسجلة باستخدام الـ API Key الجديد ---
     async function triggerNotification(title, body) {
-        // جلب جميع التوكنات المخزنة لزملائك من قاعدة البيانات
         database.ref('fcmTokens').once('value', async (snapshot) => {
             const tokens = snapshot.val();
             if (!tokens) return;
@@ -278,7 +277,8 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': 'key=AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo' // مفتاح API المعتمد
+                            // تم وضع المفتاح الذي استخرجتيه من صفحة Credentials هنا
+                            'Authorization': 'key=AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo' 
                         },
                         body: JSON.stringify({
                             "to": token,
@@ -286,7 +286,7 @@
                                 "title": title,
                                 "body": body,
                                 "icon": "https://cdn-icons-png.flaticon.com/512/3119/3119338.png",
-                                "click_action": "https://nabd-aust.firebaseapp.com"
+                                "click_action": "https://university-aust.github.io/" // رابط موقعك
                             }
                         })
                     });
@@ -295,7 +295,7 @@
         });
     }
 
-    // وظائف اللوحة التقليدية
+    // وظائف اللوحة
     function updateSubjects() {
         const college = document.getElementById('collegeSOS').value;
         const year = document.getElementById('yearSOS').value;
@@ -359,7 +359,7 @@
   });
   const messaging = getMessaging(app);
 
-  // طلب الإذن عند أول ضغطة للمستخدم لحل الخطأ الوردي
+  // طلب الإذن عند أول ضغطة للمستخدم لحل الخطأ الوردي (مهم جداً لزملائك)
   document.addEventListener('click', () => {
     Notification.requestPermission().then((permission) => {
         if (permission === 'granted') {
@@ -367,9 +367,11 @@
                 vapidKey: 'BEVvr0epV8DML0pVUjBpJadwBSMjPBs6c8YZEGYEnyErbpJhMNQyy7tpTNdrjf_SK_4ChMnpWp8pmf3ZcQxWi5Q' 
             }).then((currentToken) => {
                 if (currentToken) {
-                    // تخزين التوكن لضمان وصول الإشعارات لهذا الجهاز لاحقاً
-                    firebase.database().ref('fcmTokens/' + currentUserID).set(currentToken);
+                    // تسجيل التوكن في قاعدة البيانات لضمان وصول الإشعارات لهذا الجهاز
+                    firebase.database().ref('fcmTokens/' + (localStorage.getItem("userID") || 'guest')).set(currentToken);
                 }
+            }).catch((err) => {
+                console.log('حدث خطأ أثناء الحصول على التوكن: ', err);
             });
         }
     });
