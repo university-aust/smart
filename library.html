@@ -67,7 +67,7 @@
             background: rgba(15, 23, 42, 0.6); color: white; outline: none; font-size: 0.75rem;
         }
 
-        /* تنسيق الحاويات زوجي (2 في الصف) في الموبايل */
+        /* تنسيق الحاويات زوجي 2x2 في الموبايل */
         .grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
@@ -91,7 +91,7 @@
 
         .badge {
             position: absolute; top: 8px; left: 8px;
-            padding: 2px 8px; border-radius: 10px; font-size: 0.55rem; font-weight: bold; color: #fff;
+            padding: 2px 8px; border-radius: 10px; font-size: 0.55rem; font-weight: bold; color: #fff; z-index: 2;
         }
         .theory { background: var(--theory); }
         .practical { background: var(--practical); }
@@ -276,10 +276,19 @@
     function handleView(id, url, title) {
         db.ref('official_library/' + id + '/views').transaction(c => (c || 0) + 1);
         
-        // إعادة خاصية العرض داخل الموقع (Iframe) كما كانت
+        let finalUrl = url;
+        // تعديل روابط Archive لتفتح في وضع العرض السريع
+        if(url.includes('archive.org/details/')) {
+            finalUrl = url.replace('/details/', '/embed/');
+        } else if(url.includes('drive.google.com')) {
+            finalUrl = url.replace('/view?usp=sharing', '/preview').replace('/view', '/preview');
+        }
+
         Swal.fire({
             title: title,
-            html: `<iframe src="https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true" style="width:100%; height:450px; border:none; border-radius:10px;"></iframe>`,
+            html: `<div style="width:100%; height:450px; border-radius:10px; overflow:hidden; background:#000;">
+                    <iframe src="${finalUrl}" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>
+                   </div>`,
             width: '95%',
             background: '#0f172a',
             color: '#fff',
@@ -304,7 +313,7 @@
         const item = libraryData.find(i => i.id === id);
         showItemForm('تعديل بيانات المحاضرة', item, (data) => {
             db.ref('official_library/' + id).update(data);
-            Swal.fire('تم التعديل', '', 'success');
+            Swal.fire({ icon: 'success', title: 'تم التعديل بنجاح', background: '#0f172a', color: '#fff' });
         });
     }
 
@@ -315,15 +324,15 @@
             html: `
                 <input id="in-t" class="swal2-input" placeholder="اسم المادة" value="${item.title || ''}">
                 <input id="in-d" class="swal2-input" placeholder="اسم الدكتور" value="${item.doctor || ''}">
-                <input id="in-u" class="swal2-input" placeholder="رابط الملف" value="${item.url || ''}">
+                <input id="in-u" class="swal2-input" placeholder="رابط الملف (Archive/Drive)" value="${item.url || ''}">
                 <select id="in-c" class="swal2-input">
-                    <option value="كلية الهندسة المعلوماتية" ${item.category === 'كلية الهندسة المعلوماتية' ? 'selected' : ''}>الهندسة المعلوماتية</option>
-                    <option value="كلية الهندسة المعمارية" ${item.category === 'كلية الهندسة المعمارية' ? 'selected' : ''}>الهندسة المعمارية</option>
-                    <option value="كلية الهندسة الكيميائية" ${item.category === 'كلية الهندسة الكيميائية' ? 'selected' : ''}>الهندسة الكيميائية</option>
-                    <option value="كلية الهندسة البترولية" ${item.category === 'كلية الهندسة البترولية' ? 'selected' : ''}>الهندسة البترولية</option>
-                    <option value="كلية طب الأسنان" ${item.category === 'كلية طب الأسنان' ? 'selected' : ''}>طب الأسنان</option>
+                    <option value="كلية الهندسة المعلوماتية" ${item.category === 'كلية الهندسة المعلوماتية' ? 'selected' : ''}>المعلوماتية</option>
+                    <option value="كلية الهندسة المعمارية" ${item.category === 'كلية الهندسة المعمارية' ? 'selected' : ''}>المعمارية</option>
+                    <option value="كلية الهندسة الكيميائية" ${item.category === 'كلية الهندسة الكيميائية' ? 'selected' : ''}>الكيميائية</option>
+                    <option value="كلية الهندسة البترولية" ${item.category === 'كلية الهندسة البترولية' ? 'selected' : ''}>البترولية</option>
+                    <option value="كلية طب الأسنان" ${item.category === 'كلية طب الأسنان' ? 'selected' : ''}>الأسنان</option>
                     <option value="كلية الصيدلة" ${item.category === 'كلية الصيدلة' ? 'selected' : ''}>الصيدلة</option>
-                    <option value="كلية الترجمة واللغات" ${item.category === 'كلية الترجمة واللغات' ? 'selected' : ''}>الترجمة واللغات</option>
+                    <option value="كلية الترجمة واللغات" ${item.category === 'كلية الترجمة واللغات' ? 'selected' : ''}>اللغات</option>
                 </select>
                 <select id="in-y" class="swal2-input">
                     <option value="سنة أولى" ${item.year === 'سنة أولى' ? 'selected' : ''}>سنة أولى</option>
@@ -367,8 +376,8 @@
     function deleteItem(id) {
         if (!isAuthorized()) return;
         Swal.fire({ 
-            title: 'هل أنتِ متأكدة؟', 
-            text: "سيتم حذف الملف نهائياً من المكتبة!",
+            title: 'حذف المحاضرة؟', 
+            text: "لا يمكن التراجع عن هذه الخطوة!",
             icon: 'warning', 
             showCancelButton: true, 
             confirmButtonColor: '#ff4d4d',
