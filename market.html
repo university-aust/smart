@@ -11,21 +11,23 @@
             --cyan-neon: #00e5ff; 
             --cyan-glow: rgba(0, 229, 255, 0.3);
             --red: #ff4d4d; 
-            --deep-dark: rgba(9, 10, 15, 0.95);
+            --red-glow: rgba(255, 77, 77, 0.5);
+            --deep-dark: rgba(10, 11, 18, 0.75); /* شفافية زجاجية */
         }
 
         body { 
-            /* الخلفية المغبشة الأصلية */
-            background: linear-gradient(rgba(10, 10, 15, 0.85), rgba(10, 10, 15, 0.85)), url('67260.jpg') no-repeat center center fixed;
+            background: linear-gradient(rgba(10, 10, 15, 0.8), rgba(10, 10, 15, 0.8)), url('67260.jpg') no-repeat center center fixed;
             background-size: cover;
             color: white; 
             font-family: 'Segoe UI', Tahoma, sans-serif; 
             margin: 0; 
+            overflow-x: hidden;
         }
 
+        /* الهيدر */
         .header-nav { 
             display: flex; justify-content: space-between; align-items: center; 
-            padding: 15px 5%; background: rgba(0,0,0,0.6); 
+            padding: 15px 5%; background: rgba(0, 0, 0, 0.6); 
             border-bottom: 1px solid var(--cyan-glow); backdrop-filter: blur(15px);
             position: sticky; top: 0; z-index: 1000;
         }
@@ -33,61 +35,80 @@
         .header-nav h1 {
             font-size: clamp(18px, 4vw, 24px);
             background: linear-gradient(to bottom, #fff, var(--cyan-neon));
-           -webkit-background-clip: text; background-clip: text; 
-           -webkit-text-fill-color: transparent; margin: 0;
+            -webkit-background-clip: text; background-clip: text; 
+            -webkit-text-fill-color: transparent; margin: 0;
         }
 
         .btn-back { 
             background: rgba(0, 229, 255, 0.1); border: 1px solid var(--cyan-neon); 
-            color: var(--cyan-neon); padding: 8px 15px; border-radius: 12px; 
+            color: var(--cyan-neon); padding: 8px 16px; border-radius: 12px; 
             text-decoration: none; font-weight: bold; transition: 0.3s;
             display: flex; align-items: center; gap: 8px; font-size: 0.85rem;
         }
         .btn-back:hover { background: var(--cyan-neon); color: black; box-shadow: 0 0 15px var(--cyan-glow); }
 
-        .search-container { padding: 15px 5%; display: flex; gap: 10px; flex-wrap: wrap; background: rgba(0,0,0,0.2); }
+        /* منطقة البحث */
+        .search-container { padding: 15px 5%; display: flex; gap: 10px; flex-wrap: wrap; background: rgba(0,0,0,0.3); }
         .search-input { 
             flex: 1; min-width: 140px; padding: 12px; border-radius: 12px; 
             border: 1px solid var(--cyan-glow); background: rgba(0, 0, 0, 0.5); 
-            color: white; outline: none; font-size: 0.9rem;
+            color: white; outline: none; font-size: 0.9rem; transition: 0.3s;
         }
+        .search-input:focus { border-color: var(--cyan-neon); box-shadow: 0 0 10px var(--cyan-glow); }
 
+        /* الشبكة والحاويات */
         .market-grid { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 20px; padding: 20px 5%; 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); 
+            gap: 20px; padding: 25px 5%; 
         }
 
         .tool-card {
-            background: var(--deep-dark); padding: 20px; border-radius: 22px;
-            border: 1px solid var(--cyan-glow); position: relative; 
-            transition: 0.3s ease; backdrop-filter: blur(15px);
-            display: flex; flex-direction: column; min-height: 250px;
+            background: var(--deep-dark); padding: 22px; border-radius: 25px;
+            border: 1px solid rgba(0, 229, 255, 0.2); position: relative; 
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            backdrop-filter: blur(12px); display: flex; flex-direction: column; min-height: 260px;
         }
-        .tool-card:hover { transform: translateY(-5px); border-color: var(--cyan-neon); }
+        .tool-card:hover { transform: translateY(-7px); border-color: var(--cyan-neon); }
 
-        .sos-card { border: 2px solid var(--red) !important; box-shadow: 0 0 15px rgba(255, 77, 77, 0.2); }
+        /* خاصية التوهج الدائم والوميض لـ SOS */
+        .sos-card { 
+            border: 2px solid var(--red) !important; 
+            background: rgba(255, 77, 77, 0.1) !important; 
+            animation: sos-pulse 2s infinite; 
+        }
 
-        .category-tag { background: var(--cyan-neon); color: black; padding: 3px 10px; border-radius: 8px; font-size: 10px; font-weight: bold; }
-        .status-badge { font-size: 10px; padding: 2px 8px; border-radius: 5px; font-weight: bold; margin-right: 5px; }
+        @keyframes sos-pulse {
+            0% { box-shadow: 0 0 8px rgba(255, 77, 77, 0.3); border-color: rgba(255, 77, 77, 0.6); }
+            50% { box-shadow: 0 0 20px rgba(255, 77, 77, 0.6); border-color: var(--red); }
+            100% { box-shadow: 0 0 8px rgba(255, 77, 77, 0.3); border-color: rgba(255, 77, 77, 0.6); }
+        }
+
+        .category-tag { background: var(--cyan-neon); color: black; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+        .status-badge { font-size: 10px; padding: 3px 8px; border-radius: 6px; font-weight: bold; margin-right: 6px; }
         .lost-bg { background: #f1c40f; color: #000; }
         .found-bg { background: #2ecc71; color: #000; }
 
-        .post-time { font-size: 10px; color: #aaa; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+        .post-time { font-size: 10px; color: #bbb; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
         
-        /* تصميم صندوق "طلب الشرح" ليوافق الداشبورد */
+        /* صندوق الشرح المتوافق مع الداشبورد */
         .explanation-box {
-            background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 10px;
-            margin: 10px 0; font-size: 0.85rem; color: #eee; border-right: 3px solid var(--cyan-neon);
-            line-height: 1.5;
+            background: rgba(255, 255, 255, 0.06); padding: 12px; border-radius: 12px;
+            margin: 12px 0; font-size: 0.88rem; color: #f0f0f0; 
+            border-right: 4px solid var(--cyan-neon); line-height: 1.5;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
         }
 
-        .contact-btn { width: 100%; margin-top: auto; padding: 12px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .contact-btn { 
+            width: 100%; margin-top: auto; padding: 13px; border: none; 
+            border-radius: 14px; font-weight: bold; cursor: pointer; transition: 0.3s; 
+            font-size: 0.95rem;
+        }
 
         .admin-del-icon {
             position: absolute; top: 15px; left: 15px; color: var(--red);
-            cursor: pointer; opacity: 0.5; font-size: 18px; z-index: 10;
+            cursor: pointer; opacity: 0.5; font-size: 18px; z-index: 10; transition: 0.3s;
         }
-        .admin-del-icon:hover { opacity: 1; transform: scale(1.1); }
+        .admin-del-icon:hover { opacity: 1; transform: scale(1.2) rotate(10deg); }
 
         @media (max-width: 600px) { .market-grid { grid-template-columns: 1fr; } }
     </style>
@@ -101,7 +122,7 @@
 
     <div class="search-container">
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث عن مادة، غرض، مفقودات..." oninput="renderMarket()">
-        <select id="filterCollege" class="search-input" style="flex: 0; min-width: 130px;" onchange="renderMarket()">
+        <select id="filterCollege" class="search-input" style="flex: 0; min-width: 135px;" onchange="renderMarket()">
             <option value="all">كل الكليات</option>
             <option value="it">المعلوماتية</option>
             <option value="dent">الأسنان</option>
@@ -140,15 +161,15 @@
 
     const collegeMap = { 'it': 'المعلوماتية', 'dent': 'الأسنان', 'pharm': 'الصيدلة', 'arch': 'العمارة', 'chemical': 'الكيمياء', 'petro': 'البترول', 'trans': 'الترجمة', 'عام': 'عام' };
 
-    let cachedData = []; // لتسريع الظهور
+    let cachedData = []; // تسريع العرض والبحث
 
-    function fetchMarketData() {
-        // جلب لحظي للبيانات لضمان السرعة
+    function startListening() {
         database.ref('globalMarket/').on('value', (snapshot) => {
             const data = snapshot.val();
             if (!data) {
                 cachedData = [];
             } else {
+                // تحويل البيانات لمصفوفة وترتيبها من الأحدث للأقدم
                 cachedData = Object.keys(data).map(key => ({ id: key, ...data[key] })).reverse();
             }
             renderMarket();
@@ -171,20 +192,20 @@
 
             const name = item.name.toLowerCase();
             const owner = (item.owner || "").toLowerCase();
+            // دعم حقل explanation من الداشبورد وحقل المادة
             const explanation = (item.explanation || "").toLowerCase();
             const college = (item.college || "").toLowerCase();
 
             const matchesSearch = name.includes(searchTerm) || owner.includes(searchTerm) || explanation.includes(searchTerm);
             
             let matchesCollege = (filterCol === "all") || (college === filterCol);
-            // خاصية فلترة المفقودات كما في الكود القديم
             if (filterCol === "lost") matchesCollege = name.includes("مفقود") || name.includes("موجود");
 
             return matchesSearch && matchesCollege;
         });
 
         if (filtered.length === 0) {
-            grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; opacity: 0.5;">لا توجد منشورات حالياً.. 🕸️</p>`;
+            grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; opacity: 0.5; margin-top: 50px;">لا توجد منشورات تطابق بحثك.. 🕸️</p>`;
             return;
         }
 
@@ -192,18 +213,17 @@
             const isSOS = item.isSOS === true;
             const isOwner = (item.owner && item.owner.trim().toLowerCase() === currentUserName);
             
-            // تحديد الحالة (مفقود/موجود)
             let statusTag = '';
             if(item.name.includes("مفقود")) statusTag = '<span class="status-badge lost-bg">مفقود</span>';
             else if(item.name.includes("موجود")) statusTag = '<span class="status-badge found-bg">موجود</span>';
 
-            // التوافق مع خاصية الوقت fullTime من الداشبورد
+            // التوافق مع الوقت التفصيلي fullTime
             const displayTime = item.fullTime || item.date || "منذ قليل";
 
             htmlContent += `
                 <div class="tool-card ${isSOS ? 'sos-card' : ''}">
                     ${(isSuperAdmin || isOwner) ? 
-                        `<i class="fas fa-trash-alt admin-del-icon" onclick="handleDelete('${item.id}', ${isSuperAdmin}, ${isOwner})" title="حذف"></i>` 
+                        `<i class="fas fa-trash-alt admin-del-icon" onclick="handleDelete('${item.id}', ${isSuperAdmin}, ${isOwner})"></i>` 
                         : ''}
                     
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -212,19 +232,20 @@
                     </div>
 
                     <div class="post-time"><i class="far fa-clock"></i> ${displayTime}</div>
-                    <div style="color:var(--cyan-neon); font-size:12px; font-weight:bold;">👤 ${item.owner}</div>
-                    <h3 style="margin:8px 0; font-size: 1rem; color: #fff;">${item.name}</h3>
+                    <div style="color:var(--cyan-neon); font-size:12.5px; font-weight:bold;">👤 ${item.owner}</div>
+                    <h3 style="margin:10px 0; font-size: 1.05rem; color: #fff; line-height: 1.4;">${item.name}</h3>
                     
                     ${item.explanation ? `
-                        <div class="explanation-box">
-                            <i class="fas fa-info-circle" style="color:var(--cyan-neon); margin-left:5px;"></i>
-                            <b>التفاصيل:</b> ${item.explanation}
+                        <div class="explanation-box" style="border-right-color: ${isSOS ? 'var(--red)' : 'var(--cyan-neon)'}">
+                            <i class="fas ${isSOS ? 'fa-bolt' : 'fa-info-circle'}" 
+                               style="color: ${isSOS ? 'var(--red)' : 'var(--cyan-neon)'}; margin-left:6px;"></i>
+                            <b>${isSOS ? 'طلب شرح:' : 'التفاصيل:'}</b> ${item.explanation}
                         </div>` : ''}
                     
                     <button onclick="goToChat('${item.owner}', '${item.name}')" 
                             class="contact-btn"
                             style="background:${isSOS ? 'var(--red)' : 'var(--cyan-neon)'}; color:${isSOS ? 'white' : 'black'};">
-                        ${isSOS ? 'تقديم مساعدة' : 'تواصل الآن'}
+                        <i class="fas fa-comments"></i> ${isSOS ? 'تقديم مساعدة' : 'تواصل الآن'}
                     </button>
                 </div>`;
         });
@@ -245,6 +266,7 @@
             }).then((result) => {
                 if (result.isConfirmed && result.value === ADMIN_PASS) {
                     database.ref('globalMarket/' + itemId).remove();
+                    Swal.fire({ icon: 'success', title: 'تم الحذف بنجاح', background: '#0a0a0f', color: '#fff' });
                 } else if (result.isConfirmed) {
                     Swal.fire({ icon: 'error', title: 'كلمة السر خطأ!', background: '#0a0a0f', color: '#fff' });
                 }
@@ -257,7 +279,10 @@
                 confirmButtonText: 'نعم، احذف',
                 background: '#0a0a0f', color: '#fff'
             }).then((res) => {
-                if (res.isConfirmed) database.ref('globalMarket/' + itemId).remove();
+                if (res.isConfirmed) {
+                    database.ref('globalMarket/' + itemId).remove();
+                    Swal.fire({ icon: 'success', title: 'تم الحذف', timer: 1000, showConfirmButton: false, background: '#0a0a0f' });
+                }
             });
         }
     }
@@ -271,7 +296,7 @@
         window.location.href = `chat.html?to=${encodeURIComponent(owner)}&item=${encodeURIComponent(itemName)}`;
     }
 
-    window.onload = fetchMarketData;
+    window.onload = startListening;
 </script>
 </body>
 </html>
