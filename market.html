@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>المعرض العام | نبض AUST</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="icon" href="data:,">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root { 
@@ -16,6 +15,7 @@
         }
 
         body { 
+            /* الخلفية المغبشة الأصلية */
             background: linear-gradient(rgba(10, 10, 15, 0.85), rgba(10, 10, 15, 0.85)), url('67260.jpg') no-repeat center center fixed;
             background-size: cover;
             color: white; 
@@ -43,6 +43,7 @@
             text-decoration: none; font-weight: bold; transition: 0.3s;
             display: flex; align-items: center; gap: 8px; font-size: 0.85rem;
         }
+        .btn-back:hover { background: var(--cyan-neon); color: black; box-shadow: 0 0 15px var(--cyan-glow); }
 
         .search-container { padding: 15px 5%; display: flex; gap: 10px; flex-wrap: wrap; background: rgba(0,0,0,0.2); }
         .search-input { 
@@ -62,8 +63,9 @@
             transition: 0.3s ease; backdrop-filter: blur(15px);
             display: flex; flex-direction: column; min-height: 250px;
         }
+        .tool-card:hover { transform: translateY(-5px); border-color: var(--cyan-neon); }
 
-        .sos-card { border: 2px solid var(--red) !important; box-shadow: 0 0 10px rgba(255, 77, 77, 0.2); }
+        .sos-card { border: 2px solid var(--red) !important; box-shadow: 0 0 15px rgba(255, 77, 77, 0.2); }
 
         .category-tag { background: var(--cyan-neon); color: black; padding: 3px 10px; border-radius: 8px; font-size: 10px; font-weight: bold; }
         .status-badge { font-size: 10px; padding: 2px 8px; border-radius: 5px; font-weight: bold; margin-right: 5px; }
@@ -72,8 +74,8 @@
 
         .post-time { font-size: 10px; color: #aaa; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
         
-        /* تنسيق نص طلب الشرح */
-        .study-details {
+        /* تصميم صندوق "طلب الشرح" ليوافق الداشبورد */
+        .explanation-box {
             background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 10px;
             margin: 10px 0; font-size: 0.85rem; color: #eee; border-right: 3px solid var(--cyan-neon);
             line-height: 1.5;
@@ -98,13 +100,16 @@
     </div>
 
     <div class="search-container">
-        <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث..." oninput="renderMarket()">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث عن مادة، غرض، مفقودات..." oninput="renderMarket()">
         <select id="filterCollege" class="search-input" style="flex: 0; min-width: 130px;" onchange="renderMarket()">
-            <option value="all">الكل</option>
+            <option value="all">كل الكليات</option>
             <option value="it">المعلوماتية</option>
             <option value="dent">الأسنان</option>
             <option value="pharm">الصيدلة</option>
             <option value="arch">العمارة</option>
+            <option value="chemical">الكيمياء</option>
+            <option value="petro">البترول</option>
+            <option value="trans">الترجمة</option>
             <option value="lost">🔍 المفقودات</option>
         </select>
     </div>
@@ -115,6 +120,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
+    // بيانات الأدمن (شهد الخالد)
     const ADMIN_NAME = "shahed mamdoh alkhald";
     const ADMIN_ID = "20241600060";
     const ADMIN_PASS = "shjkshjk"; 
@@ -134,26 +140,19 @@
 
     const collegeMap = { 'it': 'المعلوماتية', 'dent': 'الأسنان', 'pharm': 'الصيدلة', 'arch': 'العمارة', 'chemical': 'الكيمياء', 'petro': 'البترول', 'trans': 'الترجمة', 'عام': 'عام' };
 
-    // تخزين البيانات محلياً لتسريع العرض عند الفلترة
-    let cachedData = [];
+    let cachedData = []; // لتسريع الظهور
 
-    function fetchInitialData() {
-        // جلب البيانات مرة واحدة بسرعة في البداية
-        database.ref('globalMarket/').once('value', (snapshot) => {
-            updateUI(snapshot.val());
-            // ثم البدء بمراقبة التغييرات للحالات اللحظية
-            database.ref('globalMarket/').on('value', (snap) => updateUI(snap.val()));
-        });
-    }
-
-    function updateUI(data) {
-        if (!data) {
-            cachedData = [];
+    function fetchMarketData() {
+        // جلب لحظي للبيانات لضمان السرعة
+        database.ref('globalMarket/').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (!data) {
+                cachedData = [];
+            } else {
+                cachedData = Object.keys(data).map(key => ({ id: key, ...data[key] })).reverse();
+            }
             renderMarket();
-            return;
-        }
-        cachedData = Object.keys(data).map(key => ({ id: key, ...data[key] })).reverse();
-        renderMarket();
+        });
     }
 
     function renderMarket() {
@@ -168,22 +167,24 @@
         let htmlContent = "";
 
         const filtered = cachedData.filter(item => {
-            if (!item || !item.name) return false; // منع الخطأ
+            if (!item || !item.name) return false;
 
             const name = item.name.toLowerCase();
             const owner = (item.owner || "").toLowerCase();
-            const details = (item.details || "").toLowerCase();
+            const explanation = (item.explanation || "").toLowerCase();
             const college = (item.college || "").toLowerCase();
 
-            const matchesSearch = name.includes(searchTerm) || owner.includes(searchTerm) || details.includes(searchTerm);
+            const matchesSearch = name.includes(searchTerm) || owner.includes(searchTerm) || explanation.includes(searchTerm);
+            
             let matchesCollege = (filterCol === "all") || (college === filterCol);
+            // خاصية فلترة المفقودات كما في الكود القديم
             if (filterCol === "lost") matchesCollege = name.includes("مفقود") || name.includes("موجود");
 
             return matchesSearch && matchesCollege;
         });
 
         if (filtered.length === 0) {
-            grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; opacity: 0.5;">لا توجد نتائج.. 🕸️</p>`;
+            grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; opacity: 0.5;">لا توجد منشورات حالياً.. 🕸️</p>`;
             return;
         }
 
@@ -191,29 +192,39 @@
             const isSOS = item.isSOS === true;
             const isOwner = (item.owner && item.owner.trim().toLowerCase() === currentUserName);
             
+            // تحديد الحالة (مفقود/موجود)
             let statusTag = '';
             if(item.name.includes("مفقود")) statusTag = '<span class="status-badge lost-bg">مفقود</span>';
             else if(item.name.includes("موجود")) statusTag = '<span class="status-badge found-bg">موجود</span>';
 
+            // التوافق مع خاصية الوقت fullTime من الداشبورد
+            const displayTime = item.fullTime || item.date || "منذ قليل";
+
             htmlContent += `
                 <div class="tool-card ${isSOS ? 'sos-card' : ''}">
-                    ${(isSuperAdmin || isOwner) ? `<i class="fas fa-trash-alt admin-del-icon" onclick="handleDelete('${item.id}', ${isSuperAdmin}, ${isOwner})"></i>` : ''}
+                    ${(isSuperAdmin || isOwner) ? 
+                        `<i class="fas fa-trash-alt admin-del-icon" onclick="handleDelete('${item.id}', ${isSuperAdmin}, ${isOwner})" title="حذف"></i>` 
+                        : ''}
                     
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                        <span class="category-tag">${collegeMap[item.college] || 'AUST'}</span>
+                        <span class="category-tag">${collegeMap[item.college] || item.college || 'AUST'}</span>
                         ${statusTag}
                     </div>
 
-                    <div class="post-time"><i class="far fa-clock"></i> ${item.date || 'الآن'}</div>
+                    <div class="post-time"><i class="far fa-clock"></i> ${displayTime}</div>
                     <div style="color:var(--cyan-neon); font-size:12px; font-weight:bold;">👤 ${item.owner}</div>
                     <h3 style="margin:8px 0; font-size: 1rem; color: #fff;">${item.name}</h3>
                     
-                    ${item.details ? `<div class="study-details"><b>طلب شرح:</b><br>${item.details}</div>` : ''}
+                    ${item.explanation ? `
+                        <div class="explanation-box">
+                            <i class="fas fa-info-circle" style="color:var(--cyan-neon); margin-left:5px;"></i>
+                            <b>التفاصيل:</b> ${item.explanation}
+                        </div>` : ''}
                     
                     <button onclick="goToChat('${item.owner}', '${item.name}')" 
                             class="contact-btn"
                             style="background:${isSOS ? 'var(--red)' : 'var(--cyan-neon)'}; color:${isSOS ? 'white' : 'black'};">
-                        ${isSOS ? 'تقديم مساعدة' : 'تواصل'}
+                        ${isSOS ? 'تقديم مساعدة' : 'تواصل الآن'}
                     </button>
                 </div>`;
         });
@@ -221,24 +232,46 @@
         grid.innerHTML = htmlContent;
     }
 
-    // وظائف الحذف والدردشة (تم الحفاظ عليها)
     function handleDelete(itemId, isGlobalAdmin, isOwner) {
-        const action = () => database.ref('globalMarket/' + itemId).remove();
         if (isGlobalAdmin) {
-            Swal.fire({ title: 'حذف إداري', input: 'password', showCancelButton: true, confirmButtonColor: '#ff4d4d', background: '#0a0a0f', color: '#fff' })
-            .then(res => { if(res.value === ADMIN_PASS) action(); });
-        } else {
-            Swal.fire({ title: 'حذف المنشور؟', icon: 'warning', showCancelButton: true, background: '#0a0a0f', color: '#fff' })
-            .then(res => { if(res.isConfirmed) action(); });
+            Swal.fire({
+                title: 'حذف إداري (شهد)',
+                input: 'password',
+                inputPlaceholder: 'كلمة السر shjkshjk..',
+                showCancelButton: true,
+                confirmButtonColor: '#ff4d4d',
+                confirmButtonText: 'حذف نهائي',
+                background: '#0a0a0f', color: '#fff'
+            }).then((result) => {
+                if (result.isConfirmed && result.value === ADMIN_PASS) {
+                    database.ref('globalMarket/' + itemId).remove();
+                } else if (result.isConfirmed) {
+                    Swal.fire({ icon: 'error', title: 'كلمة السر خطأ!', background: '#0a0a0f', color: '#fff' });
+                }
+            });
+        } else if (isOwner) {
+            Swal.fire({
+                title: 'هل تريد حذف منشورك؟',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'نعم، احذف',
+                background: '#0a0a0f', color: '#fff'
+            }).then((res) => {
+                if (res.isConfirmed) database.ref('globalMarket/' + itemId).remove();
+            });
         }
     }
 
     function goToChat(owner, itemName) {
-        if (owner === localStorage.getItem("userName")) return;
+        const loggedUser = localStorage.getItem("userName") || "مستخدم";
+        if (owner === loggedUser) {
+            Swal.fire({ icon: 'info', title: 'تنبيه', text: 'هذا منشوركِ!', background: '#0a0a0f', color: '#fff' });
+            return;
+        }
         window.location.href = `chat.html?to=${encodeURIComponent(owner)}&item=${encodeURIComponent(itemName)}`;
     }
 
-    window.onload = fetchInitialData;
+    window.onload = fetchMarketData;
 </script>
 </body>
 </html>
