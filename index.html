@@ -125,8 +125,13 @@
                 <input type="email" id="emailInput" placeholder="name@gmail.com">
             </div>
 
+            <div class="form-group" id="verifyCodeGroup" style="display:none;">
+                <label>كود التحقق المرسل للإيميل</label>
+                <input type="text" id="verifyCodeInput" placeholder="أدخل الـ 6 أرقام">
+            </div>
+
             <div class="form-group" id="passGroup">
-                <label>الرمز السري (8 محارف على الأقل)</label>
+                <label id="passLabel">الرمز السري (8 محارف على الأقل)</label>
                 <input type="password" id="passInput" placeholder="أحرف، أرقام، رموز">
                 <i class="fas fa-eye pass-toggle" onclick="togglePass(this)"></i>
             </div>
@@ -160,6 +165,7 @@
     const database = firebase.database();
 
     let mode = 'login';
+    let savedRecoveryCode = null; // لحفظ الكود برمجياً
 
     function notify(msg) {
         const container = document.getElementById('toast-container');
@@ -183,7 +189,11 @@
     }
 
     function toggleMode() {
-        if (mode === 'login' || mode === 'forgot') {
+        // تصفير الواجهة عند التبديل
+        document.getElementById('verifyCodeGroup').style.display = 'none';
+        document.getElementById('passGroup').style.display = 'block';
+
+        if (mode === 'login' || mode === 'forgot' || mode === 'verify') {
             mode = 'register';
             updateUI("إنشاء حساب", "تأكيد الحساب", "block", "block", "block", "لديك حساب؟ <b>سجل دخولك</b>");
             document.getElementById('forgotLink').style.display = 'none';
@@ -197,6 +207,7 @@
     function showForgot() {
         mode = 'forgot';
         updateUI("استعادة الرمز", "إرسال كود التحقق", "none", "block", "none", "العودة للدخول");
+        document.getElementById('verifyCodeGroup').style.display = 'none';
     }
 
     function updateUI(t, b, n, e, p, sw) {
@@ -213,6 +224,7 @@
         const pass = document.getElementById('passInput').value;
         const name = document.getElementById('nameInput').value.trim();
         const email = document.getElementById('emailInput').value.trim();
+        const userEnteredCode = document.getElementById('verifyCodeInput').value.trim();
 
         if (!id || isNaN(id)) { notify("رقم الطالب يجب أن يكون أرقاماً"); return; }
 
@@ -222,91 +234,57 @@
             if (pass.length < 8) { notify("الرمز 8 محارف على الأقل"); return; }
             if (!email.toLowerCase().endsWith("@gmail.com")) { notify("Gmail فقط!"); return; }
 
-            notify("جاري التحقق من الرقم الجامعي...");
-
+            notify("جاري التحقق...");
             database.ref('users/' + id).once('value').then((snapshot) => {
-                if (snapshot.exists()) {
-                    notify("خطأ: هذا الرقم الجامعي مسجل مسبقاً!");
-                } else {
-                    database.ref('users/' + id).set({
-                        id: id,
-                        pass: pass,
-                        name: name,
-                        email: email,
-                        major: "هندسة البرمجيات",
-                        createdAt: new Date().toISOString()
-                    }).then(() => {
-                        notify("تم إنشاء الحساب بنجاح!");
-                        setTimeout(toggleMode, 1500);
-                    });
+                if (snapshot.exists()) { notify("رقم الطالب مسجل مسبقاً!"); }
+                else {
+                    database.ref('users/' + id).set({ id, pass, name, email, major: "هندسة البرمجيات", createdAt: new Date().toISOString() })
+                    .then(() => { notify("تم الإنشاء بنجاح!"); setTimeout(toggleMode, 1500); });
                 }
-            }).catch(() => notify("خطأ في الاتصال بقاعدة البيانات"));
+            });
         } 
         else if (mode === 'login') {
             database.ref('users/' + id).once('value').then((snapshot) => {
                 const data = snapshot.val();
-                
                 if (data && data.pass === pass) {
-                    // التخزين في LocalStorage مع تنظيف البيانات لضمان تطابقها في المعرض
-                    const cleanName = data.name.trim();
-                    const cleanID = data.id.trim();
-
-                    localStorage.setItem("userName", cleanName);
-                    localStorage.setItem("userID", cleanID); // مفتاح موحد لصفحة المعرض
-                    localStorage.setItem("universityID", cleanID);
-                    localStorage.setItem("securityKey", data.pass);
+                    localStorage.setItem("userName", data.name.trim());
+                    localStorage.setItem("userID", data.id.trim());
                     localStorage.setItem("userMajor", data.major || "هندسة البرمجيات");
-                    
-                    // لربط صفحة الذكاء
-                    localStorage.setItem("studentName", cleanName);
-                    localStorage.setItem("studentMajor", data.major || "هندسة البرمجيات");
-                    localStorage.setItem("studentID", cleanID);
-
-                    notify("مرحباً بك مجدداً: " + cleanName);
-                    
-                    setTimeout(() => {
-                        window.location.href = "dashboard.html";
-                    }, 1200);
-                } else { 
-                    notify("البيانات غير صحيحة أو الحساب غير موجود"); 
-                }
-            }).catch((error) => {
-                console.error(error);
-                notify("حدث خطأ في الاتصال بالسيرفر");
+                    notify("مرحباً " + data.name);
+                    setTimeout(() => { window.location.href = "dashboard.html"; }, 1200);
+                } else { notify("البيانات غير صحيحة"); }
             });
         }
         else if (mode === 'forgot') {
-            if (!id || !email) { notify("أدخل الرقم الجامعي والإيميل"); return; }
+            if (!id || !email) { notify("أدخل الرقم والإيميل"); return; }
             notify("جاري البحث عن حسابك...");
-            
             database.ref('users/' + id).once('value').then((snapshot) => {
                 const data = snapshot.val();
                 if (data && data.email.toLowerCase() === email.toLowerCase()) {
-                    const code = Math.floor(100000 + Math.random() * 900000);
-                    const templateParams = {
-                        to_name: data.name,
-                        to_email: email,
-                        recovery_code: code
-                    };
-
-                    emailjs.send("service_cgm7d0c", "template_xi6oxl7", templateParams)
+                    savedRecoveryCode = Math.floor(100000 + Math.random() * 900000);
+                    emailjs.send("service_cgm7d0c", "template_xi6oxl7", { to_name: data.name, to_email: email, recovery_code: savedRecoveryCode })
                     .then(() => {
-                        let userCode = prompt("أدخل كود التحقق المرسل لإيميلك " + email + ":");
-                        if (userCode == code) {
-                            let newP = prompt("أدخل الرمز الجديد (8 محارف على الأقل):");
-                            if (newP && newP.length >= 8) {
-                                database.ref('users/' + id).update({pass: newP}).then(() => {
-                                    notify("تم تغيير الرمز بنجاح! سجل دخولك الآن");
-                                    setTimeout(() => location.reload(), 1500);
-                                });
-                            } else { notify("الرمز قصير جداً"); }
-                        } else { notify("الكود الذي أدخلته خاطئ"); }
-                    })
-                    .catch(() => notify("فشل إرسال الإيميل"));
-                } else { 
-                    notify("لم نجد حساباً بهذا الرقم والإيميل"); 
-                }
+                        notify("تم إرسال الكود لبريدك ✅");
+                        // تغيير الواجهة لتصبح واجهة "إدخال الكود"
+                        mode = 'verify';
+                        document.getElementById('mainTitle').innerText = "تأكيد الرمز الجديد";
+                        document.getElementById('emailGroup').style.display = 'none';
+                        document.getElementById('verifyCodeGroup').style.display = 'block';
+                        document.getElementById('passGroup').style.display = 'block';
+                        document.getElementById('passLabel').innerText = "أدخل الرمز السري الجديد";
+                        document.getElementById('btnText').innerText = "تحديث كلمة المرور";
+                    });
+                } else { notify("البيانات غير متطابقة"); }
             });
+        }
+        else if (mode === 'verify') {
+            if (userEnteredCode == savedRecoveryCode) {
+                if (pass.length < 8) { notify("الرمز الجديد قصير جداً"); return; }
+                database.ref('users/' + id).update({pass: pass}).then(() => {
+                    notify("تم تغيير الرمز بنجاح! سجل دخولك");
+                    setTimeout(() => location.reload(), 1500);
+                });
+            } else { notify("كود التحقق خاطئ ❌"); }
         }
     }
 
