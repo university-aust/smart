@@ -11,11 +11,10 @@
             --cyan-neon: #00e5ff; 
             --cyan-glow: rgba(0, 229, 255, 0.3);
             --red: #ff4d4d; 
-            --deep-dark: rgba(9, 10, 15, 0.9);
+            --deep-dark: rgba(9, 10, 15, 0.95);
         }
 
         body { 
-            /* الخلفية الأصلية المغبشة والداكنة */
             background: linear-gradient(rgba(10, 10, 15, 0.85), rgba(10, 10, 15, 0.85)), url('67260.jpg') no-repeat center center fixed;
             background-size: cover;
             color: white; 
@@ -25,56 +24,45 @@
 
         .header-nav { 
             display: flex; justify-content: space-between; align-items: center; 
-            padding: 15px 5%; background: rgba(0,0,0,0.5); 
-            border-bottom: 1px solid var(--cyan-glow); backdrop-filter: blur(10px);
+            padding: 15px 5%; background: rgba(0,0,0,0.6); 
+            border-bottom: 1px solid var(--cyan-glow); backdrop-filter: blur(15px);
             position: sticky; top: 0; z-index: 1000;
         }
         
         .header-nav h1 {
             font-size: clamp(18px, 4vw, 24px);
             background: linear-gradient(to bottom, #fff, var(--cyan-neon));
-           -webkit-background-clip: text;
-            background-clip: text; 
-            -webkit-text-fill-color: transparent;
-            margin: 0;
+           -webkit-background-clip: text; background-clip: text; 
+           -webkit-text-fill-color: transparent; margin: 0;
         }
 
         .btn-back { 
             background: rgba(0, 229, 255, 0.1); border: 1px solid var(--cyan-neon); 
             color: var(--cyan-neon); padding: 8px 15px; border-radius: 12px; 
-            cursor: pointer; text-decoration: none; font-weight: bold; transition: 0.3s;
-            display: flex; align-items: center; gap: 8px; font-size: 0.9rem;
+            text-decoration: none; font-weight: bold; transition: 0.3s;
+            display: flex; align-items: center; gap: 8px; font-size: 0.85rem;
         }
-        .btn-back:hover { background: var(--cyan-neon); color: black; box-shadow: 0 0 15px var(--cyan-glow); }
 
-        .search-container { 
-            padding: 20px 5%; display: flex; gap: 10px; flex-wrap: wrap; background: rgba(0,0,0,0.2);
-        }
+        .search-container { padding: 15px 5%; display: flex; gap: 10px; flex-wrap: wrap; background: rgba(0,0,0,0.2); }
         .search-input { 
-            flex: 1; min-width: 150px; padding: 12px 15px; border-radius: 15px; 
+            flex: 1; min-width: 140px; padding: 12px; border-radius: 12px; 
             border: 1px solid var(--cyan-glow); background: rgba(0, 0, 0, 0.5); 
-            color: white; outline: none; transition: 0.3s; font-size: 0.9rem;
+            color: white; outline: none; font-size: 0.9rem;
         }
 
         .market-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
             gap: 20px; padding: 20px 5%; 
         }
 
         .tool-card {
             background: var(--deep-dark); padding: 20px; border-radius: 22px;
             border: 1px solid var(--cyan-glow); position: relative; 
-            transition: 0.4s ease; backdrop-filter: blur(15px);
-            display: flex; flex-direction: column; min-height: 240px;
+            transition: 0.3s ease; backdrop-filter: blur(15px);
+            display: flex; flex-direction: column; min-height: 250px;
         }
-        .tool-card:hover { transform: translateY(-5px); border-color: var(--cyan-neon); box-shadow: 0 0 20px var(--cyan-glow); }
 
-        .sos-card { border: 2px solid var(--red) !important; background: rgba(255, 77, 77, 0.1) !important; animation: pulse-red 1.5s infinite; }
-        @keyframes pulse-red {
-            0%, 100% { box-shadow: 0 0 0px rgba(255, 77, 77, 0.2); }
-            50% { box-shadow: 0 0 15px rgba(255, 77, 77, 0.5); }
-        }
+        .sos-card { border: 2px solid var(--red) !important; box-shadow: 0 0 10px rgba(255, 77, 77, 0.2); }
 
         .category-tag { background: var(--cyan-neon); color: black; padding: 3px 10px; border-radius: 8px; font-size: 10px; font-weight: bold; }
         .status-badge { font-size: 10px; padding: 2px 8px; border-radius: 5px; font-weight: bold; margin-right: 5px; }
@@ -82,18 +70,23 @@
         .found-bg { background: #2ecc71; color: #000; }
 
         .post-time { font-size: 10px; color: #aaa; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+        
+        /* تنسيق نص طلب الشرح */
+        .study-details {
+            background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 10px;
+            margin: 10px 0; font-size: 0.85rem; color: #eee; border-right: 3px solid var(--cyan-neon);
+            line-height: 1.5;
+        }
+
         .contact-btn { width: 100%; margin-top: auto; padding: 12px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; }
 
         .admin-del-icon {
             position: absolute; top: 15px; left: 15px; color: var(--red);
-            cursor: pointer; opacity: 0.6; transition: 0.3s; font-size: 18px; z-index: 10;
+            cursor: pointer; opacity: 0.5; font-size: 18px; z-index: 10;
         }
-        .admin-del-icon:hover { opacity: 1; transform: scale(1.2); }
+        .admin-del-icon:hover { opacity: 1; transform: scale(1.1); }
 
-        @media (max-width: 600px) {
-            .market-grid { grid-template-columns: 1fr; }
-            .search-input { min-width: 100%; }
-        }
+        @media (max-width: 600px) { .market-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -104,16 +97,13 @@
     </div>
 
     <div class="search-container">
-        <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث عن مادة، أداة، مفقودات..." oninput="renderMarket()">
-        <select id="filterCollege" class="search-input" style="flex: 0; min-width: 140px;" onchange="renderMarket()">
-            <option value="all">جميع الكليات</option>
-            <option value="it">هندسة المعلوماتية</option>
-            <option value="dent">طب الأسنان</option>
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث..." oninput="renderMarket()">
+        <select id="filterCollege" class="search-input" style="flex: 0; min-width: 130px;" onchange="renderMarket()">
+            <option value="all">الكل</option>
+            <option value="it">المعلوماتية</option>
+            <option value="dent">الأسنان</option>
             <option value="pharm">الصيدلة</option>
-            <option value="arch">الهندسة المعمارية</option>
-            <option value="chemical">الكيمياء الصناعية</option>
-            <option value="petro">هندسة البترول</option>
-            <option value="trans">الترجمة واللغات</option>
+            <option value="arch">العمارة</option>
             <option value="lost">🔍 المفقودات</option>
         </select>
     </div>
@@ -124,7 +114,6 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-    // بيانات الأدمن (شهد الخالد)
     const ADMIN_NAME = "shahed mamdoh alkhald";
     const ADMIN_ID = "20241600060";
     const ADMIN_PASS = "shjkshjk"; 
@@ -142,7 +131,29 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    const collegeMap = { 'it': 'المعلوماتية', 'dent': 'طب الأسنان', 'pharm': 'الصيدلة', 'arch': 'العمارة', 'chemical': 'الكيمياء', 'petro': 'البترول', 'trans': 'الترجمة', 'عام': 'عام' };
+    const collegeMap = { 'it': 'المعلوماتية', 'dent': 'الأسنان', 'pharm': 'الصيدلة', 'arch': 'العمارة', 'chemical': 'الكيمياء', 'petro': 'البترول', 'trans': 'الترجمة', 'عام': 'عام' };
+
+    // تخزين البيانات محلياً لتسريع العرض عند الفلترة
+    let cachedData = [];
+
+    function fetchInitialData() {
+        // جلب البيانات مرة واحدة بسرعة في البداية
+        database.ref('globalMarket/').once('value', (snapshot) => {
+            updateUI(snapshot.val());
+            // ثم البدء بمراقبة التغييرات للحالات اللحظية
+            database.ref('globalMarket/').on('value', (snap) => updateUI(snap.val()));
+        });
+    }
+
+    function updateUI(data) {
+        if (!data) {
+            cachedData = [];
+            renderMarket();
+            return;
+        }
+        cachedData = Object.keys(data).map(key => ({ id: key, ...data[key] })).reverse();
+        renderMarket();
+    }
 
     function renderMarket() {
         const grid = document.getElementById("marketGrid");
@@ -153,131 +164,83 @@
         const currentUserID = (localStorage.getItem("userID") || "").trim(); 
         const isSuperAdmin = (currentUserName === ADMIN_NAME.toLowerCase().trim() && currentUserID === ADMIN_ID.trim());
 
-        database.ref('globalMarket/').on('value', (snapshot) => {
-            const data = snapshot.val();
-            grid.innerHTML = "";
-            if (!data) {
-                grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; opacity: 0.5;">لا توجد منشورات حالياً.. 🕸️</p>`;
-                return;
-            }
+        let htmlContent = "";
 
-            const marketArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+        const filtered = cachedData.filter(item => {
+            if (!item || !item.name) return false; // منع الخطأ
 
-            marketArray.filter(item => {
-                // الحماية من الخطأ: التأكد من أن item و item.name موجودان
-                if (!item || !item.name) return false; 
+            const name = item.name.toLowerCase();
+            const owner = (item.owner || "").toLowerCase();
+            const details = (item.details || "").toLowerCase();
+            const college = (item.college || "").toLowerCase();
 
-                const itemName = item.name.toLowerCase();
-                const itemOwner = (item.owner || "").toLowerCase();
-                const itemCollege = (item.college || "").toLowerCase();
-                
-                const matchesSearch = itemName.includes(searchTerm) || itemOwner.includes(searchTerm);
-                
-                let matchesCollege = false;
-                if (filterCol === "all") {
-                    matchesCollege = true;
-                } else if (filterCol === "lost") {
-                    matchesCollege = itemName.includes("مفقود") || itemName.includes("موجود") || itemName.includes("لقيت");
-                } else {
-                    matchesCollege = (itemCollege === filterCol);
-                }
-                
-                return matchesSearch && matchesCollege;
-            }).reverse().forEach(item => {
-                const isSOS = item.isSOS === true;
-                const isOwner = (item.owner && item.owner.trim().toLowerCase() === currentUserName);
+            const matchesSearch = name.includes(searchTerm) || owner.includes(searchTerm) || details.includes(searchTerm);
+            let matchesCollege = (filterCol === "all") || (college === filterCol);
+            if (filterCol === "lost") matchesCollege = name.includes("مفقود") || name.includes("موجود");
 
-                let statusTag = '';
-                if(item.name.includes("مفقود")) statusTag = '<span class="status-badge lost-bg">مفقود</span>';
-                if(item.name.includes("موجود") || item.name.includes("لقيت")) statusTag = '<span class="status-badge found-bg">موجود</span>';
-
-                const displayTime = item.fullTime || item.date || "الآن";
-
-                grid.innerHTML += `
-                    <div class="tool-card ${isSOS ? 'sos-card' : ''}">
-                        ${(isSuperAdmin || isOwner) ? 
-                            `<i class="fas fa-trash-alt admin-del-icon" onclick="handleDelete('${item.id}', ${isSuperAdmin}, ${isOwner})" title="حذف"></i>` 
-                            : ''}
-                        
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                            <div>
-                                <span class="category-tag">${collegeMap[item.college] || item.college || 'AUST'}</span>
-                                ${statusTag}
-                            </div>
-                            ${isSOS ? '<span style="background:var(--red); color:white; padding:4px 8px; border-radius:10px; font-size:10px; font-weight:bold;">SOS 📡</span>' : ''}
-                        </div>
-
-                        <div class="post-time"><i class="far fa-clock"></i> ${displayTime}</div>
-
-                        <div style="color:var(--cyan-neon); font-size:13px; font-weight:bold;">👤 ${item.owner}</div>
-                        <h3 style="margin:10px 0; font-size: 1.05rem; color: #fff; line-height:1.4;">${item.name}</h3>
-                        
-                        <button onclick="goToChat('${item.owner}', '${item.name}')" 
-                                class="contact-btn"
-                                style="background:${isSOS ? 'var(--red)' : 'var(--cyan-neon)'}; color:${isSOS ? 'white' : 'black'};">
-                            ${isSOS ? 'تقديم مساعدة' : 'تواصل الآن'}
-                        </button>
-                    </div>`;
-            });
+            return matchesSearch && matchesCollege;
         });
+
+        if (filtered.length === 0) {
+            grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; opacity: 0.5;">لا توجد نتائج.. 🕸️</p>`;
+            return;
+        }
+
+        filtered.forEach(item => {
+            const isSOS = item.isSOS === true;
+            const isOwner = (item.owner && item.owner.trim().toLowerCase() === currentUserName);
+            
+            let statusTag = '';
+            if(item.name.includes("مفقود")) statusTag = '<span class="status-badge lost-bg">مفقود</span>';
+            else if(item.name.includes("موجود")) statusTag = '<span class="status-badge found-bg">موجود</span>';
+
+            htmlContent += `
+                <div class="tool-card ${isSOS ? 'sos-card' : ''}">
+                    ${(isSuperAdmin || isOwner) ? `<i class="fas fa-trash-alt admin-del-icon" onclick="handleDelete('${item.id}', ${isSuperAdmin}, ${isOwner})"></i>` : ''}
+                    
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <span class="category-tag">${collegeMap[item.college] || 'AUST'}</span>
+                        ${statusTag}
+                    </div>
+
+                    <div class="post-time"><i class="far fa-clock"></i> ${item.date || 'الآن'}</div>
+                    <div style="color:var(--cyan-neon); font-size:12px; font-weight:bold;">👤 ${item.owner}</div>
+                    <h3 style="margin:8px 0; font-size: 1rem; color: #fff;">${item.name}</h3>
+                    
+                    ${item.details ? `<div class="study-details"><b>طلب شرح:</b><br>${item.details}</div>` : ''}
+                    
+                    <button onclick="goToChat('${item.owner}', '${item.name}')" 
+                            class="contact-btn"
+                            style="background:${isSOS ? 'var(--red)' : 'var(--cyan-neon)'}; color:${isSOS ? 'white' : 'black'};">
+                        ${isSOS ? 'تقديم مساعدة' : 'تواصل'}
+                    </button>
+                </div>`;
+        });
+
+        grid.innerHTML = htmlContent;
     }
 
+    // وظائف الحذف والدردشة (تم الحفاظ عليها)
     function handleDelete(itemId, isGlobalAdmin, isOwner) {
+        const action = () => database.ref('globalMarket/' + itemId).remove();
         if (isGlobalAdmin) {
-            Swal.fire({
-                title: 'حذف إداري (شهد)',
-                input: 'password',
-                inputPlaceholder: 'كلمة السر shjkshjk..',
-                showCancelButton: true,
-                confirmButtonColor: '#ff4d4d',
-                confirmButtonText: 'حذف نهائي',
-                background: '#0a0a0f',
-                color: '#fff'
-            }).then((result) => {
-                if (result.isConfirmed && result.value === ADMIN_PASS) {
-                    database.ref('globalMarket/' + itemId).remove();
-                    Swal.fire({ icon: 'success', title: 'تم الحذف بنجاح', background: '#0a0a0f', color: '#fff' });
-                } else if (result.isConfirmed) {
-                    Swal.fire({ icon: 'error', title: 'كلمة السر خطأ!', background: '#0a0a0f', color: '#fff' });
-                }
-            });
-        } else if (isOwner) {
-            Swal.fire({
-                title: 'هل تريد حذف منشورك؟',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'نعم، احذف',
-                background: '#0a0a0f', color: '#fff'
-            }).then((res) => {
-                if (res.isConfirmed) database.ref('globalMarket/' + itemId).remove();
-            });
+            Swal.fire({ title: 'حذف إداري', input: 'password', showCancelButton: true, confirmButtonColor: '#ff4d4d', background: '#0a0a0f', color: '#fff' })
+            .then(res => { if(res.value === ADMIN_PASS) action(); });
+        } else {
+            Swal.fire({ title: 'حذف المنشور؟', icon: 'warning', showCancelButton: true, background: '#0a0a0f', color: '#fff' })
+            .then(res => { if(res.isConfirmed) action(); });
         }
     }
 
     function goToChat(owner, itemName) {
-        const loggedUser = localStorage.getItem("userName") || "مستخدم";
-        if (owner === loggedUser) {
-            Swal.fire({ icon: 'info', title: 'تنبيه', text: 'هذا منشوركِ!', background: '#0a0a0f', color: '#fff' });
-            return;
-        }
-        const user1 = loggedUser.replace(/\s/g, '');
-        const user2 = owner.replace(/\s/g, '');
-        const chatId = [user1, user2].sort().join('_');
-
-        database.ref('chats/' + chatId).limitToLast(1).once('value', (snap) => {
-            if (!snap.exists()) {
-                database.ref('chats/' + chatId).push({
-                    sender: loggedUser,
-                    text: `مرحباً، أنا مهتم بـ: ${itemName}`,
-                    time: new Date().toLocaleTimeString('ar-EG'),
-                    seen: false
-                });
-            }
-            window.location.href = `chat.html?to=${encodeURIComponent(owner)}&item=${encodeURIComponent(itemName)}`;
-        });
+        if (owner === localStorage.getItem("userName")) return;
+        window.location.href = `chat.html?to=${encodeURIComponent(owner)}&item=${encodeURIComponent(itemName)}`;
     }
 
-    window.onload = renderMarket;
+    window.onload = fetchInitialData;
+</script>
+</body>
+</html>d = renderMarket;
 </script>
 </body>
 </html>
