@@ -150,7 +150,12 @@
 
     <div class="pulse-ticker">
         <div class="ticker-content"> ✨ تم تحديث كافة الكليات لجامعة AUST • نظام SOS والتبادل والمفقودات يعمل الآن بكفاءة 100%! </div>
+   
     </div>
+    <div class="profile-container">
+    <div id="notifyDot" class="notification-dot"></div> 
+    <a href="profile.html" class="profile-btn"><i class="fas fa-user-graduate"></i> الملف الشخصي</a>
+</div>
 
     <nav class="header-nav">
         <h1>AUST <span style="color:var(--cyan)">Smart Pulse</span></h1>
@@ -270,6 +275,39 @@
         const subjects = allAUSTSubjects[college] ? allAUSTSubjects[college][year] : [];
         select.innerHTML = subjects.map(s => `<option value="${s}">${s}</option>`).join('') || `<option value="">لا توجد مواد</option>`;
     }
+    // أضيفي هذا الكود داخل الـ script في الداشبورد ليفحص وجود رسائل غير مقروءة
+function checkUnreadMessages() {
+    const myName = localStorage.getItem("userName");
+    const notifyDot = document.getElementById("notifyDot");
+
+    // نتحقق من قاعدة بيانات المحادثات
+    database.ref('chats').on('value', (snapshot) => {
+        let hasUnread = false;
+        const chats = snapshot.val();
+        
+        if (chats) {
+            for (let id in chats) {
+                // إذا كان اسم المستخدم جزءاً من معرف المحادثة
+                if (id.includes(myName.replace(/\s/g, ''))) {
+                    const messages = chats[id];
+                    for (let msgKey in messages) {
+                        // إذا كانت الرسالة مرسلة من شخص آخر ولم تُقرأ بعد
+                        if (messages[msgKey].sender !== myName && messages[msgKey].seen === false) {
+                            hasUnread = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // إظهار أو إخفاء النقطة بناءً على النتيجة
+        notifyDot.style.display = hasUnread ? "block" : "none";
+    });
+}
+
+// تشغيل الفحص عند تحميل الصفحة
+window.addEventListener('load', checkUnreadMessages);
 
     function sendSOS() {
         const subject = document.getElementById('subjectSelect').value;
