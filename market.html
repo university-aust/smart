@@ -15,7 +15,7 @@
         }
 
         body { 
-            /* إعادة الخلفية المغبشة والداكنة كما كانت تماماً */
+            /* الخلفية الأصلية المغبشة والداكنة */
             background: linear-gradient(rgba(10, 10, 15, 0.85), rgba(10, 10, 15, 0.85)), url('67260.jpg') no-repeat center center fixed;
             background-size: cover;
             color: white; 
@@ -58,7 +58,6 @@
 
         .market-grid { 
             display: grid; 
-            /* إعادة التصميم الأصلي: الحاويات تتمدد لتملأ العرض */
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
             gap: 20px; padding: 20px 5%; 
         }
@@ -91,7 +90,6 @@
         }
         .admin-del-icon:hover { opacity: 1; transform: scale(1.2); }
 
-        /* التجاوب الأصلي للهاتف */
         @media (max-width: 600px) {
             .market-grid { grid-template-columns: 1fr; }
             .search-input { min-width: 100%; }
@@ -126,6 +124,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
+    // بيانات الأدمن (شهد الخالد)
     const ADMIN_NAME = "shahed mamdoh alkhald";
     const ADMIN_ID = "20241600060";
     const ADMIN_PASS = "shjkshjk"; 
@@ -150,13 +149,10 @@
         const searchTerm = document.getElementById("searchInput").value.toLowerCase();
         const filterCol = document.getElementById("filterCollege").value;
         
-        // جلب البيانات من الـ Dashboard لضمان التوافق (اسم المستخدم + ID)
         const currentUserName = (localStorage.getItem("userName") || "").trim().toLowerCase();
         const currentUserID = (localStorage.getItem("userID") || "").trim(); 
-
         const isSuperAdmin = (currentUserName === ADMIN_NAME.toLowerCase().trim() && currentUserID === ADMIN_ID.trim());
 
-        // استخدام .on لضمان التحديث اللحظي كما طلبكِ
         database.ref('globalMarket/').on('value', (snapshot) => {
             const data = snapshot.val();
             grid.innerHTML = "";
@@ -168,7 +164,10 @@
             const marketArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
 
             marketArray.filter(item => {
-                const itemName = (item.name || "").toLowerCase();
+                // الحماية من الخطأ: التأكد من أن item و item.name موجودان
+                if (!item || !item.name) return false; 
+
+                const itemName = item.name.toLowerCase();
                 const itemOwner = (item.owner || "").toLowerCase();
                 const itemCollege = (item.college || "").toLowerCase();
                 
@@ -186,7 +185,6 @@
                 return matchesSearch && matchesCollege;
             }).reverse().forEach(item => {
                 const isSOS = item.isSOS === true;
-                // التحقق من الملكية لظهور زر الحذف
                 const isOwner = (item.owner && item.owner.trim().toLowerCase() === currentUserName);
 
                 let statusTag = '';
@@ -224,7 +222,6 @@
         });
     }
 
-    // وظائف الحذف والدردشة (بدون أي تغيير)
     function handleDelete(itemId, isGlobalAdmin, isOwner) {
         if (isGlobalAdmin) {
             Swal.fire({
