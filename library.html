@@ -6,6 +6,7 @@
     <title>منصة نبض AUST | Shahd Al-Khaled</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="data:,">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -67,7 +68,6 @@
             background: rgba(15, 23, 42, 0.6); color: white; outline: none; font-size: 0.75rem;
         }
 
-        /* تنسيق الحاويات زوجي (2 في الصف) في الموبايل */
         .grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
@@ -83,7 +83,7 @@
             background: var(--card-bg); border-radius: 18px; padding: 12px;
             position: relative; border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            min-height: 190px; display: flex; flex-direction: column; justify-content: space-between;
+            min-height: 220px; display: flex; flex-direction: column; justify-content: space-between;
             transition: 0.3s;
         }
 
@@ -91,7 +91,7 @@
 
         .badge {
             position: absolute; top: 8px; left: 8px;
-            padding: 2px 8px; border-radius: 10px; font-size: 0.55rem; font-weight: bold; color: #fff;
+            padding: 2px 8px; border-radius: 10px; font-size: 0.55rem; font-weight: bold; color: #fff; z-index: 2;
         }
         .theory { background: var(--theory); }
         .practical { background: var(--practical); }
@@ -101,7 +101,10 @@
         .edit-icon { color: var(--cyan); cursor: pointer; font-size: 0.9rem; }
 
         .doc-name { font-size: 0.7rem; color: var(--cyan); margin-top: 4px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .stats-bar { display: flex; gap: 6px; font-size: 0.6rem; margin-top: 5px; opacity: 0.8; }
+        /* ستايل بيانات الكلية والسنة */
+        .info-tag { font-size: 0.6rem; color: #ccc; margin-top: 2px; display: block; }
+        
+        .stats-bar { display: flex; gap: 6px; font-size: 0.6rem; margin-top: 8px; opacity: 0.8; }
 
         .btn-group { display: flex; gap: 5px; margin-top: 10px; }
         .btn-card-main { flex: 2; padding: 8px; border-radius: 8px; border: none; background: var(--cyan); color: #000; font-weight: bold; cursor: pointer; font-size: 0.75rem; }
@@ -142,7 +145,7 @@
         <select id="f_fac" class="m-select" onchange="runFilter()">
             <option value="الكل">جميع الكليات</option>
             <option value="كلية الهندسة المعلوماتية">المعلوماتية</option>
-            <option value="كلية الهندسة المعمارية">العمارة</option>
+            <option value="كلية الهندسة المعمارية">المعمارية</option>
             <option value="كلية الهندسة الكيميائية">الكيمياء</option>
             <option value="كلية الهندسة البترولية">البترول</option>
             <option value="كلية طب الأسنان">الأسنان</option>
@@ -258,6 +261,9 @@
                     <div onclick="handleView('${item.id}', '${item.url}', '${item.title}')" style="cursor:pointer;">
                         <h3 style="margin:25px 0 3px 0; font-size:0.85rem; line-height:1.2; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">${item.title}</h3>
                         <div class="doc-name">د. ${item.doctor || 'غير محدد'}</div>
+                        <span class="info-tag"><i class="fas fa-university"></i> ${item.category}</span>
+                        <span class="info-tag"><i class="fas fa-calendar-alt"></i> ${item.year}</span>
+                        
                         <div class="stats-bar">
                             <span><i class="fas fa-eye" style="color:var(--cyan)"></i> ${item.views || 0}</span>
                             <span><i class="fas fa-download" style="color:#10ac84"></i> ${item.downloads || 0}</span>
@@ -276,10 +282,21 @@
     function handleView(id, url, title) {
         db.ref('official_library/' + id + '/views').transaction(c => (c || 0) + 1);
         
-        // إعادة خاصية العرض داخل الموقع (Iframe) كما كانت
+        let finalUrl = url;
+        // التعامل مع روابط Archive.org
+        if(url.includes('archive.org/details/')) {
+            finalUrl = url.replace('/details/', '/embed/');
+        } 
+        // التعامل مع روابط Google Drive
+        else if(url.includes('drive.google.com')) {
+            finalUrl = url.replace('/view?usp=sharing', '/preview').replace('/view', '/preview');
+        }
+
         Swal.fire({
             title: title,
-            html: `<iframe src="https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true" style="width:100%; height:450px; border:none; border-radius:10px;"></iframe>`,
+            html: `<div style="width:100%; height:450px; border-radius:12px; overflow:hidden; background:#000;">
+                    <iframe src="${finalUrl}" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>
+                   </div>`,
             width: '95%',
             background: '#0f172a',
             color: '#fff',
@@ -304,7 +321,7 @@
         const item = libraryData.find(i => i.id === id);
         showItemForm('تعديل بيانات المحاضرة', item, (data) => {
             db.ref('official_library/' + id).update(data);
-            Swal.fire('تم التعديل', '', 'success');
+            Swal.fire({ icon: 'success', title: 'تم التعديل بنجاح', background: '#0f172a', color: '#fff' });
         });
     }
 
@@ -367,8 +384,8 @@
     function deleteItem(id) {
         if (!isAuthorized()) return;
         Swal.fire({ 
-            title: 'هل أنتِ متأكدة؟', 
-            text: "سيتم حذف الملف نهائياً من المكتبة!",
+            title: 'حذف المحاضرة؟', 
+            text: "لا يمكن التراجع عن هذه الخطوة!",
             icon: 'warning', 
             showCancelButton: true, 
             confirmButtonColor: '#ff4d4d',
