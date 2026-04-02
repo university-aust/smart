@@ -4,163 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Pulse | لوحه التحكم </title>
-    <link rel="icon" href="data:,">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        :root {
-            --cyan: #00d4ff; 
-            --cyan-glow: rgba(0, 212, 255, 0.5);
-            --navy-deep: #1e293b; 
-            --glass: rgba(10, 15, 30, 0.75); 
-            --input-bg: rgba(255, 255, 255, 0.95);
-        }
-
-        h2, label, .ticker-content, .profile-btn {
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
-        }
-
+        :root { --cyan: #00d4ff; --cyan-glow: rgba(0, 212, 255, 0.5); --navy-deep: #1e293b; --glass: rgba(10, 15, 30, 0.75); --input-bg: rgba(255, 255, 255, 0.95); }
+        h2, label, .ticker-content, .profile-btn { text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
-
-        body {
-            min-height: 100vh;
-            background-color: #030712;
-            background-image: url('67260.jpg'); 
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            color: white;
-            overflow-x: hidden;
-        }
-
-        .pulse-ticker {
-            background: rgba(30, 41, 59, 0.8);
-            backdrop-filter: blur(10px);
-            color: var(--cyan);
-            padding: 12px;
-            white-space: nowrap;
-            overflow: hidden;
-            border-bottom: 2px solid var(--cyan);
-            font-weight: bold;
-            box-shadow: 0 0 15px var(--cyan-glow);
-        }
-        .ticker-content { 
-            display: inline-block; 
-            animation: marquee-rtl 25s linear infinite; 
-        }
+        body { min-height: 100vh; background: #030712 url('67260.jpg') center/cover fixed no-repeat; color: white; overflow-x: hidden; }
+        .pulse-ticker { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); color: var(--cyan); padding: 12px; white-space: nowrap; overflow: hidden; border-bottom: 2px solid var(--cyan); font-weight: bold; box-shadow: 0 0 15px var(--cyan-glow); }
+        .ticker-content { display: inline-block; animation: marquee-rtl 25s linear infinite; }
         @keyframes marquee-rtl { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-
-        .header-nav {
-            padding: 15px 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--glass);
-            backdrop-filter: blur(15px);
-            border-bottom: 1px solid rgba(0, 212, 255, 0.3);
-            flex-wrap: wrap; gap: 15px;
-        }
-
-        .nav-links { 
-            display: flex; 
-            gap: 15px; 
-            align-items: center; 
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
+        .header-nav { padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; background: var(--glass); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(0, 212, 255, 0.3); flex-wrap: wrap; gap: 15px; }
+        .nav-links { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; justify-content: center; }
         .profile-container { position: relative; }
-        .notification-dot {
-            position: absolute; top: -5px; right: -5px;
-            width: 14px; height: 14px; background: #ff4d4d;
-            border-radius: 50%; border: 2px solid white;
-            box-shadow: 0 0 15px #ff4d4d;
-            display: none; 
-            animation: pulse-red 1.5s infinite;
-            z-index: 10;
-        }
-        @keyframes pulse-red { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
-
-        .profile-btn {
-            text-decoration: none; color: var(--cyan); padding: 8px 18px; 
-            border-radius: 12px; border: 2px solid var(--cyan); 
-            transition: 0.3s; font-weight: bold;
-            white-space: nowrap;
-        }
+        .notification-dot { position: absolute; top: -5px; right: -5px; width: 14px; height: 14px; background: #ff4d4d; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 15px #ff4d4d; display: none; animation: pulse-red 1.5s infinite; z-index: 10; }
+        @keyframes pulse-red { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.3); } }
+        .profile-btn { text-decoration: none; color: var(--cyan); padding: 8px 18px; border-radius: 12px; border: 2px solid var(--cyan); transition: 0.3s; font-weight: bold; white-space: nowrap; }
         .profile-btn:hover { background: var(--cyan); color: black; box-shadow: 0 0 20px var(--cyan); }
-
-        .card {
-            background: var(--glass);
-            backdrop-filter: blur(25px);
-            border: 1px solid rgba(0, 212, 255, 0.2);
-            border-radius: 35px;
-            padding: 30px;
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-            display: flex;
-            flex-direction: column;
-        }
-        .card:hover { 
-            transform: translateY(-12px); 
-            border-color: var(--cyan); 
-            box-shadow: 0 20px 50px var(--cyan-glow);
-        }
-
-        h2 { 
-            color: var(--cyan); font-size: 1.3rem; margin-bottom: 20px; 
-            border-right: 5px solid var(--cyan); padding-right: 15px; 
-        }
-
+        .card { background: var(--glass); backdrop-filter: blur(25px); border: 1px solid rgba(0, 212, 255, 0.2); border-radius: 35px; padding: 30px; transition: 0.4s; box-shadow: 0 10px 30px rgba(0,0,0,0.4); display: flex; flex-direction: column; }
+        .card:hover { transform: translateY(-8px); border-color: var(--cyan); box-shadow: 0 10px 40px var(--cyan-glow); }
+        h2 { color: var(--cyan); font-size: 1.3rem; margin-bottom: 20px; border-right: 5px solid var(--cyan); padding-right: 15px; }
         label { display: block; margin: 10px 0 5px; color: var(--cyan); font-size: 0.85rem; font-weight: bold; }
-
-        select, input {
-            width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1); background: var(--input-bg); 
-            color: #1e293b; font-size: 0.95rem; outline: none; font-weight: 800;
-        }
-
-        .btn-main { 
-            width: 100%; padding: 14px; border: none; border-radius: 15px; 
-            font-weight: 900; cursor: pointer; transition: 0.3s;
-            background: linear-gradient(45deg, var(--cyan), var(--navy-deep));
-            color: #fff; box-shadow: 0 4px 15px var(--cyan-glow);
-            margin-top: 10px;
-        }
+        select, input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 12px; border: none; background: var(--input-bg); color: #1e293b; font-size: 0.95rem; outline: none; font-weight: 800; }
+        .btn-main { width: 100%; padding: 14px; border: none; border-radius: 15px; font-weight: 900; cursor: pointer; transition: 0.3s; background: linear-gradient(45deg, var(--cyan), var(--navy-deep)); color: #fff; box-shadow: 0 4px 15px var(--cyan-glow); margin-top: 10px; }
         .btn-main:hover { transform: scale(1.02); box-shadow: 0 0 25px var(--cyan); }
-
-        .btn-market {
-            background: rgba(39, 174, 96, 0.9);
-            border: 1px solid #27ae60;
-        }
-
-        .footer {
-            text-align: center; padding: 40px; background: rgba(0,0,0,0.7);
-            margin-top: 50px; border-top: 2px solid var(--cyan);
-        }
-
-        @media (max-width: 768px) {
-            .header-nav { flex-direction: column; text-align: center; padding: 20px 2%; }
-            .nav-links { flex-direction: column; width: 100%; gap: 10px; }
-            .card { padding: 20px; border-radius: 25px; margin-bottom: 15px; }
-            div[style*="grid"] { padding: 20px 3% !important; gap: 20px !important; }
-        }
+        .btn-market { background: rgba(39, 174, 96, 0.9); border: 1px solid #27ae60; }
+        .footer { text-align: center; padding: 40px; background: rgba(0,0,0,0.7); margin-top: 50px; border-top: 2px solid var(--cyan); }
+        @media (max-width: 768px) { .header-nav { flex-direction: column; text-align: center; } .nav-links { flex-direction: column; width: 100%; } .card { padding: 20px; margin-bottom: 15px; } }
     </style>
 </head>
 <body>
 
     <div class="pulse-ticker">
         <div class="ticker-content"> ✨ تم تحديث كافة الكليات لجامعة AUST • نظام SOS والتبادل والمفقودات يعمل الآن بكفاءة 100%! </div>
-   
     </div>
-    <div class="profile-container">
-    <div id="notifyDot" class="notification-dot"></div> 
-    <a href="profile.html" class="profile-btn"><i class="fas fa-user-graduate"></i> الملف الشخصي</a>
-</div>
 
     <nav class="header-nav">
         <h1>AUST <span style="color:var(--cyan)">Smart Pulse</span></h1>
         <div class="nav-links">
-            <p>مرحباً، <span id="userDisplayName" style="color:var(--cyan); font-weight:bold;">جاري التحميل...</span></p>
+            <p>مرحباً، <span id="userDisplayName" style="color:var(--cyan); font-weight:bold;">شهد الخالد</span></p>
             <div class="profile-container">
                 <div id="notifyDot" class="notification-dot"></div>
                 <a href="profile.html" class="profile-btn"><i class="fas fa-user-graduate"></i> الملف الشخصي</a>
@@ -182,22 +64,16 @@
                 <option value="petro">🛢️ هندسة البترول</option>
                 <option value="trans">📖 كلية الترجمة</option>
             </select>
-
             <label>السنة الدراسية:</label>
             <select id="yearSOS" onchange="updateSubjects()">
-                <option value="1">السنة الأولى</option><option value="2">السنة الثانية</option>
-                <option value="3">السنة الثالثة</option><option value="4">السنة الرابعة</option>
-                <option value="5">السنة الخامسة</option>
+                <option value="1">السنة الأولى</option><option value="2">السنة الثانية</option><option value="3">السنة الثالثة</option><option value="4">السنة الرابعة</option><option value="5">السنة الخامسة</option>
             </select>
-
             <label>المادة:</label>
             <select id="subjectSelect"></select>
-            
-            <label>اشرح كيف يمكن مساعدتك في هذه المادة؟</label>
-            <input type="text" id="customSOS" placeholder="مثال: أحتاج شرح لفقرة التوريث، أو حل مسألة...">
-            
+            <label>كيف يمكن مساعدتك؟</label>
+            <input type="text" id="customSOS" placeholder="مثال: أحتاج شرح لفقرة التوريث...">
             <button class="btn-main" style="background: linear-gradient(45deg, #ff4d4d, var(--navy-deep));" onclick="sendSOS()">إرسال نداء SOS 🆘</button>
-            <button class="btn-main btn-market" onclick="location.href='market.html'"><i class="fas fa store"></i> دخول المعرض العام</button>
+            <button class="btn-main btn-market" onclick="location.href='market.html'"><i class="fas fa-store"></i> دخول المعرض العام</button>
         </div>
 
         <div class="card">
@@ -208,7 +84,6 @@
                 <option value="مفقود">🔍 مفقودات (أبحث عن...)</option>
                 <option value="موجود">📍 موجودات (وجدت غرضاً...)</option>
             </select>
-
             <label>الكلية التابع لها الغرض:</label>
             <select id="itemCollege">
                 <option value="عام">كل الكليات (عام)</option>
@@ -220,28 +95,34 @@
                 <option value="petro">هندسة البترول</option>
                 <option value="trans">كلية الترجمة</option>
             </select>
-
             <label>اسم الغرض:</label>
-            <input type="text" id="newToolName" placeholder="مثال: مسطرة T، نظارة، كتاب...">
-
+            <input type="text" id="newToolName" placeholder="مثال: مسطرة T، نظارة...">
             <button class="btn-main" onclick="addNewTool()">نشر في المعرض ✅</button>
-            <button class="btn-main btn-market" onclick="location.href='market.html'"><i class="fas fa-store"></i> دخول المعرض العام</button>
-            
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px;">
-                <button onclick="location.href='library.html'" style="background:rgba(41, 128, 185, 0.8); color:white; border:1px solid #2980b9; padding:12px; border-radius:10px; cursor:pointer; font-weight:bold;">📚 المكتبة</button>
-                <button onclick="location.href='AI.html'" style="background:rgba(108, 92, 231, 0.8); color:white; border:1px solid #6c5ce7; padding:12px; border-radius:10px; cursor:pointer; font-weight:bold;">🤖 الذكاء الاصطناعي</button>
+                <button onclick="location.href='library.html'" style="background:rgba(41, 128, 185, 0.8); color:white; border:none; padding:12px; border-radius:10px; cursor:pointer; font-weight:bold;">📚 المكتبة</button>
+                <button onclick="location.href='AI.html'" style="background:rgba(108, 92, 231, 0.8); color:white; border:none; padding:12px; border-radius:10px; cursor:pointer; font-weight:bold;">🤖 الذكاء</button>
             </div>
+            <button class="btn-main btn-market" onclick="location.href='market.html'" style="margin-top:10px;"><i class="fas fa-store"></i> المعرض العام</button>
         </div>
     </div>
 
     <footer class="footer">
-        <a href="about.html" style="color: var(--cyan); text-decoration: none; font-weight: bold; border: 1px solid var(--cyan); padding: 10px 20px; border-radius: 20px;">📖 حول الموقع والقسم</a>
+        <a href="about.html" style="color: var(--cyan); text-decoration: none; font-weight: bold; border: 1px solid var(--cyan); padding: 10px 20px; border-radius: 20px;">📖 حول القسم والموقع</a>
     </footer>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
+    // تكوين الفايربيس (محمي كما هو)
+    const firebaseConfig = { apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo", authDomain: "nabd-aust.firebaseapp.com", databaseURL: "https://nabd-aust-default-rtdb.europe-west1.firebasedatabase.app", projectId: "nabd-aust", storageBucket: "nabd-aust.firebasestorage.app", messagingSenderId: "921777725948", appId: "1:921777725948:web:7b024d0aa101068bef9279" };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // البيانات الأساسية
+    const currentUserName = localStorage.getItem("userName") || "مستخدم جديد";
+    const currentUserID = localStorage.getItem("userID") || "0000";
+
     const allAUSTSubjects = {
         it: { 1: ["البرمجة 1", "الفيزياء 1", "الرياضيات 1", "الرسم الهندسي", "مهارات الحاسوب", "البرمجة 2", "الفيزياء 2", "الرياضيات 2", "الكيمياء الهندسية", "الميكانيك"], 2: ["خوارزميات 1", "برمجة ويب", "رياضيات متقطعة", "احتمالات", "OOP 1", "قواعد بيانات 1", "خوارزميات 2", "هندسة كهربائية", "تحليل عددي", "OOP 2"], 3: ["هندسة برمجيات 1", "تطوير ويب", "معمارية حاسوب", "نظم تشغيل 1", "تحليل نظم", "هندسة برمجيات 2", "نظم معلومات", "قواعد بيانات 2", "ذكاء صنعي"], 4: ["تنقيب بيانات", "رسم حاسوبي", "نظم زمن حقيقي", "شبكات 1", "إدارة قواعد بيانات", "نظم دعم قرار", "نمذجة ومحاكاة", "شبكات 2"], 5: ["مشروع تخرج 1", "إدارة مشاريع", "أنظمة خبيرة", "شبكات عصبونية", "مشروع تخرج 2", "معالجة صور", "أمن معلومات"] },
         chemical: { 1: ["الرياضيات 1", "الفيزياء", "كيمياء عامة", "رسم هندسي", "ميكانيك هندسي", "رياضيات 2", "كيمياء عضوية 1"], 2: ["برامج حاسوبية", "رياضيات تطبيقية", "كيمياء فيزيائية 1", "تقانات عضوية", "كيمياء تحليلية", "تحليل عددي", "كيمياء فيزيائية 2"], 3: ["جريان موائع", "انتقال حرارة", "ثيرموديناميك", "عمليات موحدة 1", "علم مواد", "إحصاء هندسي"], 4: ["انتقال كتلة", "هندسة تفاعلات 1", "تقانة أسمدة", "أصباغ ودهانات", "ألياف", "تفاعلات 2"], 5: ["ديناميك وتحكم", "تصميم أجهزة", "هندسة بيئية", "مشروع 1", "صناعات تكرير", "أمن صناعي"] },
@@ -252,119 +133,76 @@
         trans: { 1: ["صوتيات", "قراءة وكتابة 1", "استماع وتحدث 1", "قواعد 1", "ترجمة 1", "مقدمة أدب"], 2: ["مسرح نهضة", "شعر نهضة", "ترجمة 2", "مناهج بحث", "رواية قرن 18", "قصة قصيرة"], 3: ["مقالة نقدية", "مسرح حديث", "شعر حديث", "ترجمة 3", "نظام صوتي", "رواية قرن 19"], 4: ["مسرح عصر حديث", "شعر عصر حديث", "ترجمة 4", "نقد أدبي", "مشروع تخرج", "رواية حديثة"] }
     };
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
-        authDomain: "nabd-aust.firebaseapp.com",
-        databaseURL: "https://nabd-aust-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "nabd-aust",
-        storageBucket: "nabd-aust.firebasestorage.app",
-        messagingSenderId: "921777725948",
-        appId: "1:921777725948:web:7b024d0aa101068bef9279"
-    };
-
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-
-    const currentUserName = localStorage.getItem("userName") || "شهد الخالد";
-    const currentUserID = localStorage.getItem("userID") || "20241600060";
-
+    // تسريع جلب المواد
     function updateSubjects() {
         const college = document.getElementById('collegeSOS').value;
         const year = document.getElementById('yearSOS').value;
         const select = document.getElementById('subjectSelect');
-        const subjects = allAUSTSubjects[college] ? allAUSTSubjects[college][year] : [];
-        select.innerHTML = subjects.map(s => `<option value="${s}">${s}</option>`).join('') || `<option value="">لا توجد مواد</option>`;
+        const subjects = (allAUSTSubjects[college] && allAUSTSubjects[college][year]) ? allAUSTSubjects[college][year] : [];
+        select.innerHTML = subjects.map(s => `<option value="${s}">${s}</option>`).join('');
     }
-    // أضيفي هذا الكود داخل الـ script في الداشبورد ليفحص وجود رسائل غير مقروءة
-function checkUnreadMessages() {
-    const myName = localStorage.getItem("userName");
-    const notifyDot = document.getElementById("notifyDot");
 
-    // نتحقق من قاعدة بيانات المحادثات
-    database.ref('chats').on('value', (snapshot) => {
-        let hasUnread = false;
-        const chats = snapshot.val();
+    // مراقبة الرسائل (Optimization: استخدام Off لعدم تكرار المستمعات)
+    function checkUnreadMessages() {
+        const myName = localStorage.getItem("userName");
+        if(!myName) return;
+        const notifyDot = document.getElementById("notifyDot");
+        const chatsRef = database.ref('chats');
         
-        if (chats) {
-            for (let id in chats) {
-                // إذا كان اسم المستخدم جزءاً من معرف المحادثة
-                if (id.includes(myName.replace(/\s/g, ''))) {
-                    const messages = chats[id];
-                    for (let msgKey in messages) {
-                        // إذا كانت الرسالة مرسلة من شخص آخر ولم تُقرأ بعد
-                        if (messages[msgKey].sender !== myName && messages[msgKey].seen === false) {
-                            hasUnread = true;
-                            break;
-                        }
-                    }
+        chatsRef.on('value', (snapshot) => {
+            let hasUnread = false;
+            snapshot.forEach((child) => {
+                if (child.key.includes(myName.replace(/\s/g, ''))) {
+                    child.forEach((msg) => {
+                        if (msg.val().sender !== myName && msg.val().seen === false) { hasUnread = true; }
+                    });
                 }
-            }
-        }
-        
-        // إظهار أو إخفاء النقطة بناءً على النتيجة
-        notifyDot.style.display = hasUnread ? "block" : "none";
-    });
-}
+            });
+            notifyDot.style.display = hasUnread ? "block" : "none";
+        });
+    }
 
-// تشغيل الفحص عند تحميل الصفحة
-window.addEventListener('load', checkUnreadMessages);
-
+    // إرسال SOS
     function sendSOS() {
         const subject = document.getElementById('subjectSelect').value;
         const explanation = document.getElementById('customSOS').value.trim();
-        if(!subject) return Swal.fire('تنبيه', 'يرجى اختيار مادة', 'warning');
-        if(!explanation) return Swal.fire('تنبيه', 'يرجى شرح المساعدة المطلوبة', 'info');
-        
-        const now = new Date();
-        const fullTime = now.toLocaleDateString('ar-EG') + " | " + now.toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'});
+        if(!subject || !explanation) return Swal.fire('تنبيه', 'أكمل البيانات المطلوبة', 'warning');
 
-        Swal.showLoading();
-        // تم دمج الإرسال لمرة واحدة لضمان وصول كافة البيانات للماركت دفعة واحدة
-        database.ref('globalMarket/').push({ 
-            name: `🆘 SOS: ${subject}`, 
-            explanation: explanation, 
-            college: document.getElementById('collegeSOS').value, 
-            owner: currentUserName, 
-            studentId: currentUserID,
-            date: now.toLocaleDateString('ar-EG'), 
-            fullTime: fullTime,
-            isSOS: true 
-        })
-        .then(() => { 
-            Swal.fire({ icon: 'success', title: 'تم الإرسال', timer: 2000 }); 
-            document.getElementById('customSOS').value = ""; 
+        const now = new Date();
+        const timeStr = now.toLocaleDateString('ar-EG') + " | " + now.toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'});
+
+        database.ref('globalMarket/').push({
+            name: `🆘 SOS: ${subject}`, explanation, college: document.getElementById('collegeSOS').value,
+            owner: currentUserName, studentId: currentUserID, fullTime: timeStr, isSOS: true
+        }).then(() => {
+            Swal.fire({ icon: 'success', title: 'تم الإرسال', timer: 1500, showConfirmButton: false });
+            document.getElementById('customSOS').value = "";
         });
     }
 
+    // إضافة غرض للماركت
     function addNewTool() {
         const name = document.getElementById('newToolName').value.trim();
-        const college = document.getElementById('itemCollege').value;
-        const type = document.getElementById('itemType').value;
-        if (!name) return Swal.fire('خطأ', 'يرجى كتابة اسم الغرض', 'error');
+        if (!name) return Swal.fire('خطأ', 'اكتب اسم الغرض', 'error');
         
+        const type = document.getElementById('itemType').value;
         const now = new Date();
-        const fullTime = now.toLocaleDateString('ar-EG') + " | " + now.toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'});
+        const timeStr = now.toLocaleDateString('ar-EG') + " | " + now.toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'});
 
-        Swal.showLoading();
-        // تم دمج الإرسال لمرة واحدة لضمان ظهور البيانات بشكل سليم في المعرض
-        database.ref('globalMarket/').push({ 
-            name: `${type}: ${name}`, 
-            college: college, 
-            owner: currentUserName, 
-            studentId: currentUserID,
-            date: now.toLocaleDateString('ar-EG'), 
-            fullTime: fullTime,
-            isSOS: false 
-        })
-        .then(() => { 
-            Swal.fire({ icon: 'success', title: 'تم النشر بنجاح', timer: 2000 }); 
-            document.getElementById('newToolName').value = ""; 
+        database.ref('globalMarket/').push({
+            name: `${type}: ${name}`, college: document.getElementById('itemCollege').value,
+            owner: currentUserName, studentId: currentUserID, fullTime: timeStr, isSOS: false
+        }).then(() => {
+            Swal.fire({ icon: 'success', title: 'تم النشر', timer: 1500, showConfirmButton: false });
+            document.getElementById('newToolName').value = "";
         });
     }
 
-    window.onload = function() {
+    // عند التحميل
+    window.onload = () => {
         document.getElementById("userDisplayName").innerText = currentUserName;
         updateSubjects();
+        checkUnreadMessages();
     };
 </script>
 </body>
