@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المعرض العام | نبض AUST</title>
+    <title>المعرض العام | Shahd Al-Khaled</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
@@ -96,7 +96,7 @@
     </div>
 
     <div class="search-container">
-        <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث..." oninput="renderMarket()">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث عن أداة أو زميل..." oninput="renderMarket()">
         <select id="filterCollege" class="search-input" style="flex: 0; min-width: 110px;" onchange="renderMarket()">
             <option value="all">الكل</option>
             <option value="it">المعلوماتية</option>
@@ -113,6 +113,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
+    // بيانات المسؤول (Shahd Al-Khaled)
     const ADMIN_NAME = "shahed mamdoh alkhald";
     const ADMIN_ID = "20241600060";
     const ADMIN_PASS = "shjkshjk"; 
@@ -136,7 +137,7 @@
     function startListening() {
         database.ref('globalMarket/').on('value', (snapshot) => {
             const data = snapshot.val();
-            // ترتيب عكسي لجعل الأحدث فوق
+            // ترتيب عكسي (الأحدث أولاً)
             cachedData = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })).reverse() : [];
             renderMarket();
         });
@@ -147,7 +148,7 @@
         const searchTerm = document.getElementById("searchInput").value.toLowerCase();
         const filterCol = document.getElementById("filterCollege").value;
         
-        // استخدام المفتاح الموحد universityID
+        // جلب بيانات المستخدم الحالي من localStorage
         const myID = (localStorage.getItem("universityID") || "").trim();
         const myName = (localStorage.getItem("userName") || "").trim().toLowerCase();
         const isSuperAdmin = (myName === ADMIN_NAME.toLowerCase().trim() && myID === ADMIN_ID.trim());
@@ -162,23 +163,23 @@
         });
 
         if (filtered.length === 0) {
-            grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; opacity: 0.5;">لا يوجد إعلانات حالياً.. 🕸️</p>`;
+            grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; opacity: 0.5; margin-top: 50px;">لا توجد نتائج مطابقة لبحثك.. 🕸️</p>`;
             return;
         }
 
         filtered.forEach(item => {
             const isSOS = item.isSOS === true;
-            // التحقق من الملكية لمنع مراسلة النفس وللسماح بالحذف
+            // التحقق من الملكية عبر universityID لضمان الأمان
             const isOwner = (item.ownerID && item.ownerID.toString().trim() === myID);
             const cardClass = isSOS ? 'sos-card' : 'exchange-card';
 
             htmlContent += `
                 <div class="tool-card ${cardClass}">
-                    ${(isSuperAdmin || isOwner) ? `<i class="fas fa-trash-alt admin-del-icon" onclick="handleDelete('${item.id}', ${isSuperAdmin}, '${item.ownerID}')"></i>` : ''}
+                    ${(isSuperAdmin || isOwner) ? `<i class="fas fa-trash-alt admin-del-icon" title="حذف المنشور" onclick="handleDelete('${item.id}', ${isSuperAdmin}, '${item.ownerID}')"></i>` : ''}
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span class="category-tag">${collegeMap[item.college] || 'AUST'}</span>
                     </div>
-                    <div class="post-time"><i class="far fa-clock"></i> ${item.fullTime || 'الآن'}</div>
+                    <div class="post-time"><i class="far fa-clock"></i> ${item.fullTime || 'منذ قليل'}</div>
                     <div class="post-owner">👤 ${item.owner} ${isOwner ? '(أنت)' : ''}</div>
                     <h3 style="margin:5px 0; font-size: 0.85rem; color: #fff;">${item.name}</h3>
                     ${item.explanation ? `<div class="explanation-box">${item.explanation}</div>` : ''}
@@ -200,18 +201,32 @@
 
         Swal.fire({
             title: isGlobalAdmin ? 'حذف بصفتك مسؤول؟' : 'حذف المنشور؟',
+            text: "لا يمكن التراجع عن هذه الخطوة!",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#ff4d4d',
+            cancelButtonColor: '#3085d6',
             confirmButtonText: 'نعم، احذف',
+            cancelButtonText: 'إلغاء',
             background: '#0a0a0f',
             color: '#fff'
         }).then(res => {
             if(res.isConfirmed) {
-                if (isGlobalAdmin) {
-                    Swal.fire({ title: 'كلمة مرور المسؤول', input: 'password', background: '#0a0a0f', color: '#fff' }).then(p => {
-                        if(p.value === ADMIN_PASS) database.ref('globalMarket/' + itemId).remove();
-                        else Swal.fire('خطأ', 'كلمة المرور غير صحيحة', 'error');
+                if (isGlobalAdmin && myID !== postOwnerID) {
+                    // طلب كلمة مرور المسؤول إذا لم يكن هو صاحب المنشور
+                    Swal.fire({ 
+                        title: 'كلمة مرور المسؤول', 
+                        input: 'password', 
+                        background: '#0a0a0f', 
+                        color: '#fff',
+                        inputPlaceholder: 'أدخل رمز الحماية'
+                    }).then(p => {
+                        if(p.value === ADMIN_PASS) {
+                            database.ref('globalMarket/' + itemId).remove();
+                            Swal.fire('تم!', 'تم الحذف بنجاح.', 'success');
+                        } else if (p.value !== undefined) {
+                            Swal.fire('خطأ', 'كلمة المرور غير صحيحة', 'error');
+                        }
                     });
                 } else {
                     database.ref('globalMarket/' + itemId).remove();
@@ -225,12 +240,12 @@
         const myName = (localStorage.getItem("userName") || "").trim();
 
         // قفل أمان إضافي لمنع مراسلة النفس
-        if (ownerID.toString().trim() === myID || ownerName === myName) {
-            Swal.fire({ text: 'لا يمكنك مراسلة نفسك!', icon: 'info', background: '#0a0a0f', color: '#fff', timer: 1500, showConfirmButton: false });
+        if (ownerID && ownerID.toString().trim() === myID) {
+            Swal.fire({ text: 'هذا منشورك الخاص!', icon: 'info', background: '#0a0a0f', color: '#fff', timer: 1500, showConfirmButton: false });
             return;
         }
 
-        // التوجه للشات مع تمرير الاسم والمعرف لضمان التعرف عليه في البروفايل
+        // التوجه للشات مع تمرير البيانات المطلوبة للربط مع البروفايل
         window.location.href = `chat.html?to=${encodeURIComponent(ownerName)}&toID=${ownerID}&item=${encodeURIComponent(itemName)}`;
     }
 
