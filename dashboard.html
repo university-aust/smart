@@ -47,7 +47,7 @@
 <body>
 
     <div class="pulse-ticker">
-        <div class="ticker-content"> ✨ أهلاً بكِ في Smart Pulse | تم تحديث قوائم المواد لكل الكليات بنجاح • نظام SOS يعمل بكفاءة وأمان 🚀 </div>
+        <div class="ticker-content"> ✨ أهلاً بكِ في Smart Pulse | تم تحديث كافة المواد والوظائف بنجاح • النظام يعمل الآن بكفاءة 100% 🚀 </div>
     </div>
 
     <nav class="header-nav">
@@ -98,9 +98,10 @@
             <button class="btn-main" onclick="addNewTool()">نشر في المعرض ✅</button>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px;">
-                <button onclick="location.href='library.html'" style="background:rgba(41, 128, 185, 0.8); color:white; border:none; padding:12px; border-radius:10px; cursor:pointer; font-weight:bold;">📚 المكتبة</button>
+                <button onclick="location.href='library.html'" style="background:rgba(41, 128, 185, 0.8); color:white; border:none; padding:12px; border-radius:10px; cursor:pointer; font-weight:bold;">📚 مكتبة المحاضرات</button>
                 <button onclick="location.href='AI.html'" style="background:rgba(41, 128, 126, 0.8); color:white; border:none; padding:12px; border-radius:10px; cursor:pointer; font-weight:bold;">🤖 الذكاء المساعد</button>
             </div>
+            <button class="btn-main btn-market" onclick="location.href='market.html'" style="margin-top:10px;"><i class="fas fa-store"></i> المعرض العام</button>
         </div>
     </div>
 
@@ -127,43 +128,38 @@
     const database = firebase.database();
     const auth = firebase.auth();
 
-    // جلب البيانات من localStorage
-    const currentUserName = localStorage.getItem("userName") || "مستخدم";
-    const currentUserID = localStorage.getItem("universityID") || "غير معروف";
+    const currentUserName = localStorage.getItem("userName") || "مستخدم جديد";
+    const currentUserID = localStorage.getItem("universityID") || "0000";
 
-    // قاعدة بيانات المواد المحدثة لعام 2026
     const allAUSTSubjects = {
-        it: { name: "💻 هندسة المعلوماتية", 1: ["البرمجة 1", "الفيزياء 1", "الرياضيات 1", "الرسم الهندسي", "مهارات الحاسوب", "البرمجة 2", "الفيزياء 2", "الرياضيات 2", "الكيمياء الهندسية", "الميكانيك"], 2: ["خوارزميات 1", "برمجة ويب", "رياضيات متقطعة", "احتمالات", "OOP 1", "قواعد بيانات 1", "خوارزميات 2", "هندسة كهربائية", "تحليل عددي", "OOP 2"], 3: ["هندسة برمجيات 1", "تطوير ويب", "معمارية حاسوب", "نظم تشغيل 1", "تحليل نظم", "هندسة برمجيات 2", "نظم معلومات", "قواعد بيانات 2", "ذكاء صنعي"], 4: ["تنقيب بيانات", "رسم حاسوبي", "نظم زمن حقيقي", "شبكات 1", "إدارة قواعد بيانات", "نظم دعم قرار", "نمذجة ومحاكاة", "شبكات 2"], 5: ["مشروع تخرج 1", "إدارة مشاريع", "أنظمة خبيرة", "شبكات عصبونية", "مشروع تخرج 2", "معالجة صور", "أمن معلومات"] },
-        chemical: { name: "🧪 الكيمياء الصناعية", 1: ["الرياضيات 1", "الفيزياء", "كيمياء عامة", "رسم هندسي"], 2: ["برامج حاسوبية", "رياضيات تطبيقية", "كيمياء تحليلية"], 3: ["جريان موائع", "انتقال حرارة", "ثيرموديناميك"], 4: ["انتقال كتلة", "هندسة تفاعلات 1", "تقانة أسمدة"], 5: ["ديناميك وتحكم", "تصميم أجهزة", "هندسة بيئية"] },
-        dent: { name: "🦷 طب الأسنان", 1: ["كيمياء عامة", "تشريح عام 1", "بيولوجيا", "فيزيولوجيا"], 2: ["تعويضات ثابتة 1", "مواد ترميمية", "تشريح ونحت أسنان"], 3: ["تعويضات متحركة 2", "أدوية", "باطنة وجلدية"], 4: ["تقويم 1", "مداواة لبية 1", "أمراض فم 1"], 5: ["زرع أسنان", "جراحة فم وفكين", "أطفال 2"] },
-        pharm: { name: "💊 كلية الصيدلة", 1: ["تشريح", "فيزياء طبية", "بيولوجيا خلية", "كيمياء عامة"], 2: ["صيدلانيات 1", "كيمياء تحليلية", "كيمياء فيزيائية"], 3: ["تكنولوجيا صيدلانية", "عقاقير 2", "فارماكولوجيا 1"], 4: ["صيدلة صناعية 1", "سموم", "مناعة"], 5: ["إسعاف أولي", "كيمياء دوائية", "رقابة"] },
-        arch: { name: "📐 الهندسة المعمارية", 1: ["رسم هندسي", "تصميم 1", "تاريخ عمارة 1"], 2: ["تصميم معماري 1", "تنفيذ مباني", "ظل ومنظور 1"], 3: ["تصميم معماري 3", "تجهيزات 1", "تخطيط مدن"], 4: ["أبنية سكنية", "تخطيط تجمعات", "بيتون مسلح"], 5: ["إحياء أثري", "مشروع التخرج النهائي"] },
-        petro: { name: "🛢️ هندسة البترول", 1: ["رياضيات 1", "رسم هندسي", "كيمياء", "جيولوجيا"], 2: ["كيمياء نفط", "عناصر آلات", "صخور"], 3: ["جيولوجيا بترول", "ثيرموديناميك", "فيزياء طبقة"], 4: ["إنتاج نفط", "حفر 1", "مخزون 1"], 5: ["نقل وتخزين", "حفر موجه", "مشروع 2"] },
-        trans: { name: "📖 كلية الترجمة", 1: ["صوتيات", "قواعد 1", "ترجمة 1"], 2: ["مسرح نهضة", "ترجمة 2", "رواية قرن 18"], 3: ["مقالة نقدية", "ترجمة 3", "رواية قرن 19"], 4: ["نقد أدبي", "مشروع تخرج", "رواية حديثة"] }
+        it: { name: "💻 هندسة المعلوماتية", 1: ["البرمجة 1", "الفيزياء 1", "الرياضيات 1", "الرسم الهندسي", "مهارات الحاسوب", "البرمجة 2", "الفيزياء 2", "الرياضيات 2"], 2: ["خوارزميات 1", "برمجة ويب", "رياضيات متقطعة", "احتمالات", "OOP 1", "قواعد بيانات 1"], 3: ["هندسة برمجيات 1", "تطوير ويب", "معمارية حاسوب", "نظم تشغيل 1", "تحليل نظم"], 4: ["تنقيب بيانات", "رسم حاسوبي", "شبكات 1", "إدارة قواعد بيانات"], 5: ["مشروع تخرج 1", "إدارة مشاريع", "أمن معلومات"] },
+        chemical: { name: "🧪 الكيمياء الصناعية", 1: ["الرياضيات 1", "الفيزياء", "كيمياء عامة"], 2: ["برامج حاسوبية", "رياضيات تطبيقية"], 3: ["جريان موائع", "انتقال حرارة"], 4: ["انتقال كتلة", "تقانة أسمدة"], 5: ["ديناميك وتحكم", "أمن صناعي"] },
+        dent: { name: "🦷 طب الأسنان", 1: ["كيمياء عامة", "تشريح عام 1", "بيولوجيا"], 2: ["تعويضات ثابتة 1", "مواد ترميمية"], 3: ["تعويضات متحركة 2", "أدوية"], 4: ["تقويم 1", "مداواة لبية 1"], 5: ["زرع أسنان", "جراحة فم وفكين"] },
+        pharm: { name: "💊 كلية الصيدلة", 1: ["تشريح", "فيزياء طبية"], 2: ["صيدلانيات 1", "كيمياء تحليلية"], 3: ["تكنولوجيا صيدلانية", "عقاقير 2"], 4: ["صيدلة صناعية 1", "سموم"], 5: ["إسعاف أولي", "كيمياء دوائية"] },
+        arch: { name: "📐 الهندسة المعمارية", 1: ["رسم هندسي", "تصميم 1"], 2: ["تصميم معماري 1", "تنفيذ مباني"], 3: ["تجهيزات 1", "تخطيط مدن"], 4: ["أبنية سكنية", "بيتون مسلح"], 5: ["مشروع التخرج النهائي"] },
+        petro: { name: "🛢️ هندسة البترول", 1: ["رياضيات 1", "جيولوجيا"], 2: ["كيمياء نفط", "صخور"], 3: ["جريان موائع", "جيولوجيا بترول"], 4: ["إنتاج نفط", "حفر 1"], 5: ["حفر موجه", "مشروع 2"] },
+        trans: { name: "📖 كلية الترجمة", 1: ["صوتيات", "ترجمة 1"], 2: ["مسرح نهضة", "ترجمة 2"], 3: ["مقالة نقدية", "ترجمة 3"], 4: ["نقد أدبي", "مشروع تخرج"] }
     };
 
-    // التحقق من تسجيل الدخول
     auth.onAuthStateChanged((user) => {
         if (user) {
             document.getElementById("userDisplayName").innerText = currentUserName;
             initSelectors();
             checkUnreadMessages();
         } else {
-            Swal.fire('تنبيه', 'يجب تسجيل الدخول أولاً', 'info').then(() => {
-                window.location.href = "login.html";
-            });
+            window.location.href = "login.html";
         }
     });
 
     function initSelectors() {
         const sosCol = document.getElementById('collegeSOS');
         const itemCol = document.getElementById('itemCollege');
-        let options = `<option value="عام">كل الكليات (عام)</option>`;
+        let options = "";
         for (let key in allAUSTSubjects) {
             options += `<option value="${key}">${allAUSTSubjects[key].name}</option>`;
         }
         sosCol.innerHTML = options;
-        itemCol.innerHTML = options;
+        itemCol.innerHTML = `<option value="عام">كل الكليات (عام)</option>` + options;
         updateSubjects();
     }
 
@@ -171,20 +167,19 @@
         const college = document.getElementById('collegeSOS').value;
         const year = document.getElementById('yearSOS').value;
         const select = document.getElementById('subjectSelect');
-        const subjects = (allAUSTSubjects[college] && allAUSTSubjects[college][year]) ? allAUSTSubjects[college][year] : ["عام"];
+        const subjects = (allAUSTSubjects[college] && allAUSTSubjects[college][year]) 
+                         ? allAUSTSubjects[college][year] 
+                         : ["عام"];
         select.innerHTML = subjects.map(s => `<option value="${s}">${s}</option>`).join('');
     }
 
-    // نظام النقطة الحمراء (إشعارات الرسائل الجديدة)
     function checkUnreadMessages() {
         const notifyDot = document.getElementById("notifyDot");
-        // نراقب الشات الذي يحتوي على ID المستخدم كـ "مستقبل" والرسالة غير مقروءة
         database.ref('chats').on('value', (snapshot) => {
             let hasUnread = false;
             snapshot.forEach((chatRoom) => {
                 chatRoom.forEach((msg) => {
                     const data = msg.val();
-                    // إذا كنتِ أنتِ المستقبل والرسالة لم تشاهد بعد
                     if (data.receiverID === currentUserID && data.seen === false) {
                         hasUnread = true;
                     }
@@ -194,12 +189,13 @@
         });
     }
 
-    async function sendSOS() {
+    function sendSOS() {
+        const subject = document.getElementById('subjectSelect').value;
         const explanation = document.getElementById('customSOS').value.trim();
-        if(!explanation) return Swal.fire('تنبيه', 'يرجى كتابة ما تحتاجه', 'warning');
+        if(!explanation) return Swal.fire('تنبيه', 'يرجى كتابة شرح للمساعدة المطلوبة', 'warning');
 
         database.ref('globalMarket/').push({
-            name: `🆘 SOS: ${document.getElementById('subjectSelect').value}`,
+            name: `🆘 SOS: ${subject}`,
             explanation: explanation,
             college: document.getElementById('collegeSOS').value,
             owner: currentUserName,
@@ -208,9 +204,9 @@
             isSOS: true,
             timestamp: firebase.database.ServerValue.TIMESTAMP
         }).then(() => {
-            Swal.fire({ icon: 'success', title: 'تم إرسال نداء الاستغاثة', timer: 1500, showConfirmButton: false });
+            Swal.fire({ icon: 'success', title: 'تم إرسال النداء', timer: 1500, showConfirmButton: false });
             document.getElementById('customSOS').value = "";
-        });
+        }).catch(err => Swal.fire('خطأ', err.message, 'error'));
     }
 
     function addNewTool() {
