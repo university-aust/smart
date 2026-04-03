@@ -3,103 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المعرض | نبض AUST</title>
+    <title>المعرض العام | نبض AUST</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root { 
-            --bg-dark: #050608;
-            --blue-soft: rgba(0, 120, 215, 0.12); /* أزرق زجاجي هادئ جداً */
-            --red-soft: rgba(200, 30, 30, 0.15); /* أحمر خافت */
-            --border-white: rgba(255, 255, 255, 0.05);
+            --cyan-neon: #00e5ff; 
+            --cyan-glow: rgba(0, 229, 255, 0.15);
+            --red: #ff4d4d; 
+            --red-glow: rgba(255, 77, 77, 0.15);
+            --deep-dark: rgba(10, 11, 18, 0.85); 
         }
 
         body { 
-            background: linear-gradient(rgba(5, 6, 8, 0.92), rgba(5, 6, 8, 0.92)), url('67260.jpg') no-repeat center center fixed;
+            background: linear-gradient(rgba(5, 5, 10, 0.9), rgba(5, 5, 10, 0.9)), url('67260.jpg') no-repeat center center fixed;
             background-size: cover;
-            color: #bbb; 
-            font-family: 'Segoe UI', sans-serif; 
+            color: white; 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
             margin: 0; 
+            overflow-x: hidden;
         }
 
         .header-nav { 
             display: flex; justify-content: space-between; align-items: center; 
-            padding: 12px 5%; background: rgba(0, 0, 0, 0.85); 
-            border-bottom: 1px solid var(--border-white); backdrop-filter: blur(10px);
+            padding: 15px 5%; background: rgba(0, 0, 0, 0.7); 
+            border-bottom: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px);
             position: sticky; top: 0; z-index: 1000;
         }
+        
+        .header-nav h1 { font-size: clamp(16px, 4vw, 24px); color: #fff; margin: 0; }
 
-        .btn-back { color: #888; text-decoration: none; font-size: 0.85rem; border: 1px solid #333; padding: 5px 12px; border-radius: 8px; transition: 0.3s; }
-        .btn-back:hover { color: #fff; border-color: #555; }
+        .btn-back { 
+            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--cyan-neon); 
+            color: var(--cyan-neon); padding: 6px 15px; border-radius: 10px; 
+            text-decoration: none; font-weight: bold; transition: 0.3s;
+            display: flex; align-items: center; gap: 5px; font-size: 0.8rem;
+        }
 
-        .search-container { padding: 15px 4%; display: flex; gap: 8px; background: rgba(0,0,0,0.3); }
+        .search-container { padding: 12px 5%; display: flex; gap: 8px; flex-wrap: wrap; background: rgba(0,0,0,0.4); }
         .search-input { 
-            flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #222; 
-            background: #0a0a0a; color: #fff; font-size: 0.8rem; outline: none;
+            flex: 1; min-width: 120px; padding: 10px; border-radius: 10px; 
+            border: 1px solid rgba(255,255,255,0.1); background: rgba(0, 0, 0, 0.5); 
+            color: white; outline: none; font-size: 0.85rem;
         }
 
         /* نظام الشبكة: حاويتان في الموبايل */
         .market-grid { 
             display: grid; 
             grid-template-columns: repeat(2, 1fr); 
-            gap: 10px; padding: 15px 4%; 
+            gap: 12px; padding: 15px 3%; 
         }
 
+        /* الحاوية الزجاجية (للتبادل والمصادر) */
         .tool-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(8px);
-            border: 1px solid var(--border-white);
-            border-radius: 15px; padding: 12px;
-            display: flex; flex-direction: column;
-            position: relative; transition: 0.3s;
+            background: var(--cyan-glow); 
+            backdrop-filter: blur(12px);
+            padding: 12px; border-radius: 18px;
+            border: 1px solid rgba(0, 229, 255, 0.2); 
+            position: relative; 
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s;
+            display: flex; flex-direction: column; min-height: 200px;
         }
 
-        .tool-card:hover { transform: translateY(-5px); background: rgba(255, 255, 255, 0.06); }
+        /* تأثير الارتفاع عند الضغط أو اللمس */
+        .tool-card:active {
+            transform: translateY(-10px) scale(1.02);
+            z-index: 5;
+        }
 
-        /* تمييز الألوان بهدوء */
-        .sos-card { background: var(--red-soft); border-color: rgba(200, 30, 30, 0.2); }
-        .exchange-card { background: var(--blue-soft); border-color: rgba(0, 120, 215, 0.2); }
+        /* حاوية الرادار الزجاجية الحمراء */
+        .sos-card { 
+            border: 1.5px solid rgba(255, 77, 77, 0.4) !important; 
+            background: var(--red-glow) !important; 
+        }
 
-        .category-tag { font-size: 9px; color: #777; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; }
-        .post-owner { font-size: 10px; color: #00b8d4; margin-top: 8px; font-weight: bold; }
-        .post-title { font-size: 0.9rem; color: #eee; margin: 8px 0; font-weight: 600; line-height: 1.2; }
-
-        /* صندوق التفاصيل يظهر فقط في الـ SOS */
-        .sos-desc { 
-            font-size: 0.75rem; color: #999; background: rgba(0,0,0,0.2); 
-            padding: 8px; border-radius: 8px; margin-bottom: 10px; border-right: 2px solid #cc3333;
+        .category-tag { background: rgba(255,255,255,0.1); color: var(--cyan-neon); padding: 2px 6px; border-radius: 6px; font-size: 8px; font-weight: bold; border: 1px solid rgba(0,229,255,0.2); }
+        .post-time { font-size: 9px; color: #888; margin: 8px 0; display: flex; align-items: center; gap: 4px; }
+        
+        .explanation-box {
+            background: rgba(0, 0, 0, 0.2); padding: 8px; border-radius: 8px;
+            margin-bottom: 10px; font-size: 0.75rem; color: #ddd; 
+            border-right: 3px solid var(--red); line-height: 1.3;
         }
 
         .contact-btn { 
-            width: 100%; padding: 10px; border: none; border-radius: 10px; 
-            font-size: 0.75rem; font-weight: bold; cursor: pointer; transition: 0.3s;
-            background: rgba(255,255,255,0.05); color: #ccc; border: 1px solid rgba(255,255,255,0.1);
+            width: 100%; margin-top: auto; padding: 10px; border: none; 
+            border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; 
+            font-size: 0.8rem; background: rgba(255,255,255,0.05); color: #fff;
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        .contact-btn:hover { background: #fff; color: #000; }
+        .contact-btn:hover { background: var(--cyan-neon); color: #000; }
 
-        .del-icon { 
-            position: absolute; top: 8px; left: 8px; color: #555; 
-            font-size: 12px; cursor: pointer; transition: 0.3s;
+        .admin-del-icon {
+            position: absolute; top: 10px; left: 10px; color: #666;
+            cursor: pointer; font-size: 14px; z-index: 10; transition: 0.3s;
         }
-        .del-icon:hover { color: #ff4d4d; }
+        .admin-del-icon:hover { color: var(--red); }
 
-        /* شاشات الكمبيوتر: 4 حاويات */
         @media (min-width: 768px) {
             .market-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
-            .post-title { font-size: 1rem; }
+            .tool-card { padding: 20px; min-height: 240px; }
         }
     </style>
 </head>
 <body>
 
     <div class="header-nav">
-        <h1 style="font-size: 1.1rem; color: #fff;">معرض <span style="color:#00b8d4">AUST</span></h1>
+        <h1>🌐 معرض <span style="color:var(--cyan-neon)">AUST</span></h1>
         <a href="dashboard.html" class="btn-back">رجوع</a>
     </div>
 
     <div class="search-container">
-        <input type="text" id="searchInput" class="search-input" placeholder="ابحث هنا..." oninput="renderMarket()">
-        <select id="filterCollege" class="search-input" style="flex:0; min-width:90px;" onchange="renderMarket()">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث..." oninput="renderMarket()">
+        <select id="filterCollege" class="search-input" style="flex: 0; min-width: 100px;" onchange="renderMarket()">
             <option value="all">الكل</option>
             <option value="it">IT</option>
             <option value="lost">مفقودات</option>
@@ -115,6 +131,7 @@
 <script>
     const ADMIN_NAME = "shahed mamdoh alkhald";
     const ADMIN_ID = "20241600060";
+    const ADMIN_PASS = "shjkshjk"; 
 
     const firebaseConfig = { apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo", authDomain: "nabd-aust.firebaseapp.com", databaseURL: "https://nabd-aust-default-rtdb.europe-west1.firebasedatabase.app", projectId: "nabd-aust", storageBucket: "nabd-aust.firebasestorage.app", messagingSenderId: "921777725948", appId: "1:921777725948:web:7b024d0aa101068bef9279" };
 
@@ -122,6 +139,12 @@
     const database = firebase.database();
 
     let cachedData = [];
+
+    // تحديث الأمان: الاستماع للبيانات فقط بعد التأكد من الهوية
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) { startListening(); } 
+        else { window.location.href = "login.html"; }
+    });
 
     function startListening() {
         database.ref('globalMarket/').on('value', (snapshot) => {
@@ -135,13 +158,14 @@
         const grid = document.getElementById("marketGrid");
         const searchTerm = document.getElementById("searchInput").value.toLowerCase();
         const myName = (localStorage.getItem("userName") || "").trim().toLowerCase();
-        const myID = (localStorage.getItem("userID") || "").trim();
+        const myID = (localStorage.getItem("userID") || "").trim(); 
         const isSuperAdmin = (myName === ADMIN_NAME && myID === ADMIN_ID);
 
         let htmlContent = "";
 
         const filtered = cachedData.filter(item => {
-            return (item.name || "").toLowerCase().includes(searchTerm) || (item.owner || "").toLowerCase().includes(searchTerm);
+            if (!item || !item.name) return false;
+            return item.name.toLowerCase().includes(searchTerm) || (item.owner || "").toLowerCase().includes(searchTerm);
         });
 
         filtered.forEach(item => {
@@ -152,38 +176,42 @@
 
             htmlContent += `
                 <div class="tool-card ${cardClass}">
-                    ${(isSuperAdmin || isOwner) ? `<i class="fas fa-trash del-icon" onclick="handleDelete('${item.id}')"></i>` : ''}
+                    ${(isSuperAdmin || isOwner) ? `<i class="fas fa-trash-alt admin-del-icon" onclick="handleDelete('${item.id}', ${isSuperAdmin})"></i>` : ''}
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span class="category-tag">${item.college || 'AUST'}</span>
+                    </div>
+                    <div class="post-time"><i class="far fa-clock"></i> ${item.fullTime || 'الآن'}</div>
+                    <div style="color:var(--cyan-neon); font-size:10px; font-weight:bold;">👤 ${item.owner}</div>
+                    <h3 style="margin:5px 0; font-size: 0.85rem; color: #fff;">${item.name}</h3>
                     
-                    <span class="category-tag">${item.college || 'عام'}</span>
-                    <div class="post-owner">👤 ${item.owner}</div>
-                    <div class="post-title">${item.name}</div>
-
-                    ${isSOS ? `<div class="sos-desc">${item.explanation || 'طلب مساعدة..'}</div>` : ''}
-
+                    ${isSOS && item.explanation ? `<div class="explanation-box">${item.explanation}</div>` : ''}
+                    
                     <button onclick="goToChat('${item.owner}', '${item.name}')" class="contact-btn">
                         تواصل
                     </button>
                 </div>`;
         });
-        grid.innerHTML = htmlContent || `<p style="grid-column: 1/-1; text-align:center; font-size:0.8rem; opacity:0.5;">لا يوجد نتائج</p>`;
+        grid.innerHTML = htmlContent || `<p style="grid-column: 1/-1; text-align:center; opacity:0.5;">لا يوجد نتائج</p>`;
     }
 
-    function handleDelete(itemId) {
-        Swal.fire({
-            title: 'حذف؟',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            confirmButtonText: 'حذف',
-            background: '#111', color: '#fff'
-        }).then((res) => { if(res.isConfirmed) database.ref('globalMarket/' + itemId).remove(); });
+    function handleDelete(itemId, isGlobalAdmin) {
+        if (isGlobalAdmin) {
+            Swal.fire({ title: 'تأكيد الحذف (شهد)', input: 'password', showCancelButton: true, confirmButtonColor: '#ff4d4d', background: '#0a0a0f', color: '#fff' })
+            .then(res => { if(res.value === ADMIN_PASS) database.ref('globalMarket/' + itemId).remove(); });
+        } else {
+            Swal.fire({ title: 'حذف المنشور؟', icon: 'warning', showCancelButton: true, background: '#0a0a0f', color: '#fff' })
+            .then(res => { if(res.isConfirmed) database.ref('globalMarket/' + itemId).remove(); });
+        }
     }
 
     function goToChat(owner, itemName) {
+        if (owner === localStorage.getItem("userName")) {
+            Swal.fire({ title: 'هذا منشورك!', icon: 'info', background: '#0a0a0f', color: '#fff' });
+            return;
+        }
         window.location.href = `chat.html?to=${encodeURIComponent(owner)}&item=${encodeURIComponent(itemName)}`;
     }
-
-    window.onload = startListening;
 </script>
 </body>
+</html>
 </html>
