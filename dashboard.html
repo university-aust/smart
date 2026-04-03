@@ -30,18 +30,19 @@
         .btn-main:hover { transform: scale(1.02); box-shadow: 0 0 25px var(--cyan); }
         .btn-market { background: rgba(39, 174, 96, 0.9); border: 1px solid #27ae60; }
         .footer { text-align: center; padding: 40px; background: rgba(0,0,0,0.7); margin-top: 50px; border-top: 2px solid var(--cyan); }
+        @media (max-width: 768px) { .header-nav { flex-direction: column; text-align: center; } .nav-links { flex-direction: column; width: 100%; } .card { padding: 20px; margin-bottom: 15px; } }
     </style>
 </head>
 <body>
 
     <div class="pulse-ticker">
-        <div class="ticker-content">  ✨ تم تحديث كافة الكليات لجامعة AUST  الذكاء الصنعي لايعمل حاليا يتم تطويره• نظام SOS والتبادل والمفقودات يعمل الآن بكفاءة 100%!  </div>
+        <div class="ticker-content">  ✨ تم تحديث كافة الكليات لجامعة AUST • نظام SOS والتبادل والمفقودات يعمل الآن بكفاءة 100%!  </div>
     </div>
 
     <nav class="header-nav">
         <h1>AUST <span style="color:var(--cyan)">Smart Pulse</span></h1>
         <div class="nav-links">
-            <p>مرحباً، <span id="userDisplayName" style="color:var(--cyan); font-weight:bold;">تحميل...</span></p>
+            <p>مرحباً، <span id="userDisplayName" style="color:var(--cyan); font-weight:bold;">...</span></p>
             <div class="profile-container">
                 <div id="notifyDot" class="notification-dot"></div>
                 <a href="profile.html" class="profile-btn"><i class="fas fa-user-graduate"></i> الملف الشخصي</a>
@@ -50,10 +51,19 @@
     </nav>
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; padding: 40px 5%;">
-      <div class="card">
+        
+        <div class="card">
             <h2>📡 رادار المساعدة (SOS)</h2>
             <label>الكلية:</label>
-            <select id="collegeSOS" onchange="updateSubjects()"></select>
+            <select id="collegeSOS" onchange="updateSubjects()">
+                <option value="it">💻 هندسة المعلوماتية</option>
+                <option value="dent">🦷 طب الأسنان</option>
+                <option value="pharm">💊 كلية الصيدلة</option>
+                <option value="chemical">🧪 الكيمياء الصناعية</option>
+                <option value="arch">📐 الهندسة المعمارية</option>
+                <option value="petro">🛢️ هندسة البترول</option>
+                <option value="trans">📖 كلية الترجمة</option>
+            </select>
             <label>السنة الدراسية:</label>
             <select id="yearSOS" onchange="updateSubjects()">
                 <option value="1">السنة الأولى</option><option value="2">السنة الثانية</option><option value="3">السنة الثالثة</option><option value="4">السنة الرابعة</option><option value="5">السنة الخامسة</option>
@@ -62,7 +72,6 @@
             <select id="subjectSelect"></select>
             <label>كيف يمكن مساعدتك؟</label>
             <input type="text" id="customSOS" placeholder="مثال: أحتاج شرح لفقرة التوريث...">
-            
             <button class="btn-main" style="background: linear-gradient(45deg, #ff4d4d, var(--navy-deep));" onclick="sendSOS()">إرسال نداء SOS 🆘</button>
             <button class="btn-main btn-market" onclick="location.href='market.html'"><i class="fas fa-store"></i> دخول المعرض العام</button>
         </div>
@@ -76,7 +85,16 @@
                 <option value="موجود">📍 موجودات (وجدت غرضاً...)</option>
             </select>
             <label>الكلية التابع لها الغرض:</label>
-            <select id="itemCollege"></select>
+            <select id="itemCollege">
+                <option value="عام">كل الكليات (عام)</option>
+                <option value="it">هندسة المعلوماتية</option>
+                <option value="dent">طب الأسنان</option>
+                <option value="pharm">كلية الصيدلة</option>
+                <option value="chemical">الكيمياء الصناعية</option>
+                <option value="arch">الهندسة المعمارية</option>
+                <option value="petro">هندسة البترول</option>
+                <option value="trans">كلية الترجمة</option>
+            </select>
             <label>اسم الغرض:</label>
             <input type="text" id="newToolName" placeholder="مثال: مسطرة T، نظارة...">
             <button class="btn-main" onclick="addNewTool()">نشر في المعرض ✅</button>
@@ -94,108 +112,88 @@
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 
 <script>
     const firebaseConfig = { apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo", authDomain: "nabd-aust.firebaseapp.com", databaseURL: "https://nabd-aust-default-rtdb.europe-west1.firebasedatabase.app", projectId: "nabd-aust", storageBucket: "nabd-aust.firebasestorage.app", messagingSenderId: "921777725948", appId: "1:921777725948:web:7b024d0aa101068bef9279" };
-    
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-    const auth = firebase.auth();
 
-    const currentUserName = localStorage.getItem("userName") || "مستخدم جديد";
-    const currentUserID = localStorage.getItem("userID") || "0000";
+    // جلب البيانات مع تأمينها بالرقم الجامعي
+    const currentUserName = localStorage.getItem("userName") || "مستخدم";
+    const currentUserID = localStorage.getItem("universityID") || "0000";
 
     const allAUSTSubjects = {
-        it: { name: "💻 هندسة المعلوماتية", 1: ["البرمجة 1", "الفيزياء 1", "الرياضيات 1", "الرسم الهندسي", "مهارات الحاسوب", "البرمجة 2", "الفيزياء 2", "الرياضيات 2", "الكيمياء الهندسية", "الميكانيك"], 2: ["خوارزميات 1", "برمجة ويب", "رياضيات متقطعة", "احتمالات", "OOP 1", "قواعد بيانات 1"], 3: ["هندسة برمجيات 1", "تطوير ويب", "معمارية حاسوب", "نظم تشغيل 1", "تحليل نظم"], 4: ["تنقيب بيانات", "رسم حاسوبي", "شبكات 1", "إدارة قواعد بيانات"], 5: ["مشروع تخرج 1", "إدارة مشاريع", "أمن معلومات"] },
-        chemical: { name: "🧪 الكيمياء الصناعية", 1: ["الرياضيات 1", "الفيزياء", "كيمياء عامة"], 2: ["برامج حاسوبية", "رياضيات تطبيقية"], 3: ["جريان موائع", "انتقال حرارة"], 4: ["انتقال كتلة", "تقانة أسمدة"], 5: ["ديناميك وتحكم", "أمن صناعي"] },
-        dent: { name: "🦷 طب الأسنان", 1: ["كيمياء عامة", "تشريح عام 1", "بيولوجيا"], 2: ["تعويضات ثابتة 1", "مواد ترميمية"], 3: ["تعويضات متحركة 2", "أدوية"], 4: ["تقويم 1", "مداواة لبية 1"], 5: ["زرع أسنان", "جراحة فم وفكين"] },
-        pharm: { name: "💊 كلية الصيدلة", 1: ["تشريح", "فيزياء طبية"], 2: ["صيدلانيات 1", "كيمياء تحليلية"], 3: ["تكنولوجيا صيدلانية", "عقاقير 2"], 4: ["صيدلة صناعية 1", "سموم"], 5: ["إسعاف أولي", "كيمياء دوائية"] },
-        arch: { name: "📐 الهندسة المعمارية", 1: ["رسم هندسي", "تصميم 1"], 2: ["تصميم معماري 1", "تنفيذ مباني"], 3: ["تجهيزات 1", "تخطيط مدن"], 4: ["أبنية سكنية", "بيتون مسلح"], 5: ["مشروع التخرج النهائي"] },
-        petro: { name: "🛢️ هندسة البترول", 1: ["رياضيات 1", "جيولوجيا"], 2: ["كيمياء نفط", "صخور"], 3: ["جريان موائع", "جيولوجيا بترول"], 4: ["إنتاج نفط", "حفر 1"], 5: ["حفر موجه", "مشروع 2"] },
-        trans: { name: "📖 كلية الترجمة", 1: ["صوتيات", "ترجمة 1"], 2: ["مسرح نهضة", "ترجمة 2"], 3: ["مقالة نقدية", "ترجمة 3"], 4: ["نقد أدبي", "مشروع تخرج"] }
+        it: { 1: ["البرمجة 1", "الفيزياء 1", "الرياضيات 1", "الرسم الهندسي", "البرمجة 2", "الفيزياء 2", "الرياضيات 2"], 2: ["خوارزميات 1", "برمجة ويب", "رياضيات متقطعة", "OOP 1", "قواعد بيانات 1", "خوارزميات 2", "OOP 2"], 3: ["هندسة برمجيات 1", "تطوير ويب", "معمارية حاسوب", "نظم تشغيل 1", "تحليل نظم", "ذكاء صنعي"], 4: ["تنقيب بيانات", "رسم حاسوبي", "شبكات 1", "إدارة قواعد بيانات", "شبكات 2"], 5: ["مشروع تخرج 1", "إدارة مشاريع", "أنظمة خبيرة", "أمن معلومات"] },
+        dent: { 1: ["تشريح عام 1", "بيولوجيا", "فيزيولوجيا", "كيمياء حيوية"], 2: ["تعويضات ثابتة 1", "مواد ترميمية", "تشريح ونحت أسنان"], 3: ["تعويضات متحركة 2", "أدوية", "تشريح مرضي"], 4: ["تقويم 1", "مداواة لبية 1", "أمراض فم 1"], 5: ["زرع أسنان", "جراحة فم وفكين"] },
+        pharm: { 1: ["فيزياء طبية", "بيولوجيا خلية", "كيمياء عامة"], 2: ["صيدلانيات 1", "كيمياء تحليلية", "كيمياء فيزيائية"], 3: ["تكنولوجيا صيدلانية", "فارماكولوجيا 1"], 4: ["صيدلة صناعية 1", "سموم", "مناعة"], 5: ["كيمياء دوائية", "رقابة", "تغذية"] },
+        arch: { 1: ["رسم هندسي", "رسم حر 1", "تصميم 1"], 2: ["تصميم معماري 1", "تنفيذ مباني", "فيزياء بناء"], 3: ["تصميم معماري 3", "تخطيط مدن", "مساحة"], 4: ["تصميم معماري 5", "بيتون مسلح"], 5: ["إحياء أثري", "مشروع التخرج النهائي"] },
+        petro: { 1: ["رياضيات 1", "كيمياء", "جيولوجيا"], 2: ["كيمياء نفط", "عناصر آلات", "صخور"], 3: ["جريان موائع", "فيزياء طبقة"], 4: ["إنتاج نفط", "حفر 1", "مخزون 1"], 5: ["نقل وتخزين", "حفر موجه", "تآكل"] },
+        chemical: { 1: ["رياضيات 1", "كيمياء عامة"], 2: ["كيمياء فيزيائية 1", "كيمياء تحليلية"], 3: ["جريان موائع", "انتقال حرارة"], 4: ["انتقال كتلة", "هندسة تفاعلات 1"], 5: ["ديناميك وتحكم", "تصميم أجهزة"] },
+        trans: { 1: ["صوتيات", "قواعد 1", "ترجمة 1"], 2: ["ترجمة 2", "مناهج بحث"], 3: ["ترجمة 3", "مسرح حديث"], 4: ["ترجمة 4", "مشروع تخرج"] }
     };
-
-    // مراقب الأمان لفك التجمد
-    auth.onAuthStateChanged((user) => {
-        if (user) {
-            document.getElementById("userDisplayName").innerText = currentUserName;
-            initSelectors();
-            checkUnreadMessages();
-        } else {
-            window.location.href = "login.html";
-        }
-    });
-
-    function initSelectors() {
-        const sosCol = document.getElementById('collegeSOS');
-        const itemCol = document.getElementById('itemCollege');
-        let options = `<option value="عام">كل الكليات (عام)</option>`;
-        for (let key in allAUSTSubjects) {
-            options += `<option value="${key}">${allAUSTSubjects[key].name}</option>`;
-        }
-        sosCol.innerHTML = options;
-        itemCol.innerHTML = options;
-        updateSubjects();
-    }
 
     function updateSubjects() {
         const college = document.getElementById('collegeSOS').value;
         const year = document.getElementById('yearSOS').value;
-        const select = document.getElementById('subjectSelect');
         const subjects = (allAUSTSubjects[college] && allAUSTSubjects[college][year]) ? allAUSTSubjects[college][year] : ["عام"];
-        select.innerHTML = subjects.map(s => `<option value="${s}">${s}</option>`).join('');
+        document.getElementById('subjectSelect').innerHTML = subjects.map(s => `<option value="${s}">${s}</option>`).join('');
     }
 
+    // تسريع فحص الرسائل غير المقروءة (أمان عالي)
     function checkUnreadMessages() {
-        if(!currentUserName) return;
-        const notifyDot = document.getElementById("notifyDot");
-        // استخدام once لجعل الصفحة أسرع في البداية ثم on للتحديثات
-        database.ref('chats').limitToLast(10).on('value', (snapshot) => {
+        if(!currentUserID) return;
+        database.ref('chats').on('value', (snap) => {
+            const chats = snap.val();
             let hasUnread = false;
-            snapshot.forEach((child) => {
-                if (child.key.includes(currentUserName.replace(/\s/g, ''))) {
-                    child.forEach((msg) => {
-                        if (msg.val().sender !== currentUserName && msg.val().seen === false) hasUnread = true;
-                    });
-                }
-            });
-            notifyDot.style.display = hasUnread ? "block" : "none";
+            if (chats) {
+                Object.keys(chats).forEach(id => {
+                    if (id.includes(currentUserID)) { // فحص المحادثات التي تخص رقمك الجامعي فقط
+                        const msgs = chats[id];
+                        Object.keys(msgs).forEach(k => {
+                            if (msgs[k].senderID !== currentUserID && !msgs[k].seen) hasUnread = true;
+                        });
+                    }
+                });
+            }
+            document.getElementById("notifyDot").style.display = hasUnread ? "block" : "none";
         });
     }
 
     function sendSOS() {
         const subject = document.getElementById('subjectSelect').value;
         const explanation = document.getElementById('customSOS').value.trim();
-        if(!subject || !explanation) return Swal.fire('تنبيه', 'أكمل البيانات المطلوبة', 'warning');
+        if(!explanation) return Swal.fire('تنبيه', 'اشرح ما تحتاجه أولاً', 'warning');
 
-        const timeStr = new Date().toLocaleString('ar-EG', {hour: '2-digit', minute:'2-digit'});
-        
-        // استخدام التحقق من الأمان قبل الإرسال
         database.ref('globalMarket/').push({
             name: `🆘 SOS: ${subject}`, explanation, college: document.getElementById('collegeSOS').value,
-            owner: currentUserName, studentId: currentUserID, fullTime: timeStr, isSOS: true
+            owner: currentUserName, ownerID: currentUserID, 
+            fullTime: new Date().toLocaleString('ar-EG'), isSOS: true
         }).then(() => {
-            Swal.fire({ icon: 'success', title: 'تم الإرسال', timer: 1000, showConfirmButton: false });
+            Swal.fire({ icon: 'success', title: 'تم نداء الرادار بنجاح', timer: 1500, showConfirmButton: false });
             document.getElementById('customSOS').value = "";
-        }).catch(err => Swal.fire('خطأ', 'فشل الإرسال: ' + err.message, 'error'));
+        });
     }
 
     function addNewTool() {
         const name = document.getElementById('newToolName').value.trim();
-        if (!name) return Swal.fire('خطأ', 'اكتب اسم الغرض', 'error');
-        
         const type = document.getElementById('itemType').value;
-        const timeStr = new Date().toLocaleString('ar-EG', {hour: '2-digit', minute:'2-digit'});
+        if (!name) return Swal.fire('خطأ', 'ما هو الغرض؟', 'error');
 
         database.ref('globalMarket/').push({
             name: `${type}: ${name}`, college: document.getElementById('itemCollege').value,
-            owner: currentUserName, studentId: currentUserID, fullTime: timeStr, isSOS: false
+            owner: currentUserName, ownerID: currentUserID, 
+            fullTime: new Date().toLocaleString('ar-EG'), isSOS: false
         }).then(() => {
-            Swal.fire({ icon: 'success', title: 'تم النشر', timer: 1000, showConfirmButton: false });
+            Swal.fire({ icon: 'success', title: 'تم النشر في المعرض', timer: 1500, showConfirmButton: false });
             document.getElementById('newToolName').value = "";
         });
     }
+
+    window.onload = () => {
+        document.getElementById("userDisplayName").innerText = currentUserName;
+        updateSubjects();
+        checkUnreadMessages();
+    };
 </script>
 </body>
-</html> 
+</html>
