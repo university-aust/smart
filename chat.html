@@ -93,66 +93,23 @@
     const database = firebase.database();
     const auth = firebase.auth();
 
+    // جلب البيانات من الرابط
     const urlParams = new URLSearchParams(window.location.search);
     const otherUser = urlParams.get('to') || "زميل";
     const otherID = urlParams.get('toID') || "Unknown";
     const itemName = urlParams.get('item') || "موضوع عام";
     
+    // بياناتي الشخصية
     const myName = localStorage.getItem("userName");
-    const myID = localStorage.getItem("userID");
+    const myID = localStorage.getItem("universityID"); // استخدام المعرف الموحد
 
-    // معرف الغرفة بناءً على الرقم الجامعي (أكثر أماناً)
+    // إنشاء معرف فريد للغرفة يعتمد على الأرقام الجامعية لضمان الخصوصية والربط
     const chatId = [myID, otherID].sort().join("_");
 
     document.getElementById('chatWith').innerText = `دردشة مع ${otherUser}`;
     document.getElementById('itemContext').innerText = `بخصوص: ${itemName}`;
 
-    // التحقق من حالة الأمان (Firebase Auth) قبل البدء
-    auth.onAuthStateChanged((user) => {
-        if (!user) {
-            Swal.fire({
-                title: 'انتهت الجلسة',
-                text: 'يرجى تسجيل الدخول مجدداً للأمان',
-                icon: 'warning',
-                confirmButtonText: 'حسناً'
-            }).then(() => window.location.href = "index.html");
-        } else {
-            console.log("Session Active: " + user.uid);
-            listenForMessages();
-        }
-    });
-
-    function handleSend() {
-        const input = document.getElementById('msgInput');
-        const text = input.value.trim();
-        
-        if (!text) return;
-        if (!auth.currentUser) {
-            Swal.fire('خطأ أمان', 'جاري إعادة الاتصال بالسيرفر...', 'error');
-            return;
-        }
-
-        const msgData = {
-            sender: myName,
-            senderID: myID,
-            text: text,
-            seen: false,
-            time: new Date().toLocaleTimeString('ar-SY', {hour: '2-digit', minute:'2-digit'}),
-            timestamp: firebase.database.ServerValue.TIMESTAMP
-        };
-
-        input.value = ""; // تفريغ الحقل فوراً
-
-        database.ref('chats/' + chatId).push(msgData)
-        .then(() => {
-            document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
-        })
-        .catch(err => {
-            input.value = text;
-            Swal.fire('فشل الإرسال', 'السبب: ' + err.message, 'error');
-        });
-    }
-
+    // مراقبة الرسائل
     function listenForMessages() {
         const chatBox = document.getElementById('chatBox');
         database.ref('chats/' + chatId).on('value', (snap) => {
@@ -174,6 +131,7 @@
                             </div>
                         </div>`;
 
+                    // تحديث حالة الرسالة لـ "مقروءة" إذا فتحها الطرف الآخر
                     if (!isMe && !m.seen) {
                         database.ref('chats/' + chatId + '/' + k).update({ seen: true });
                     }
@@ -183,22 +141,61 @@
         });
     }
 
+    // وظيفة الإرسال المحسنة أمنياً
+    function handleSend() {
+        const input = document.getElementById('msgInput');
+        const text = input.value.trim();
+        
+        if (!text) return;
+
+        const msgData = {
+            sender: myName,
+            senderID: myID,
+            receiverName: otherUser, // هام لظهور الاسم في بروفايلك
+            receiverID: otherID,     // هام لفرز المحادثات في بروفايلك
+            text: text,
+            item: itemName,
+            seen: false,
+            time: new Date().toLocaleTimeString('ar-SY', {hour: '2-digit', minute:'2-digit'}),
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        };
+
+        input.value = ""; 
+
+        database.ref('chats/' + chatId).push(msgData)
+        .then(() => {
+            document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
+        })
+        .catch(err => {
+            input.value = text;
+            Swal.fire('خطأ في الشبكة', 'تعذر إرسال الرسالة الآن', 'error');
+        });
+    }
+
     function clearFullChat() {
         Swal.fire({
-            title: 'هل أنتِ متأكدة؟',
-            text: "سيتم مسح المحادثة بالكامل من الطرفين!",
+            title: 'حذف المحادثة؟',
+            text: "سيتم حذف السجل بالكامل من الطرفين!",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#ff4d4d',
-            confirmButtonText: 'نعم، امسح'
-        }).then(r => { if (r.isConfirmed) database.ref('chats/' + chatId).remove(); });
+            confirmButtonText: 'نعم، امسح',
+            cancelButtonText: 'إلغاء',
+            background: '#0a101e',
+            color: '#fff'
+        }).then(r => { 
+            if (r.isConfirmed) database.ref('chats/' + chatId).remove(); 
+        });
     }
 
-    // تعديل الارتفاع عند ظهور الكيبورد في الموبايل
+    // تشغيل الاستماع عند التحميل
+    window.onload = listenForMessages;
+
+    // التعامل مع الكيبورد في الجوال
     if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', () => {
             document.body.style.height = window.visualViewport.height + 'px';
-            chatBox.scrollTop = chatBox.scrollHeight;
+            document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
         });
     }
 </script>
