@@ -232,10 +232,8 @@
             if (!email.toLowerCase().endsWith("@gmail.com")) { notify("Gmail فقط!"); return; }
 
             notify("جاري إنشاء الحساب...");
-            // 1. إنشاء الحساب في نظام الـ Auth أولاً للأمان
             auth.createUserWithEmailAndPassword(email, pass)
                 .then((userCredential) => {
-                    // 2. تخزين البيانات الإضافية في الداتابيز
                     return database.ref('users/' + id).set({
                         id, pass, name, email,
                         major: "هندسة البرمجيات",
@@ -253,15 +251,17 @@
             database.ref('users/' + id).once('value').then((snapshot) => {
                 const data = snapshot.val();
                 if (data) {
-                    // تسجيل دخول رسمي لفك "تجمد" الأزرار
-                    auth.signInWithEmailAndPassword(data.email, pass)
-                        .then(() => {
-                            localStorage.setItem("userName", data.name);
-                            localStorage.setItem("userID", data.id);
-                            notify("مرحباً مهندس/ة " + data.name);
-                            setTimeout(() => { window.location.href = "dashboard.html"; }, 1200);
-                        })
-                        .catch(error => notify("كلمة المرور غير صحيحة"));
+                    // التحقق من الباسورد المخزن
+                    if (data.pass === pass) {
+                        // تخزين البيانات للتناغم مع الماركت والشات
+                        localStorage.setItem("userName", data.name);
+                        localStorage.setItem("userID", data.id);
+                        
+                        notify("مرحباً مهندس/ة " + data.name);
+                        setTimeout(() => { window.location.href = "dashboard.html"; }, 1200);
+                    } else {
+                        notify("كلمة المرور غير صحيحة");
+                    }
                 } else {
                     notify("رقم الطالب غير مسجل");
                 }
@@ -286,10 +286,7 @@
         }
         else if (mode === 'verify') {
             if (userEnteredCode == savedRecoveryCode) {
-                // تحديث كلمة المرور في Auth والداتابيز
-                auth.currentUser.updatePassword(pass).then(() => {
-                    return database.ref('users/' + id).update({pass: pass});
-                }).then(() => {
+                database.ref('users/' + id).update({pass: pass}).then(() => {
                     notify("تم التحديث! سجل دخولك");
                     setTimeout(() => location.reload(), 1500);
                 }).catch(err => notify("حدث خطأ: " + err.message));
