@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المعرض العام | Shahd Al-Khaled</title>
+    <title>المعرض السريع | نبض AUST</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
@@ -17,8 +17,7 @@
 
         body { 
             background: linear-gradient(rgba(10, 10, 15, 0.7), rgba(10, 10, 15, 0.7)), url('67260.jpg') no-repeat center center fixed;
-            background-size: cover; color: white; font-family: 'Segoe UI', Tahoma, sans-serif; 
-            margin: 0; overflow-x: hidden;
+            background-size: cover; color: white; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; overflow-x: hidden;
         }
 
         .header-nav { 
@@ -34,7 +33,6 @@
             text-decoration: none; font-weight: bold; transition: 0.3s;
             display: flex; align-items: center; gap: 5px; font-size: 0.8rem;
         }
-        .btn-back:hover { background: var(--cyan-neon); color: #000; box-shadow: var(--neon-glow); }
 
         .search-container { padding: 12px 5%; display: flex; gap: 8px; flex-wrap: wrap; background: rgba(0,0,0,0.4); }
         .search-input { 
@@ -43,67 +41,51 @@
             color: white; outline: none; font-size: 0.85rem;
         }
 
-        .market-grid { 
-            display: grid; grid-template-columns: repeat(2, 1fr); 
-            gap: 12px; padding: 15px 3%; 
-        }
+        .market-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 15px 3%; }
 
         .tool-card {
-            backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid var(--glass-border);
             padding: 12px; display: flex; flex-direction: column; position: relative;
-            transition: 0.3s; min-height: 220px; overflow: hidden;
+            transition: 0.2s; min-height: 220px; background: var(--blue-glass);
         }
+        .tool-card:hover { transform: translateY(-3px); border-color: var(--cyan-neon); }
 
-        .tool-card:hover { transform: translateY(-5px); border-color: var(--cyan-neon); box-shadow: var(--neon-glow); }
-        .exchange-card { background: var(--blue-glass); }
         .sos-card { background: var(--red-glass) !important; border-color: rgba(255, 77, 77, 0.3) !important; }
 
-        .category-tag { background: rgba(255, 255, 255, 0.1); color: #fff; padding: 2px 6px; border-radius: 6px; font-size: 10px; font-weight: bold; }
+        .category-tag { background: rgba(255, 255, 255, 0.1); color: #fff; padding: 2px 6px; border-radius: 6px; font-size: 10px; }
         .post-time { font-size: 9px; color: rgba(255,255,255,0.5); margin: 8px 0; }
-        .post-owner { color: var(--cyan-neon); font-size: 10px; font-weight: bold; margin-bottom: 4px; }
+        .post-owner { color: var(--cyan-neon); font-size: 10px; font-weight: bold; }
         
         .explanation-box {
             background: rgba(0, 0, 0, 0.2); padding: 8px; border-radius: 8px;
-            margin: 8px 0; font-size: 0.75rem; color: #eee; 
-            border-right: 3px solid var(--cyan-neon); line-height: 1.3;
+            margin: 8px 0; font-size: 0.75rem; border-right: 3px solid var(--cyan-neon);
         }
 
         .contact-btn { 
-            width: 100%; margin-top: auto; padding: 10px; border: none; 
-            border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; 
-            font-size: 0.8rem; background: rgba(255, 255, 255, 0.1); color: #fff;
-            border: 1px solid rgba(255,255,255,0.1);
+            width: 100%; margin-top: auto; padding: 10px; border-radius: 12px; 
+            font-weight: bold; cursor: pointer; font-size: 0.8rem; 
+            background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid var(--glass-border);
         }
         .contact-btn:hover:not(:disabled) { background: #fff; color: #000; }
-        .contact-btn:disabled { opacity: 0.5; cursor: not-allowed; border-color: transparent; }
 
-        .admin-del-icon {
-            position: absolute; top: 10px; left: 10px; color: rgba(255,255,255,0.4);
-            cursor: pointer; font-size: 14px; z-index: 10; transition: 0.3s;
-        }
-        .admin-del-icon:hover { color: #ff4d4d; transform: scale(1.2); }
+        .admin-del-icon { position: absolute; top: 10px; left: 10px; color: rgba(255,255,255,0.3); cursor: pointer; }
 
-        @media (min-width: 768px) {
-            .market-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
-        }
+        @media (min-width: 768px) { .market-grid { grid-template-columns: repeat(4, 1fr); } }
     </style>
 </head>
 <body>
 
     <div class="header-nav">
         <h1>🌐 معرض <span style="color:var(--cyan-neon)">AUST</span></h1>
-        <a href="dashboard.html" class="btn-back"><i class="fas fa-home"></i> الرئيسية</a>
+        <a href="dashboard.html" class="btn-back">الرئيسية</a>
     </div>
 
     <div class="search-container">
-        <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث عن أداة أو زميل..." oninput="renderMarket()">
-        <select id="filterCollege" class="search-input" style="flex: 0; min-width: 110px;" onchange="renderMarket()">
+        <input type="text" id="searchInput" class="search-input" placeholder="بحث سريع..." oninput="renderMarket()">
+        <select id="filterCollege" class="search-input" style="flex:0" onchange="renderMarket()">
             <option value="all">الكل</option>
-            <option value="it">المعلوماتية</option>
-            <option value="dent">الأسنان</option>
-            <option value="pharm">الصيدلة</option>
-            <option value="arch">العمارة</option>
-            <option value="lost">🔍 مفقودات</option>
+            <option value="it">IT</option>
+            <option value="lost">مفقودات</option>
         </select>
     </div>
 
@@ -113,11 +95,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-    // بيانات المسؤول (Shahd Al-Khaled)
-    const ADMIN_NAME = "shahed mamdoh alkhald";
     const ADMIN_ID = "20241600060";
-    const ADMIN_PASS = "shjkshjk"; 
-
     const firebaseConfig = {
         apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
         authDomain: "nabd-aust.firebaseapp.com",
@@ -128,17 +106,26 @@
         appId: "1:921777725948:web:7b024d0aa101068bef9279"
     };
 
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
+    const myID = localStorage.getItem("universityID") || "";
 
-    const collegeMap = { 'it': 'IT', 'dent': 'أسنان', 'pharm': 'صيدلة', 'arch': 'عمارة', 'chemical': 'كيمياء', 'petro': 'بترول', 'trans': 'ترجمة', 'عام': 'عام' };
-    let cachedData = [];
+    // 1. استرجاع البيانات من الكاش فوراً للسرعة
+    let cachedData = JSON.parse(localStorage.getItem("market_cache") || "[]");
+    
+    // تنفيذ الرندر الأولي فوراً إذا وجد كاش
+    if(cachedData.length > 0) renderMarket();
 
+    // 2. الاستماع لقاعدة البيانات (تحديث ذكي)
     function startListening() {
         database.ref('globalMarket/').on('value', (snapshot) => {
             const data = snapshot.val();
-            // ترتيب عكسي (الأحدث أولاً)
             cachedData = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })).reverse() : [];
+            
+            // تحديث الكاش للزيارة القادمة
+            localStorage.setItem("market_cache", JSON.stringify(cachedData));
+            
+            // رندر فعلي بالبيانات الجديدة
             renderMarket();
         });
     }
@@ -147,106 +134,41 @@
         const grid = document.getElementById("marketGrid");
         const searchTerm = document.getElementById("searchInput").value.toLowerCase();
         const filterCol = document.getElementById("filterCollege").value;
-        
-        // جلب بيانات المستخدم الحالي من localStorage
-        const myID = (localStorage.getItem("universityID") || "").trim();
-        const myName = (localStorage.getItem("userName") || "").trim().toLowerCase();
-        const isSuperAdmin = (myName === ADMIN_NAME.toLowerCase().trim() && myID === ADMIN_ID.trim());
-
-        let htmlContent = "";
 
         const filtered = cachedData.filter(item => {
-            const matchesSearch = (item.name || "").toLowerCase().includes(searchTerm) || (item.owner || "").toLowerCase().includes(searchTerm);
-            let matchesCollege = (filterCol === "all") || (item.college === filterCol);
-            if (filterCol === "lost") matchesCollege = item.name.includes("مفقود") || item.name.includes("موجود");
-            return matchesSearch && matchesCollege;
+            const matchesSearch = (item.name || "").toLowerCase().includes(searchTerm);
+            const matchesCol = (filterCol === "all") || (item.college === filterCol);
+            return matchesSearch && matchesCol;
         });
 
-        if (filtered.length === 0) {
-            grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; opacity: 0.5; margin-top: 50px;">لا توجد نتائج مطابقة لبحثك.. 🕸️</p>`;
-            return;
-        }
-
-        filtered.forEach(item => {
-            const isSOS = item.isSOS === true;
-            // التحقق من الملكية عبر universityID لضمان الأمان
-            const isOwner = (item.ownerID && item.ownerID.toString().trim() === myID);
-            const cardClass = isSOS ? 'sos-card' : 'exchange-card';
-
-            htmlContent += `
-                <div class="tool-card ${cardClass}">
-                    ${(isSuperAdmin || isOwner) ? `<i class="fas fa-trash-alt admin-del-icon" title="حذف المنشور" onclick="handleDelete('${item.id}', ${isSuperAdmin}, '${item.ownerID}')"></i>` : ''}
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span class="category-tag">${collegeMap[item.college] || 'AUST'}</span>
-                    </div>
-                    <div class="post-time"><i class="far fa-clock"></i> ${item.fullTime || 'منذ قليل'}</div>
-                    <div class="post-owner">👤 ${item.owner} ${isOwner ? '(أنت)' : ''}</div>
-                    <h3 style="margin:5px 0; font-size: 0.85rem; color: #fff;">${item.name}</h3>
-                    ${item.explanation ? `<div class="explanation-box">${item.explanation}</div>` : ''}
-                    
-                    <button 
-                        onclick="goToChat('${item.owner}', '${item.ownerID}', '${item.name}')" 
-                        class="contact-btn" 
-                        ${isOwner ? 'disabled' : ''}>
-                        ${isOwner ? 'منشوري' : 'تواصل الآن'}
+        grid.innerHTML = filtered.map(item => {
+            const isOwner = (item.ownerID === myID);
+            return `
+                <div class="tool-card ${item.isSOS ? 'sos-card' : ''}">
+                    ${(myID === ADMIN_ID || isOwner) ? `<i class="fas fa-trash admin-del-icon" onclick="deleteItem('${item.id}')"></i>` : ''}
+                    <span class="category-tag">${item.college || 'AUST'}</span>
+                    <div class="post-time">${item.fullTime || ''}</div>
+                    <div class="post-owner">👤 ${item.owner}</div>
+                    <h3 style="font-size:0.9rem">${item.name}</h3>
+                    <div class="explanation-box">${item.explanation || ''}</div>
+                    <button onclick="goToChat('${item.owner}', '${item.ownerID}', '${item.name}')" 
+                            class="contact-btn" ${isOwner ? 'disabled' : ''}>
+                        ${isOwner ? 'منشوري' : 'تواصل'}
                     </button>
-                </div>`;
-        });
-        grid.innerHTML = htmlContent;
+                </div>
+            `;
+        }).join('');
     }
 
-    function handleDelete(itemId, isGlobalAdmin, postOwnerID) {
-        const myID = (localStorage.getItem("universityID") || "").trim();
-        if (!isGlobalAdmin && myID !== postOwnerID) return;
-
-        Swal.fire({
-            title: isGlobalAdmin ? 'حذف بصفتك مسؤول؟' : 'حذف المنشور؟',
-            text: "لا يمكن التراجع عن هذه الخطوة!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ff4d4d',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'نعم، احذف',
-            cancelButtonText: 'إلغاء',
-            background: '#0a0a0f',
-            color: '#fff'
-        }).then(res => {
-            if(res.isConfirmed) {
-                if (isGlobalAdmin && myID !== postOwnerID) {
-                    // طلب كلمة مرور المسؤول إذا لم يكن هو صاحب المنشور
-                    Swal.fire({ 
-                        title: 'كلمة مرور المسؤول', 
-                        input: 'password', 
-                        background: '#0a0a0f', 
-                        color: '#fff',
-                        inputPlaceholder: 'أدخل رمز الحماية'
-                    }).then(p => {
-                        if(p.value === ADMIN_PASS) {
-                            database.ref('globalMarket/' + itemId).remove();
-                            Swal.fire('تم!', 'تم الحذف بنجاح.', 'success');
-                        } else if (p.value !== undefined) {
-                            Swal.fire('خطأ', 'كلمة المرور غير صحيحة', 'error');
-                        }
-                    });
-                } else {
-                    database.ref('globalMarket/' + itemId).remove();
-                }
-            }
+    function deleteItem(id) {
+        Swal.fire({ title: 'حذف؟', icon: 'warning', showCancelButton: true }).then(r => {
+            if(r.isConfirmed) database.ref('globalMarket/' + id).remove();
         });
     }
 
-    function goToChat(ownerName, ownerID, itemName) {
-        const myID = (localStorage.getItem("universityID") || "").trim();
-        const myName = (localStorage.getItem("userName") || "").trim();
-
-        // قفل أمان إضافي لمنع مراسلة النفس
-        if (ownerID && ownerID.toString().trim() === myID) {
-            Swal.fire({ text: 'هذا منشورك الخاص!', icon: 'info', background: '#0a0a0f', color: '#fff', timer: 1500, showConfirmButton: false });
-            return;
-        }
-
-        // التوجه للشات مع تمرير البيانات المطلوبة للربط مع البروفايل
-        window.location.href = `chat.html?to=${encodeURIComponent(ownerName)}&toID=${ownerID}&item=${encodeURIComponent(itemName)}`;
+    function goToChat(name, id, item) {
+        if (id === myID) return;
+        window.location.href = `chat.html?to=${encodeURIComponent(name)}&toID=${id}&item=${encodeURIComponent(item)}`;
     }
 
     window.onload = startListening;
