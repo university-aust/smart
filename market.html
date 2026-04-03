@@ -9,14 +9,14 @@
     <style>
         :root { 
             --cyan-neon: #00e5ff; 
-            --cyan-glow: rgba(0, 229, 255, 0.15);
+            --cyan-glow: rgba(0, 229, 255, 0.3);
             --red: #ff4d4d; 
-            --red-glow: rgba(255, 77, 77, 0.15);
+            --red-glow: rgba(255, 77, 77, 0.5);
             --deep-dark: rgba(10, 11, 18, 0.85); 
         }
 
         body { 
-            background: linear-gradient(rgba(5, 5, 10, 0.9), rgba(5, 5, 10, 0.9)), url('67260.jpg') no-repeat center center fixed;
+            background: linear-gradient(rgba(10, 10, 15, 0.85), rgba(10, 10, 15, 0.85)), url('67260.jpg') no-repeat center center fixed;
             background-size: cover;
             color: white; 
             font-family: 'Segoe UI', Tahoma, sans-serif; 
@@ -27,98 +27,82 @@
         .header-nav { 
             display: flex; justify-content: space-between; align-items: center; 
             padding: 15px 5%; background: rgba(0, 0, 0, 0.7); 
-            border-bottom: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--cyan-glow); backdrop-filter: blur(15px);
             position: sticky; top: 0; z-index: 1000;
         }
         
-        .header-nav h1 { font-size: clamp(16px, 4vw, 24px); color: #fff; margin: 0; }
+        .header-nav h1 { font-size: clamp(16px, 4vw, 24px); color: white; margin: 0; }
 
         .btn-back { 
-            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--cyan-neon); 
-            color: var(--cyan-neon); padding: 6px 15px; border-radius: 10px; 
+            background: rgba(0, 229, 255, 0.1); border: 1px solid var(--cyan-neon); 
+            color: var(--cyan-neon); padding: 8px 15px; border-radius: 12px; 
             text-decoration: none; font-weight: bold; transition: 0.3s;
-            display: flex; align-items: center; gap: 5px; font-size: 0.8rem;
+            display: flex; align-items: center; gap: 5px; font-size: 0.85rem;
         }
 
-        .search-container { padding: 12px 5%; display: flex; gap: 8px; flex-wrap: wrap; background: rgba(0,0,0,0.4); }
+        .search-container { padding: 15px 5%; display: flex; gap: 10px; flex-wrap: wrap; background: rgba(0,0,0,0.4); }
         .search-input { 
-            flex: 1; min-width: 120px; padding: 10px; border-radius: 10px; 
-            border: 1px solid rgba(255,255,255,0.1); background: rgba(0, 0, 0, 0.5); 
-            color: white; outline: none; font-size: 0.85rem;
+            flex: 1; min-width: 150px; padding: 12px; border-radius: 12px; 
+            border: 1px solid var(--cyan-glow); background: rgba(255, 255, 255, 0.05); 
+            color: white; outline: none; font-size: 0.9rem;
         }
 
-        /* نظام الشبكة: حاويتان في الموبايل */
         .market-grid { 
             display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 12px; padding: 15px 3%; 
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); 
+            gap: 15px; padding: 20px 5%; 
         }
 
-        /* الحاوية الزجاجية (للتبادل والمصادر) */
         .tool-card {
-            background: var(--cyan-glow); 
-            backdrop-filter: blur(12px);
-            padding: 12px; border-radius: 18px;
-            border: 1px solid rgba(0, 229, 255, 0.2); 
-            position: relative; 
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s;
-            display: flex; flex-direction: column; min-height: 200px;
+            background: var(--deep-dark); padding: 15px; border-radius: 20px;
+            border: 1px solid rgba(0, 229, 255, 0.15); position: relative; 
+            transition: 0.3s ease; backdrop-filter: blur(10px); 
+            display: flex; flex-direction: column; min-height: 240px;
         }
 
-        /* تأثير الارتفاع عند الضغط أو اللمس */
-        .tool-card:active {
-            transform: translateY(-10px) scale(1.02);
-            z-index: 5;
-        }
-
-        /* حاوية الرادار الزجاجية الحمراء */
         .sos-card { 
-            border: 1.5px solid rgba(255, 77, 77, 0.4) !important; 
-            background: var(--red-glow) !important; 
+            border: 1.5px solid var(--red) !important; 
+            background: rgba(255, 77, 77, 0.05) !important; 
+            box-shadow: 0 0 15px rgba(255, 77, 77, 0.2);
         }
 
-        .category-tag { background: rgba(255,255,255,0.1); color: var(--cyan-neon); padding: 2px 6px; border-radius: 6px; font-size: 8px; font-weight: bold; border: 1px solid rgba(0,229,255,0.2); }
-        .post-time { font-size: 9px; color: #888; margin: 8px 0; display: flex; align-items: center; gap: 4px; }
+        .category-tag { background: var(--cyan-neon); color: black; padding: 3px 8px; border-radius: 8px; font-size: 9px; font-weight: bold; }
+        .post-time { font-size: 10px; color: #aaa; margin: 8px 0; display: flex; align-items: center; gap: 5px; }
         
         .explanation-box {
-            background: rgba(0, 0, 0, 0.2); padding: 8px; border-radius: 8px;
-            margin-bottom: 10px; font-size: 0.75rem; color: #ddd; 
-            border-right: 3px solid var(--red); line-height: 1.3;
+            background: rgba(255, 255, 255, 0.03); padding: 10px; border-radius: 10px;
+            margin: 10px 0; font-size: 0.8rem; color: #e0e0e0; 
+            border-right: 3px solid var(--cyan-neon); line-height: 1.4;
         }
 
         .contact-btn { 
-            width: 100%; margin-top: auto; padding: 10px; border: none; 
-            border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; 
-            font-size: 0.8rem; background: rgba(255,255,255,0.05); color: #fff;
-            border: 1px solid rgba(255,255,255,0.1);
+            width: 100%; margin-top: auto; padding: 12px; border: none; 
+            border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; 
+            font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        .contact-btn:hover { background: var(--cyan-neon); color: #000; }
 
-        .admin-del-icon {
-            position: absolute; top: 10px; left: 10px; color: #666;
-            cursor: pointer; font-size: 14px; z-index: 10; transition: 0.3s;
-        }
-        .admin-del-icon:hover { color: var(--red); }
+        .contact-btn:hover { transform: scale(1.03); filter: brightness(1.1); }
 
         @media (min-width: 768px) {
-            .market-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
-            .tool-card { padding: 20px; min-height: 240px; }
+            .market-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
         }
     </style>
 </head>
 <body>
 
     <div class="header-nav">
-        <h1>🌐 معرض <span style="color:var(--cyan-neon)">AUST</span></h1>
-        <a href="dashboard.html" class="btn-back">رجوع</a>
+        <h1>🌐 معرض <span style="color:var(--cyan-neon)">AUST</span> الذكي</h1>
+        <a href="dashboard.html" class="btn-back"><i class="fas fa-arrow-right"></i> لوحة التحكم</a>
     </div>
 
     <div class="search-container">
-        <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث..." oninput="renderMarket()">
-        <select id="filterCollege" class="search-input" style="flex: 0; min-width: 100px;" onchange="renderMarket()">
-            <option value="all">الكل</option>
-            <option value="it">IT</option>
-            <option value="lost">مفقودات</option>
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث عن مادة أو غرض أو طالب..." oninput="renderMarket()">
+        <select id="filterCollege" class="search-input" style="flex: 0; min-width: 130px;" onchange="renderMarket()">
+            <option value="all">كل الأقسام</option>
+            <option value="it">المعلوماتية</option>
+            <option value="dent">طب الأسنان</option>
+            <option value="pharm">الصيدلة</option>
+            <option value="lost">🔍 مفقودات</option>
         </select>
     </div>
 
@@ -137,13 +121,19 @@
 
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
+    const auth = firebase.auth();
+
+    const collegeMap = { 'it': 'هندسة معلوماتية', 'dent': 'طب أسنان', 'pharm': 'كلية صيدلة', 'arch': 'عمارة', 'chemical': 'كيمياء', 'petro': 'بترول', 'trans': 'ترجمة', 'عام': 'عام' };
 
     let cachedData = [];
 
-    // تحديث الأمان: الاستماع للبيانات فقط بعد التأكد من الهوية
-    firebase.auth().onAuthStateChanged((user) => {
-        if (user) { startListening(); } 
-        else { window.location.href = "login.html"; }
+    // مراقبة تسجيل الدخول لضمان عمل الأزرار
+    auth.onAuthStateChanged((user) => {
+        if (!user) {
+            window.location.href = "login.html"; // حماية الصفحة
+        } else {
+            startListening();
+        }
     });
 
     function startListening() {
@@ -157,61 +147,75 @@
     function renderMarket() {
         const grid = document.getElementById("marketGrid");
         const searchTerm = document.getElementById("searchInput").value.toLowerCase();
-        const myName = (localStorage.getItem("userName") || "").trim().toLowerCase();
-        const myID = (localStorage.getItem("userID") || "").trim(); 
-        const isSuperAdmin = (myName === ADMIN_NAME && myID === ADMIN_ID);
+        const filterCol = document.getElementById("filterCollege").value;
+        const myName = (localStorage.getItem("userName") || "").trim();
 
         let htmlContent = "";
 
         const filtered = cachedData.filter(item => {
-            if (!item || !item.name) return false;
-            return item.name.toLowerCase().includes(searchTerm) || (item.owner || "").toLowerCase().includes(searchTerm);
+            const matchesSearch = (item.name || "").toLowerCase().includes(searchTerm) || (item.owner || "").toLowerCase().includes(searchTerm);
+            let matchesCollege = (filterCol === "all") || (item.college === filterCol);
+            if (filterCol === "lost") matchesCollege = item.name.includes("مفقود") || item.name.includes("موجود");
+            return matchesSearch && matchesCollege;
         });
+
+        if (filtered.length === 0) {
+            grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; opacity: 0.5;">لا توجد منشورات حالياً.. 🕸️</p>`;
+            return;
+        }
 
         filtered.forEach(item => {
             const isSOS = item.isSOS === true;
-            const itemOwner = (item.owner || "").trim().toLowerCase();
-            const isOwner = (itemOwner === myName);
-            const cardClass = isSOS ? 'sos-card' : 'exchange-card';
-
+            const isOwner = (item.owner === myName);
+            
             htmlContent += `
-                <div class="tool-card ${cardClass}">
-                    ${(isSuperAdmin || isOwner) ? `<i class="fas fa-trash-alt admin-del-icon" onclick="handleDelete('${item.id}', ${isSuperAdmin})"></i>` : ''}
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span class="category-tag">${item.college || 'AUST'}</span>
+                <div class="tool-card ${isSOS ? 'sos-card' : ''}">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span class="category-tag">${collegeMap[item.college] || 'AUST'}</span>
+                        ${isSOS ? '🆘' : ''}
                     </div>
                     <div class="post-time"><i class="far fa-clock"></i> ${item.fullTime || 'الآن'}</div>
-                    <div style="color:var(--cyan-neon); font-size:10px; font-weight:bold;">👤 ${item.owner}</div>
-                    <h3 style="margin:5px 0; font-size: 0.85rem; color: #fff;">${item.name}</h3>
-                    
-                    ${isSOS && item.explanation ? `<div class="explanation-box">${item.explanation}</div>` : ''}
-                    
-                    <button onclick="goToChat('${item.owner}', '${item.name}')" class="contact-btn">
-                        تواصل
+                    <div style="color:var(--cyan-neon); font-size:11px; font-weight:bold;">👤 ${item.owner}</div>
+                    <h3 style="margin:8px 0; font-size: 1rem;">${item.name}</h3>
+                    <div class="explanation-box" style="border-right-color: ${isSOS ? 'var(--red)' : 'var(--cyan-neon)'}">
+                        ${item.explanation || 'لا يوجد وصف إضافي..'}
+                    </div>
+                    <button onclick="goToChat('${item.owner}', '${item.name}')" 
+                            class="contact-btn" 
+                            style="background:${isSOS ? 'var(--red)' : 'var(--cyan-neon)'}; color:${isSOS ? 'white' : 'black'};"
+                            ${isOwner ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
+                        <i class="fas fa-comments"></i> ${isOwner ? 'منشورك الشخصي' : 'تواصل الآن'}
                     </button>
                 </div>`;
         });
-        grid.innerHTML = htmlContent || `<p style="grid-column: 1/-1; text-align:center; opacity:0.5;">لا يوجد نتائج</p>`;
-    }
-
-    function handleDelete(itemId, isGlobalAdmin) {
-        if (isGlobalAdmin) {
-            Swal.fire({ title: 'تأكيد الحذف (شهد)', input: 'password', showCancelButton: true, confirmButtonColor: '#ff4d4d', background: '#0a0a0f', color: '#fff' })
-            .then(res => { if(res.value === ADMIN_PASS) database.ref('globalMarket/' + itemId).remove(); });
-        } else {
-            Swal.fire({ title: 'حذف المنشور؟', icon: 'warning', showCancelButton: true, background: '#0a0a0f', color: '#fff' })
-            .then(res => { if(res.isConfirmed) database.ref('globalMarket/' + itemId).remove(); });
-        }
+        grid.innerHTML = htmlContent;
     }
 
     function goToChat(owner, itemName) {
-        if (owner === localStorage.getItem("userName")) {
-            Swal.fire({ title: 'هذا منشورك!', icon: 'info', background: '#0a0a0f', color: '#fff' });
+        const myName = localStorage.getItem("userName");
+        if (!myName || owner === myName) {
+            Swal.fire('تنبيه', 'لا يمكنك مراسلة نفسك!', 'info');
             return;
         }
+        // التحويل لصفحة الشات مع تمرير البيانات في الرابط
         window.location.href = `chat.html?to=${encodeURIComponent(owner)}&item=${encodeURIComponent(itemName)}`;
+    }
+
+    // حذف المنشورات (للمالك أو الأدمن شهد)
+    function handleDelete(itemId) {
+        Swal.fire({
+            title: 'هل أنت متأكد؟',
+            text: "سيتم حذف المنشور نهائياً",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ff4d4d',
+            confirmButtonText: 'نعم، احذف'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                database.ref('globalMarket/' + itemId).remove();
+            }
+        });
     }
 </script>
 </body>
-</html>
 </html>
