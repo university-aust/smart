@@ -9,106 +9,110 @@
     <style>
         :root { 
             --cyan-neon: #00e5ff; 
-            --blue-glass: rgba(0, 40, 80, 0.7); 
-            --red-glass: rgba(139, 0, 0, 0.6); 
-            --glass-border: rgba(255, 255, 255, 0.15);
-            --neon-glow: 0 0 15px rgba(0, 229, 255, 0.3);
+            --blue-glass: rgba(15, 23, 42, 0.85); 
+            --red-glass: rgba(69, 10, 10, 0.85); 
+            --glass-border: rgba(0, 229, 255, 0.2);
         }
 
         body { 
-            background: #0a0a0f url('67260.jpg') no-repeat center center fixed;
+            /* خلفية داكنة جداً مع صورة خافتة */
+            background: linear-gradient(rgba(5, 7, 10, 0.9), rgba(5, 7, 10, 0.9)), url('67260.jpg') no-repeat center center fixed;
             background-size: cover;
             color: white; 
             font-family: 'Segoe UI', Tahoma, sans-serif; 
             margin: 0; 
+            min-height: 100vh;
         }
 
         .header-nav { 
             display: flex; justify-content: space-between; align-items: center; 
-            padding: 10px 4%; background: rgba(0, 0, 0, 0.85); 
+            padding: 12px 5%; background: rgba(0, 0, 0, 0.9); 
             border-bottom: 1px solid var(--cyan-neon); backdrop-filter: blur(10px);
             position: sticky; top: 0; z-index: 1000;
         }
 
         .btn-back { 
             color: var(--cyan-neon); text-decoration: none; font-weight: bold; 
-            font-size: 0.8rem; border: 1px solid var(--cyan-neon);
-            padding: 5px 12px; border-radius: 8px;
+            font-size: 0.85rem; border: 1px solid var(--cyan-neon);
+            padding: 6px 14px; border-radius: 10px; transition: 0.3s;
         }
+        .btn-back:hover { background: var(--cyan-neon); color: black; }
 
-        .search-container { padding: 10px 3%; display: flex; gap: 5px; background: rgba(0,0,0,0.5); }
+        .search-container { padding: 12px 3%; display: flex; gap: 8px; background: rgba(0,0,0,0.6); border-bottom: 1px solid rgba(255,255,255,0.05); }
         .search-input { 
-            flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--glass-border);
-            background: rgba(255,255,255,0.1); color: white; font-size: 0.8rem; outline: none;
+            flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border);
+            background: rgba(255,255,255,0.05); color: white; font-size: 0.85rem; outline: none;
         }
 
-        /* تعديل الشبكة لتصبح زوجية على الموبايل */
+        /* التصميم الزوجي للموبايل */
         .market-grid { 
             display: grid; 
-            grid-template-columns: repeat(2, 1fr); /* كرتين دائماً */
-            gap: 10px; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 12px; 
             padding: 15px 10px; 
         }
 
         .tool-card {
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
             border: 1px solid var(--glass-border);
-            padding: 10px;
+            padding: 12px;
             display: flex; flex-direction: column;
             position: relative;
-            min-height: 200px; /* تقليل الطول ليناسب الشاشات الصغيرة */
-            transition: 0.3s;
+            min-height: 220px;
+            transition: transform 0.3s ease;
         }
+        .tool-card:active { transform: scale(0.97); }
 
         .exchange-card { background: var(--blue-glass); }
         .sos-card { background: var(--red-glass); border-color: #ff4d4d; }
 
-        .category-tag { font-size: 9px; color: var(--cyan-neon); font-weight: bold; margin-bottom: 5px; display: block; }
-        .post-owner { font-size: 10px; color: #ddd; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .category-tag { font-size: 10px; color: var(--cyan-neon); font-weight: bold; margin-bottom: 6px; }
+        .post-owner { font-size: 11px; color: #aaa; margin-bottom: 4px; }
         
-        /* تصغير العنوان ليناسب الكرتين */
-        h3 { font-size: 0.85rem; margin: 5px 0; line-height: 1.2; height: 32px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        h3 { font-size: 0.9rem; margin: 6px 0; color: #fff; line-height: 1.3; font-weight: 600; }
 
         .explanation-box {
-            background: rgba(0, 0, 0, 0.3); padding: 5px; border-radius: 5px;
-            font-size: 0.7rem; color: #ccc; margin-bottom: 8px;
-            max-height: 45px; overflow: hidden;
+            background: rgba(0, 0, 0, 0.4); padding: 8px; border-radius: 10px;
+            font-size: 0.75rem; color: #ddd; margin-bottom: 10px;
+            border-right: 3px solid var(--cyan-neon);
+            overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
         }
+        .sos-card .explanation-box { border-right-color: #ff4d4d; }
 
         .contact-btn { 
-            width: 100%; margin-top: auto; padding: 8px; border: none; 
-            border-radius: 10px; font-weight: bold; font-size: 0.75rem;
-            background: var(--cyan-neon); color: #000;
+            width: 100%; margin-top: auto; padding: 10px; border: none; 
+            border-radius: 12px; font-weight: bold; font-size: 0.8rem;
+            background: var(--cyan-neon); color: #000; transition: 0.3s;
         }
 
         .admin-del-icon {
-            position: absolute; top: 8px; left: 8px; color: rgba(255,255,255,0.6);
-            font-size: 14px; z-index: 5;
+            position: absolute; top: 10px; left: 10px; color: rgba(255,255,255,0.4);
+            font-size: 16px; padding: 5px; cursor: pointer; transition: 0.3s;
         }
+        .admin-del-icon:hover { color: #ff4d4d; transform: scale(1.2); }
 
-        /* للأجهزة الكبيرة (كمبيوتر) نرجعها 4 كروت */
         @media (min-width: 768px) {
             .market-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; padding: 30px 5%; }
-            .tool-card { min-height: 250px; padding: 15px; }
-            h3 { font-size: 1rem; }
+            h3 { font-size: 1.1rem; }
         }
     </style>
 </head>
 <body>
 
     <div class="header-nav">
-        <h1 style="font-size: 1.1rem;">معرض <span style="color:var(--cyan-neon)">Smart Pulse</span></h1>
+        <h1 style="font-size: 1.2rem;">معرض <span style="color:var(--cyan-neon)">Smart Pulse</span></h1>
         <a href="dashboard.html" class="btn-back">الرئيسية</a>
     </div>
 
     <div class="search-container">
-        <input type="text" id="searchInput" class="search-input" placeholder="بحث..." oninput="renderMarket()">
-        <select id="filterCollege" class="search-input" style="flex: 0; min-width: 100px;" onchange="renderMarket()">
+        <input type="text" id="searchInput" class="search-input" placeholder="بحث عن مادة أو طالب..." oninput="renderMarket()">
+        <select id="filterCollege" class="search-input" style="flex: 0; min-width: 110px;" onchange="renderMarket()">
             <option value="all">الكل</option>
             <option value="it">IT</option>
             <option value="dent">أسنان</option>
             <option value="pharm">صيدلة</option>
+            <option value="arch">عمارة</option>
             <option value="lost">مفقودات</option>
         </select>
     </div>
@@ -160,43 +164,72 @@
         let htmlContent = "";
 
         const filtered = cachedData.filter(item => {
-            const matchesSearch = item.name.toLowerCase().includes(searchTerm) || (item.owner || "").toLowerCase().includes(searchTerm);
+            const nameMatch = (item.name || "").toLowerCase().includes(searchTerm);
+            const ownerMatch = (item.owner || "").toLowerCase().includes(searchTerm);
             let matchesCollege = (filterCol === "all") || (item.college === filterCol);
             if (filterCol === "lost") matchesCollege = item.name.includes("مفقود") || item.name.includes("موجود");
-            return matchesSearch && matchesCollege;
+            return (nameMatch || ownerMatch) && matchesCollege;
         });
 
         filtered.forEach(item => {
             const isSOS = item.isSOS === true;
-            const postOwnerID = (item.ownerID || ""); 
-            const isOwner = (postOwnerID === currentUserID);
+            // التحقق من الملكية عبر ID الطالب
+            const isOwner = (item.ownerID === currentUserID);
             const cardClass = isSOS ? 'sos-card' : 'exchange-card';
 
             htmlContent += `
                 <div class="tool-card ${cardClass}">
                     ${(isSuperAdmin || isOwner) ? `<i class="fas fa-trash-alt admin-del-icon" onclick="handleDelete('${item.id}', ${isSuperAdmin})"></i>` : ''}
                     <span class="category-tag">${collegeMap[item.college] || 'AUST'}</span>
-                    <div class="post-owner">👤 ${item.owner}</div>
+                    <div class="post-owner">👤 ${item.owner || 'مجهول'}</div>
                     <h3>${item.name}</h3>
                     ${item.explanation ? `<div class="explanation-box">${item.explanation}</div>` : ''}
-                    <button onclick="goToChat('${item.owner}', '${item.name}', '${postOwnerID}')" class="contact-btn">مراسلة</button>
+                    <button onclick="goToChat('${item.owner}', '${item.name}', '${item.ownerID}')" class="contact-btn">مراسلة</button>
                 </div>`;
         });
-        grid.innerHTML = htmlContent || `<p style="grid-column: 1/-1; text-align:center;">لا توجد منشورات</p>`;
+        grid.innerHTML = htmlContent || `<p style="grid-column: 1/-1; text-align:center; padding:50px; opacity:0.5;">لا يوجد نتائج حالياً</p>`;
     }
 
     function handleDelete(itemId, isGlobalAdmin) {
         if (isGlobalAdmin) {
-            Swal.fire({ title: 'كلمة مرور المسؤول', input: 'password', background: '#0a0a0f', color: '#fff' })
-            .then(res => { if(res.value === ADMIN_PASS) database.ref('globalMarket/' + itemId).remove(); });
+            Swal.fire({ 
+                title: 'حذف المسؤول', 
+                text: 'أدخل الرمز للتأكيد:',
+                input: 'password', 
+                background: '#0a0a0f', 
+                color: '#fff',
+                confirmButtonColor: '#ff4d4d'
+            }).then(res => { 
+                if(res.value === ADMIN_PASS) {
+                    database.ref('globalMarket/' + itemId).remove();
+                    Swal.fire('تم الحذف', '', 'success');
+                } else if(res.value) {
+                    Swal.fire('خطأ', 'الرمز غير صحيح', 'error');
+                }
+            });
         } else {
-            Swal.fire({ title: 'حذف المنشور؟', icon: 'warning', showCancelButton: true })
-            .then(res => { if(res.isConfirmed) database.ref('globalMarket/' + itemId).remove(); });
+            Swal.fire({ 
+                title: 'هل تريد حذف منشورك؟', 
+                icon: 'warning', 
+                showCancelButton: true,
+                background: '#0a0a0f',
+                color: '#fff',
+                confirmButtonText: 'نعم، احذف',
+                cancelButtonText: 'إلغاء'
+            }).then(res => { 
+                if(res.isConfirmed) {
+                    database.ref('globalMarket/' + itemId).remove();
+                }
+            });
         }
     }
 
     function goToChat(ownerName, itemName, ownerID) {
-        if (ownerID === localStorage.getItem("universityID")) return;
+        const myID = localStorage.getItem("universityID");
+        if (ownerID === myID) {
+            Swal.fire({ text: 'هذا منشورك!', icon: 'info', timer: 1000, showConfirmButton: false });
+            return;
+        }
         window.location.href = `chat.html?to=${encodeURIComponent(ownerName)}&item=${encodeURIComponent(itemName)}&toID=${ownerID}`;
     }
 
