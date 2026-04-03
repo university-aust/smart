@@ -17,11 +17,8 @@
 
         body { 
             background: linear-gradient(rgba(10, 10, 15, 0.7), rgba(10, 10, 15, 0.7)), url('67260.jpg') no-repeat center center fixed;
-            background-size: cover;
-            color: white; 
-            font-family: 'Segoe UI', Tahoma, sans-serif; 
-            margin: 0; 
-            overflow-x: hidden;
+            background-size: cover; color: white; font-family: 'Segoe UI', Tahoma, sans-serif; 
+            margin: 0; overflow-x: hidden;
         }
 
         .header-nav { 
@@ -47,30 +44,21 @@
         }
 
         .market-grid { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
+            display: grid; grid-template-columns: repeat(2, 1fr); 
             gap: 12px; padding: 15px 3%; 
         }
 
         .tool-card {
-            backdrop-filter: blur(15px) saturate(150%);
-            -webkit-backdrop-filter: blur(15px) saturate(150%);
-            border-radius: 20px;
-            border: 1px solid var(--glass-border);
-            padding: 12px;
-            display: flex; flex-direction: column;
-            position: relative;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            min-height: 220px;
-            overflow: hidden;
+            backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid var(--glass-border);
+            padding: 12px; display: flex; flex-direction: column; position: relative;
+            transition: 0.3s; min-height: 220px; overflow: hidden;
         }
 
         .tool-card:hover { transform: translateY(-5px); border-color: var(--cyan-neon); box-shadow: var(--neon-glow); }
-
         .exchange-card { background: var(--blue-glass); }
         .sos-card { background: var(--red-glass) !important; border-color: rgba(255, 77, 77, 0.3) !important; }
 
-        .category-tag { background: rgba(255, 255, 255, 0.1); color: #fff; padding: 2px 6px; border-radius: 6px; font-size: 8px; font-weight: bold; }
+        .category-tag { background: rgba(255, 255, 255, 0.1); color: #fff; padding: 2px 6px; border-radius: 6px; font-size: 10px; font-weight: bold; }
         .post-time { font-size: 9px; color: rgba(255,255,255,0.5); margin: 8px 0; }
         .post-owner { color: var(--cyan-neon); font-size: 10px; font-weight: bold; margin-bottom: 4px; }
         
@@ -86,7 +74,8 @@
             font-size: 0.8rem; background: rgba(255, 255, 255, 0.1); color: #fff;
             border: 1px solid rgba(255,255,255,0.1);
         }
-        .contact-btn:hover { background: #fff; color: #000; }
+        .contact-btn:hover:not(:disabled) { background: #fff; color: #000; }
+        .contact-btn:disabled { opacity: 0.5; cursor: not-allowed; border-color: transparent; }
 
         .admin-del-icon {
             position: absolute; top: 10px; left: 10px; color: rgba(255,255,255,0.4);
@@ -96,7 +85,6 @@
 
         @media (min-width: 768px) {
             .market-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
-            .tool-card { padding: 20px; }
         }
     </style>
 </head>
@@ -143,21 +131,13 @@
     const database = firebase.database();
 
     const collegeMap = { 'it': 'IT', 'dent': 'أسنان', 'pharm': 'صيدلة', 'arch': 'عمارة', 'chemical': 'كيمياء', 'petro': 'بترول', 'trans': 'ترجمة', 'عام': 'عام' };
-
     let cachedData = [];
-
-    // التخزين المؤقت للسرعة
-    const localSaved = localStorage.getItem("marketCache");
-    if (localSaved) {
-        cachedData = JSON.parse(localSaved);
-        setTimeout(renderMarket, 50); 
-    }
 
     function startListening() {
         database.ref('globalMarket/').on('value', (snapshot) => {
             const data = snapshot.val();
+            // ترتيب عكسي لجعل الأحدث فوق
             cachedData = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })).reverse() : [];
-            localStorage.setItem("marketCache", JSON.stringify(cachedData));
             renderMarket();
         });
     }
@@ -167,29 +147,29 @@
         const searchTerm = document.getElementById("searchInput").value.toLowerCase();
         const filterCol = document.getElementById("filterCollege").value;
         
-        const currentUserID = (localStorage.getItem("userID") || "").trim(); 
-        const currentUserName = (localStorage.getItem("userName") || "").trim().toLowerCase();
-        const isSuperAdmin = (currentUserName === ADMIN_NAME.toLowerCase().trim() && currentUserID === ADMIN_ID.trim());
+        // استخدام المفتاح الموحد universityID
+        const myID = (localStorage.getItem("universityID") || "").trim();
+        const myName = (localStorage.getItem("userName") || "").trim().toLowerCase();
+        const isSuperAdmin = (myName === ADMIN_NAME.toLowerCase().trim() && myID === ADMIN_ID.trim());
 
         let htmlContent = "";
 
         const filtered = cachedData.filter(item => {
-            if (!item || !item.name) return false;
-            const matchesSearch = item.name.toLowerCase().includes(searchTerm) || (item.owner || "").toLowerCase().includes(searchTerm);
+            const matchesSearch = (item.name || "").toLowerCase().includes(searchTerm) || (item.owner || "").toLowerCase().includes(searchTerm);
             let matchesCollege = (filterCol === "all") || (item.college === filterCol);
             if (filterCol === "lost") matchesCollege = item.name.includes("مفقود") || item.name.includes("موجود");
             return matchesSearch && matchesCollege;
         });
 
-        if (filtered.length === 0 && cachedData.length > 0) {
-            grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; opacity: 0.5;">لا يوجد نتائج.. 🕸️</p>`;
+        if (filtered.length === 0) {
+            grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; opacity: 0.5;">لا يوجد إعلانات حالياً.. 🕸️</p>`;
             return;
         }
 
         filtered.forEach(item => {
             const isSOS = item.isSOS === true;
-            // التحقق من الملكية عبر الرقم الجامعي (أدق)
-            const isOwner = (item.ownerID && item.ownerID.trim() === currentUserID);
+            // التحقق من الملكية لمنع مراسلة النفس وللسماح بالحذف
+            const isOwner = (item.ownerID && item.ownerID.toString().trim() === myID);
             const cardClass = isSOS ? 'sos-card' : 'exchange-card';
 
             htmlContent += `
@@ -199,12 +179,15 @@
                         <span class="category-tag">${collegeMap[item.college] || 'AUST'}</span>
                     </div>
                     <div class="post-time"><i class="far fa-clock"></i> ${item.fullTime || 'الآن'}</div>
-                    <div class="post-owner">👤 ${item.owner}</div>
+                    <div class="post-owner">👤 ${item.owner} ${isOwner ? '(أنت)' : ''}</div>
                     <h3 style="margin:5px 0; font-size: 0.85rem; color: #fff;">${item.name}</h3>
                     ${item.explanation ? `<div class="explanation-box">${item.explanation}</div>` : ''}
                     
-                    <button onclick="goToChat('${item.owner}', '${item.ownerID}', '${item.name}')" class="contact-btn">
-                        تواصل
+                    <button 
+                        onclick="goToChat('${item.owner}', '${item.ownerID}', '${item.name}')" 
+                        class="contact-btn" 
+                        ${isOwner ? 'disabled' : ''}>
+                        ${isOwner ? 'منشوري' : 'تواصل الآن'}
                     </button>
                 </div>`;
         });
@@ -212,33 +195,42 @@
     }
 
     function handleDelete(itemId, isGlobalAdmin, postOwnerID) {
-        const currentUserID = (localStorage.getItem("userID") || "").trim();
-        if (!isGlobalAdmin && currentUserID !== postOwnerID) return;
+        const myID = (localStorage.getItem("universityID") || "").trim();
+        if (!isGlobalAdmin && myID !== postOwnerID) return;
 
-        const confirmAndDel = () => database.ref('globalMarket/' + itemId).remove();
-
-        if (isGlobalAdmin) {
-            Swal.fire({ title: 'حذف بصفتك مسؤول', input: 'password', showCancelButton: true, confirmButtonColor: '#ff4d4d', background: '#0a0a0f', color: '#fff' })
-            .then(res => { if(res.value === ADMIN_PASS) confirmAndDel(); });
-        } else {
-            Swal.fire({ title: 'حذف المنشور؟', icon: 'warning', showCancelButton: true, background: '#0a0a0f', color: '#fff' })
-            .then(res => { if(res.isConfirmed) confirmAndDel(); });
-        }
+        Swal.fire({
+            title: isGlobalAdmin ? 'حذف بصفتك مسؤول؟' : 'حذف المنشور؟',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ff4d4d',
+            confirmButtonText: 'نعم، احذف',
+            background: '#0a0a0f',
+            color: '#fff'
+        }).then(res => {
+            if(res.isConfirmed) {
+                if (isGlobalAdmin) {
+                    Swal.fire({ title: 'كلمة مرور المسؤول', input: 'password', background: '#0a0a0f', color: '#fff' }).then(p => {
+                        if(p.value === ADMIN_PASS) database.ref('globalMarket/' + itemId).remove();
+                        else Swal.fire('خطأ', 'كلمة المرور غير صحيحة', 'error');
+                    });
+                } else {
+                    database.ref('globalMarket/' + itemId).remove();
+                }
+            }
+        });
     }
 
     function goToChat(ownerName, ownerID, itemName) {
-        const currentUserID = (localStorage.getItem("userID") || "").trim();
+        const myID = (localStorage.getItem("universityID") || "").trim();
+        const myName = (localStorage.getItem("userName") || "").trim();
 
-        if (ownerID === currentUserID) {
-            Swal.fire({ text: 'هذا منشورك الخاص', icon: 'info', background: '#0a0a0f', color: '#fff', timer: 1500, showConfirmButton: false });
+        // قفل أمان إضافي لمنع مراسلة النفس
+        if (ownerID.toString().trim() === myID || ownerName === myName) {
+            Swal.fire({ text: 'لا يمكنك مراسلة نفسك!', icon: 'info', background: '#0a0a0f', color: '#fff', timer: 1500, showConfirmButton: false });
             return;
         }
 
-        if (!ownerID) {
-            Swal.fire({ text: 'بيانات المعلن غير مكتملة', icon: 'error', background: '#0a0a0f', color: '#fff' });
-            return;
-        }
-
+        // التوجه للشات مع تمرير الاسم والمعرف لضمان التعرف عليه في البروفايل
         window.location.href = `chat.html?to=${encodeURIComponent(ownerName)}&toID=${ownerID}&item=${encodeURIComponent(itemName)}`;
     }
 
