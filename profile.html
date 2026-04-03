@@ -23,10 +23,6 @@
             backdrop-filter: blur(25px); border: 1px solid rgba(0, 212, 255, 0.2);
             box-shadow: 0 20px 50px rgba(0,0,0,0.6); text-align: center;
         }
-        @media (max-width: 600px) {
-            .profile-card { padding: 15px; border-radius: 20px; }
-            .brand-h1 { font-size: 1.8rem; }
-        }
         .avatar {
             width: 80px; height: 80px; background: linear-gradient(135deg, var(--gold), var(--navy-deep));
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -90,18 +86,18 @@
             </div>
 
             <div style="text-align: right; margin-top: 25px;">
-                <h3 style="color: var(--gold); font-size: 1.1rem;"><i class="fas fa-comments"></i> المحادثات النشطة (الأحدث أولاً):</h3>
+                <h3 style="color: var(--gold); font-size: 1.1rem;"><i class="fas fa-comments"></i> المحادثات النشطة:</h3>
                 <div id="myChatsList" class="chats-container">
                     <p style="text-align:center; opacity:0.5; font-size: 0.8rem;">جاري مزامنة الرسائل...</p>
                 </div>
             </div>
 
             <div style="text-align: right; margin-top: 25px;">
-                <h3 style="color: var(--gold); font-size: 1.1rem;"><i class="fas fa-box"></i> إعلاناتي الأخيرة (الأحدث أولاً):</h3>
+                <h3 style="color: var(--gold); font-size: 1.1rem;"><i class="fas fa-box"></i> إعلاناتي الأخيرة:</h3>
                 <div id="myActivityList" style="max-height: 250px; overflow-y: auto;"></div>
             </div>
 
-            <button onclick="logout()" style="background:none; border:1px solid #ff4d4d; color:#ff4d4d; padding:12px; width:100%; border-radius:15px; margin-top:30px; cursor:pointer; font-weight:bold; transition: 0.3s;">تسجيل الخروج</button>
+            <button onclick="logout()" style="background:none; border:1px solid #ff4d4d; color:#ff4d4d; padding:12px; width:100%; border-radius:15px; margin-top:30px; cursor:pointer; font-weight:bold;">تسجيل الخروج</button>
         </div>
     </div>
 
@@ -109,6 +105,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
+    // --- إعدادات Firebase ---
     const firebaseConfig = {
         apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
         authDomain: "nabd-aust.firebaseapp.com",
@@ -116,8 +113,7 @@
         projectId: "nabd-aust",
         storageBucket: "nabd-aust.firebasestorage.app",
         messagingSenderId: "921777725948",
-        appId: "1:921777725948:web:7b024d0aa101068bef9279",
-        measurementId: "G-HC2TSQ70V2"
+        appId: "1:921777725948:web:7b024d0aa101068bef9279"
     };
 
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
@@ -127,14 +123,12 @@
         return localStorage.getItem("userName") || "مستخدم";
     }
 
-    // التنفيذ عند التشغيل
     window.onload = function() {
         refreshProfile();
     };
 
     function refreshProfile() {
         const name = getActiveUser();
-        // ضمان جلب الاختصاص المخزن أو وضع قيمة افتراضية
         const major = localStorage.getItem("userMajor") || "هندسة البرمجيات";
         
         document.getElementById("userNameDisplay").innerText = name;
@@ -146,27 +140,76 @@
         loadMyChatsFromFirebase(); 
     }
 
-    async function editMajor() {
-        const currentMajor = localStorage.getItem("userMajor") || "هندسة البرمجيات";
-        const { value: newMajor } = await Swal.fire({
-            title: 'تعديل الاختصاص',
-            input: 'text',
-            inputValue: currentMajor,
-            confirmButtonColor: '#00d4ff',
-            showCancelButton: true,
-            cancelButtonText: 'إلغاء',
-            background: '#0a0f1e',
-            color: '#fff'
-        });
+    // --- تعديل: منطق جلب المحادثات لضمان الظهور ---
+    function loadMyChatsFromFirebase() {
+        const chatListDiv = document.getElementById("myChatsList");
+        const currentName = getActiveUser();
+        const currentID = localStorage.getItem("universityID"); // هام جداً للربط
+        
+        // المفتاح الذي نستخدمه للفلترة هو الاسم بدون فراغات
+        const safeKey = currentName.replace(/\s/g, '');
 
-        if (newMajor && newMajor.trim() !== "") {
-            localStorage.setItem("userMajor", newMajor.trim());
-            document.getElementById("userMajorDisplay").innerText = newMajor.trim();
-            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'تم التحديث بنجاح', showConfirmButton: false, timer: 1500 });
-        }
+        database.ref('chats').on('value', (snapshot) => {
+            const allChats = snapshot.val();
+            chatListDiv.innerHTML = "";
+            let chatArray = [];
+
+            if (allChats) {
+                Object.keys(allChats).forEach(chatId => {
+                    // التحقق إذا كان اسمك جزء من المعرف البرمجي للغرفة
+                    if (chatId.includes(safeKey)) {
+                        const messages = allChats[chatId];
+                        const msgKeys = Object.keys(messages);
+                        const lastMsg = messages[msgKeys[msgKeys.length - 1]];
+                        
+                        chatArray.push({
+                            chatId: chatId,
+                            lastMsg: lastMsg,
+                            msgKeys: msgKeys,
+                            messages: messages,
+                            timestamp: lastMsg.timestamp || 0 // للترتيب الصحيح
+                        });
+                    }
+                });
+
+                // ترتيب: الأحدث يظهر في الأعلى
+                chatArray.sort((a, b) => b.timestamp - a.timestamp);
+
+                chatArray.forEach(chatObj => {
+                    const messages = chatObj.messages;
+                    // حساب غير المقروء (أي رسالة لستِ أنتِ مرسلها ولم تُقرأ بعد)
+                    const unreadCount = chatObj.msgKeys.filter(k => messages[k].sender !== currentName && !messages[k].seen).length;
+                    
+                    // استخراج اسم الشخص الآخر من عنوان الغرفة
+                    const parts = chatObj.chatId.split('_');
+                    let otherPersonRaw = parts.find(p => p !== safeKey) || "زميل";
+
+                    chatListDiv.innerHTML += `
+                        <div class="chat-item-card ${unreadCount > 0 ? 'has-new' : ''}" 
+                             onclick="window.location.href='chat.html?to=${encodeURIComponent(otherPersonRaw)}&item=${encodeURIComponent(chatObj.lastMsg.item || 'عام')}'">
+                            <div class="avatar" style="width:45px; height:45px; font-size:20px; margin:0; flex-shrink:0;">
+                                ${otherPersonRaw.charAt(0).toUpperCase()}
+                                ${unreadCount > 0 ? `<div class="unread-badge">${unreadCount}</div>` : ''}
+                            </div>
+                            <div style="flex:1; min-width:0; margin-right:10px;">
+                                <div style="font-weight:bold; color:var(--gold); font-size:0.95rem;">${otherPersonRaw}</div>
+                                <div style="font-size:0.8rem; opacity:0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    ${chatObj.lastMsg.sender === currentName ? 'أنتِ: ' : ''}${chatObj.lastMsg.text}
+                                </div>
+                            </div>
+                            <div style="font-size:0.65rem; opacity:0.5; flex-shrink:0;">${chatObj.lastMsg.time || ''}</div>
+                        </div>
+                    `;
+                });
+            }
+            
+            if (chatArray.length === 0) {
+                chatListDiv.innerHTML = "<p style='text-align:center; opacity:0.5; font-size:0.8rem; margin-top:20px;'>لا توجد محادثات نشطة حالياً.</p>";
+            }
+        });
     }
 
-    // عرض المنشورات: ترتيب زمني عكسي (الأحدث فوق)
+    // --- تعديل: عرض المنشورات لضمان التحديث اللحظي ---
     function renderMyItems(currentName) {
         database.ref('globalMarket/').on('value', (snapshot) => {
             const data = snapshot.val();
@@ -177,7 +220,6 @@
                 return;
             }
 
-            // تصفية المنشورات الخاصة بالمستخدم وترتيبها عكسياً بناءً على وقت الإضافة
             const myItems = [];
             Object.keys(data).forEach(key => {
                 if (data[key].owner === currentName) {
@@ -185,9 +227,7 @@
                 }
             });
 
-            // الترتيب العكسي (الأحدث يظهر أولاً)
-            myItems.reverse();
-
+            myItems.reverse(); // الأحدث أولاً
             document.getElementById("itemsCount").innerText = myItems.length;
             
             if(myItems.length === 0) {
@@ -206,81 +246,36 @@
         });
     }
 
-    function deleteMyItem(firebaseKey) {
+    async function editMajor() {
+        const { value: newMajor } = await Swal.fire({
+            title: 'تعديل الاختصاص',
+            input: 'text',
+            inputValue: localStorage.getItem("userMajor") || "هندسة البرمجيات",
+            confirmButtonColor: '#00d4ff',
+            showCancelButton: true,
+            background: '#0a0f1e',
+            color: '#fff'
+        });
+        if (newMajor) {
+            localStorage.setItem("userMajor", newMajor);
+            refreshProfile();
+        }
+    }
+
+    function deleteMyItem(key) {
         Swal.fire({
             title: 'حذف المنشور؟',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#ff4d4d',
-            confirmButtonText: 'نعم، احذف',
-            cancelButtonText: 'إلغاء',
             background: '#0a0f1e',
             color: '#fff'
-        }).then((res) => {
-            if (res.isConfirmed) {
-                database.ref('globalMarket/' + firebaseKey).remove();
-            }
-        });
-    }
-
-    // عرض المحادثات: ترتيب زمني عكسي (الأحدث فوق)
-    function loadMyChatsFromFirebase() {
-        const chatListDiv = document.getElementById("myChatsList");
-        const currentUserName = getActiveUser();
-        // تنظيف الاسم لاستخدامه كـ Key (كما في صفحة الشات)
-        const safeKey = currentUserName.replace(/\s/g, '');
-
-        database.ref('chats').on('value', (snapshot) => {
-            const allChats = snapshot.val();
-            chatListDiv.innerHTML = "";
-            let chatArray = [];
-
-            if (allChats) {
-                Object.keys(allChats).forEach(chatId => {
-                    if (chatId.includes(safeKey)) {
-                        const messages = allChats[chatId];
-                        const msgKeys = Object.keys(messages);
-                        const lastMsg = messages[msgKeys[msgKeys.length - 1]];
-                        
-                        chatArray.push({
-                            chatId: chatId,
-                            lastMsg: lastMsg,
-                            msgKeys: msgKeys,
-                            messages: messages
-                        });
-                    }
-                });
-
-                // ترتيب المحادثات عكسياً (الأحدث يظهر أولاً)
-                chatArray.reverse().forEach(chatObj => {
-                    const messages = chatObj.messages;
-                    const unreadCount = chatObj.msgKeys.filter(k => messages[k].sender !== currentUserName && !messages[k].seen).length;
-                    
-                    const parts = chatObj.chatId.split('_');
-                    const otherPersonRaw = parts.find(p => p !== safeKey) || "زميل";
-
-                    chatListDiv.innerHTML += `
-                        <div class="chat-item-card ${unreadCount > 0 ? 'has-new' : ''}" 
-                             onclick="window.location.href='chat.html?to=${encodeURIComponent(otherPersonRaw)}&item=${encodeURIComponent(chatObj.lastMsg.item || 'عام')}'">
-                            <div class="avatar" style="width:45px; height:45px; font-size:20px; margin:0; flex-shrink:0;">
-                                ${otherPersonRaw.charAt(0).toUpperCase()}
-                                ${unreadCount > 0 ? `<div class="unread-badge">${unreadCount}</div>` : ''}
-                            </div>
-                            <div style="flex:1; min-width:0;">
-                                <div style="font-weight:bold; color:var(--gold); font-size:0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${otherPersonRaw}</div>
-                                <div style="font-size:0.8rem; opacity:0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${chatObj.lastMsg.text}</div>
-                            </div>
-                            <div style="font-size:0.65rem; opacity:0.5; flex-shrink:0;">${chatObj.lastMsg.time}</div>
-                        </div>
-                    `;
-                });
-            }
-            if (chatArray.length === 0) chatListDiv.innerHTML = "<p style='text-align:center; opacity:0.5; font-size:0.8rem; margin-top:20px;'>لا توجد محادثات بعد.</p>";
+        }).then(res => {
+            if (res.isConfirmed) database.ref('globalMarket/' + key).remove();
         });
     }
 
     function logout() { 
-        // لا نحذف كل الـ LocalStorage لكي لا يضيع الاختصاص، نحذف فقط بيانات الجلسة الحالية
         localStorage.removeItem("userName");
         localStorage.removeItem("universityID"); 
         window.location.href = "index.html"; 
