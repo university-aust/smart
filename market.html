@@ -8,62 +8,67 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root { 
-            --cyan-neon: #00e5ff; 
-            --blue-glass: rgba(0, 150, 255, 0.25);
-            --red-glass: rgba(255, 77, 77, 0.25);
-            --glass-border: rgba(255, 255, 255, 0.15);
+            /* تعميق الألوان لجعلها أقل فقاعة */
+            --cyan-neon: #00b8d4; /* أزرق سماوي أعمق قليلاً */
+            --blue-glass: rgba(0, 100, 200, 0.15); /* أزرق زجاجي داكن */
+            --red-glass: rgba(150, 20, 20, 0.2); /* أحمر زجاجي داكن */
+            --glass-border: rgba(255, 255, 255, 0.08); /* حدود أنعم */
+            --card-bg: rgba(10, 15, 25, 0.85); /* خلفية حاوية داكنة جداً */
         }
 
         body { 
-            background: #0a0b12 url('67260.jpg') no-repeat center center fixed;
+            background: #05060a url('67260.jpg') no-repeat center center fixed;
             background-size: cover;
-            color: white; 
+            color: #e0e0e0; /* أبيض مطفأ مريح للعين */
             font-family: 'Segoe UI', Tahoma, sans-serif; 
             margin: 0; 
             overflow-x: hidden;
         }
 
-        /* الهيدر الزجاجي */
+        /* الهيدر الزجاجي الداكن */
         .header-nav { 
             display: flex; justify-content: space-between; align-items: center; 
-            padding: 15px 5%; background: rgba(0, 0, 0, 0.7); 
-            border-bottom: 1px solid var(--glass-border); backdrop-filter: blur(20px);
+            padding: 15px 5%; background: rgba(0, 0, 0, 0.8); 
+            border-bottom: 1px solid var(--glass-border); backdrop-filter: blur(25px);
             position: sticky; top: 0; z-index: 1000;
         }
         
-        .header-nav h1 { font-size: clamp(18px, 4vw, 26px); margin: 0; font-weight: 800; }
+        .header-nav h1 { font-size: clamp(18px, 4vw, 26px); margin: 0; font-weight: 800; color: #fff; }
 
         .btn-back { 
-            background: rgba(255, 255, 255, 0.1); border: 1px solid var(--cyan-neon); 
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(0, 184, 212, 0.3); 
             color: var(--cyan-neon); padding: 8px 18px; border-radius: 15px; 
             text-decoration: none; font-weight: bold; transition: 0.3s;
-            display: flex; align-items: center; gap: 8px;
+            display: flex; align-items: center; gap: 8px; font-size: 0.9rem;
         }
-        .btn-back:hover { background: var(--cyan-neon); color: black; box-shadow: 0 0 20px var(--cyan-neon); }
+        .btn-back:hover { background: rgba(0, 184, 212, 0.2); border-color: var(--cyan-neon); }
 
+        /* حاوية البحث الداكنة */
         .search-container { 
             padding: 20px 5%; display: flex; gap: 15px; flex-wrap: wrap; 
-            background: rgba(0,0,0,0.4); backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--glass-border);
         }
         .search-input { 
             flex: 1; min-width: 180px; padding: 14px; border-radius: 15px; 
-            border: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.05); 
-            color: white; outline: none; font-size: 0.95rem; transition: 0.3s;
+            border: 1px solid var(--glass-border); background: rgba(0, 0, 0, 0.3); 
+            color: #fff; outline: none; font-size: 0.95rem; transition: 0.3s;
         }
-        .search-input:focus { border-color: var(--cyan-neon); background: rgba(255, 255, 255, 0.1); }
+        .search-input:focus { border-color: rgba(0, 184, 212, 0.5); background: rgba(0, 0, 0, 0.5); }
+        .search-input option { background: #0a0b12; color: #fff; }
 
         /* شبكة العرض */
         .market-grid { 
             display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 25px; padding: 30px 5%; 
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); 
+            gap: 30px; padding: 30px 5%; 
         }
 
-        /* الحاوية الزجاجية */
+        /* الحاوية الزجاجية الداكنة */
         .tool-card {
-            backdrop-filter: blur(15px) saturate(180%);
-            -webkit-backdrop-filter: blur(15px) saturate(180%);
-            background: rgba(17, 25, 40, 0.75);
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            background: var(--card-bg);
             border-radius: 25px;
             border: 1px solid var(--glass-border);
             padding: 25px;
@@ -71,57 +76,62 @@
             display: flex;
             flex-direction: column;
             position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
         /* تأثير الارتفاع Floating Effect */
         .tool-card:hover {
             transform: translateY(-12px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+            border-color: rgba(255, 255, 255, 0.15);
         }
 
-        /* تخصيص الألوان */
+        /* تخصيص الألوان الداكنة */
         .sos-card { 
             background: var(--red-glass) !important;
-            border: 1px solid rgba(255, 77, 77, 0.4) !important;
+            border: 1px solid rgba(200, 50, 50, 0.3) !important;
         }
         .exchange-card { 
             background: var(--blue-glass) !important;
-            border: 1px solid rgba(0, 150, 255, 0.4) !important;
+            border: 1px solid rgba(0, 120, 200, 0.3) !important;
         }
 
         .category-tag { 
-            background: rgba(255, 255, 255, 0.15); color: white; 
+            background: rgba(255, 255, 255, 0.05); color: #ccc; 
             padding: 5px 12px; border-radius: 10px; font-size: 11px; font-weight: bold;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.05);
         }
 
-        .post-time { font-size: 11px; color: #ccc; margin: 10px 0; display: flex; align-items: center; gap: 6px; }
+        .post-time { font-size: 11px; color: #999; margin: 12px 0; display: flex; align-items: center; gap: 6px; }
         
         .explanation-box {
-            background: rgba(0, 0, 0, 0.25); padding: 15px; border-radius: 15px;
-            margin: 15px 0; font-size: 0.9rem; line-height: 1.5; color: #efefef;
-            border-right: 4px solid var(--cyan-neon);
+            background: rgba(0, 0, 0, 0.4); padding: 15px; border-radius: 15px;
+            margin: 15px 0; font-size: 0.9rem; line-height: 1.6; color: #cdcdcd;
+            border-right: 3px solid rgba(0, 184, 212, 0.5);
+            border: 1px solid rgba(255,255,255,0.03);
+            border-right-width: 3px;
         }
 
         .contact-btn { 
-            width: 100%; margin-top: auto; padding: 15px; border: none; 
+            width: 100%; margin-top: auto; padding: 16px; border: none; 
             border-radius: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; 
             font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 10px;
+            letter-spacing: 0.5px;
         }
-        .contact-btn:hover { filter: brightness(1.2); transform: scale(1.02); }
+        .contact-btn:hover { filter: brightness(1.1); transform: scale(1.01); }
 
         /* أزرار الحذف للأدمن */
         .admin-del-btn {
-            position: absolute; top: 15px; left: 15px; background: rgba(255,0,0,0.2);
-            color: #ff4d4d; border: 1px solid #ff4d4d; width: 30px; height: 30px;
+            position: absolute; top: 15px; left: 15px; background: rgba(100,0,0,0.1);
+            color: #cc3333; border: 1px solid rgba(200, 50, 50, 0.3); width: 32px; height: 32px;
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; z-index: 5; transition: 0.3s;
+            cursor: pointer; z-index: 5; transition: 0.3s; font-size: 12px;
         }
-        .admin-del-btn:hover { background: #ff4d4d; color: white; }
+        .admin-del-btn:hover { background: #cc3333; color: white; border-color: #cc3333; }
 
-        @media (max-width: 600px) {
-            .market-grid { grid-template-columns: 1fr; padding: 15px; }
+        @media (max-width: 650px) {
+            .market-grid { grid-template-columns: 1fr; padding: 15px; gap: 20px; }
+            .tool-card { padding: 20px; }
         }
     </style>
 </head>
@@ -134,9 +144,9 @@
 
     <div class="search-container">
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث عن مادة، غرض، أو طالب..." oninput="renderMarket()">
-        <select id="filterCollege" class="search-input" style="flex: 0; min-width: 140px;" onchange="renderMarket()">
+        <select id="filterCollege" class="search-input" style="flex: 0; min-width: 150px;" onchange="renderMarket()">
             <option value="all">كل الأقسام</option>
-            <option value="it">المعلوماتية</option>
+            <option value="it">هندسة المعلوماتية</option>
             <option value="dent">طب الأسنان</option>
             <option value="pharm">الصيدلة</option>
             <option value="lost">🔍 مفقودات</option>
@@ -205,39 +215,42 @@
                     
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span class="category-tag">${collegeMap[item.college] || 'AUST'}</span>
-                        ${isSOS ? '<span style="color:#ff4d4d; font-weight:bold; font-size:12px;">🆘 نداء عاجل</span>' : ''}
+                        ${isSOS ? '<span style="color:#ee5555; font-weight:bold; font-size:12px; display:flex; align-items:center; gap:4px;"><i class="fas fa-exclamation-circle"></i> نداء عاجل</span>' : ''}
                     </div>
 
                     <div class="post-time"><i class="far fa-clock"></i> ${item.fullTime || 'الآن'}</div>
                     
                     <div style="margin:10px 0;">
-                        <div style="color:var(--cyan-neon); font-size:12px; font-weight:bold;">👤 الطالب: ${item.owner}</div>
-                        <h3 style="margin:8px 0; font-size: 1.1rem; color: #fff;">${item.name}</h3>
+                        <div style="color:rgba(0, 184, 212, 0.7); font-size:12px; font-weight:bold;">👤 الطالب: ${item.owner}</div>
+                        <h3 style="margin:10px 0; font-size: 1.15rem; color: #fff; font-weight: 700;">${item.name}</h3>
                     </div>
 
-                    <div class="explanation-box" style="border-right-color: ${isSOS ? '#ff4d4d' : 'var(--cyan-neon)'}">
-                        ${item.explanation || 'لا يوجد تفاصيل إضافية..'}
+                    <div class="explanation-box" style="border-right-color: ${isSOS ? 'rgba(238, 85, 85, 0.5)' : 'rgba(0, 184, 212, 0.4)'}">
+                        ${item.explanation || 'لا يوجد تفاصيل إضافية لهذا المنشور..'}
                     </div>
 
                     <button onclick="goToChat('${item.owner}', '${item.name}')" 
                             class="contact-btn" 
-                            style="background:${isSOS ? '#ff4d4d' : 'var(--cyan-neon)'}; color:${isSOS ? 'white' : 'black'};"
-                            ${isOwner ? 'disabled style="opacity:0.3; cursor:not-allowed;"' : ''}>
+                            style="background:${isSOS ? '#cc3333' : '#0097a7'}; color:${isSOS ? 'white' : 'white'};"
+                            ${isOwner ? 'disabled style="opacity:0.25; cursor:not-allowed;"' : ''}>
                         <i class="fas fa-paper-plane"></i> ${isOwner ? 'منشورك الشخصي' : 'تواصل مع الطالب'}
                     </button>
                 </div>`;
         });
-        grid.innerHTML = htmlContent || `<p style="text-align:center; grid-column:1/-1; opacity:0.5;">🕸️ لا يوجد نتائج حالياً..</p>`;
+        grid.innerHTML = htmlContent || `<p style="text-align:center; grid-column:1/-1; opacity:0.5; padding:50px 0;">🕸️ لا توجد نتائج حالياً في المعرض..</p>`;
     }
 
     function handleDelete(itemId, isGlobal) {
         Swal.fire({
             title: 'هل تريد حذف المنشور؟',
+            text: isGlobal ? "حذف بصفتك مسؤول النظام" : "سيتم حذف منشورك نهائياً",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#ff4d4d',
+            confirmButtonColor: '#cc3333',
             cancelButtonText: 'إلغاء',
-            confirmButtonText: 'نعم، احذف'
+            confirmButtonText: 'نعم، احذف',
+            background: '#0a0b12',
+            color: '#fff'
         }).then((result) => {
             if (result.isConfirmed) {
                 database.ref('globalMarket/' + itemId).remove();
