@@ -2,129 +2,230 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة شهد الخالد | AUST AI</title>
-    <link rel="icon" href="data:,"> 
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>منصة شهد الخالد | AUST</title>
     <style>
-        :root { --cyan: #00e5ff; --gold: #f1c40f; --dark: #0a0b10; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #000; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        
-        /* الهيدر العلوي */
-        .top-bar { height: 60px; background: rgba(0,0,0,0.9); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; border-bottom: 1px solid var(--cyan); box-shadow: 0 0 15px rgba(0,229,255,0.2); }
-        .logo-text { color: var(--cyan); font-weight: bold; letter-spacing: 1px; }
-        .user-name { color: var(--gold); font-size: 14px; border: 1px solid var(--gold); padding: 4px 12px; border-radius: 20px; }
+        :root { --cyan: #00e5ff; --gold: #f1c40f; --dark: #0a0b10; --red: #ff4444; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        html, body { height: 100%; overflow: hidden; background: #000; }
+        body { background: url('67260.jpg') no-repeat center center fixed; background-size: cover; display: flex; flex-direction: column; }
 
-        /* منطقة العمل */
-        .dashboard { flex: 1; display: flex; overflow: hidden; }
-        
-        /* القائمة الجانبية */
-        .sidebar { width: 280px; background: rgba(10, 11, 16, 0.95); padding: 20px; border-left: 1px solid var(--cyan); display: flex; flex-direction: column; gap: 20px; }
-        .timer-box { background: rgba(0, 229, 255, 0.05); border: 1px solid var(--cyan); border-radius: 12px; padding: 15px; text-align: center; font-family: 'Courier New', monospace; font-size: 24px; color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
-        .sidebar-btn { width: 100%; padding: 12px; background: transparent; border: 1px solid var(--cyan); color: white; border-radius: 8px; cursor: pointer; transition: 0.3s; }
-        .sidebar-btn:hover { background: var(--cyan); color: black; }
+        .top-bar { height: 60px; background: rgba(0,0,0,0.9); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; border-bottom: 1px solid var(--cyan); z-index: 1100; }
+        .dashboard { flex: 1; display: flex; position: relative; overflow: hidden; }
 
-        /* منطقة الدردشة */
-        .chat-container { flex: 1; background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png'); display: flex; flex-direction: column; position: relative; }
-        #chatBox { flex: 1; overflow-y: auto; padding: 25px; display: flex; flex-direction: column; gap: 15px; }
-        
-        /* فقاعات الرسائل */
-        .message { max-width: 85%; padding: 15px; border-radius: 18px; font-size: 15px; line-height: 1.6; position: relative; animation: fadeIn 0.4s ease; }
-        .user-msg { align-self: flex-start; background: var(--cyan); color: #000; border-bottom-left-radius: 2px; box-shadow: 4px 4px 10px rgba(0,0,0,0.3); }
-        .ai-msg { align-self: flex-end; background: rgba(255,255,255,0.05); border: 1px solid var(--cyan); color: white; border-bottom-right-radius: 2px; white-space: pre-wrap; }
-        
-        /* منطقة الإدخال */
-        .input-area { background: #0a0b10; padding: 20px; display: flex; gap: 12px; border-top: 1px solid var(--cyan); align-items: center; }
-        #aiInput { flex: 1; background: #111; border: 1px solid var(--cyan); border-radius: 30px; color: white; padding: 12px 25px; outline: none; font-size: 15px; transition: 0.3s; }
-        #aiInput:focus { box-shadow: 0 0 10px var(--cyan); }
-        .btn-send { background: var(--cyan); border: none; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; font-size: 20px; }
-        .btn-send:hover { transform: scale(1.1); box-shadow: 0 0 15px var(--cyan); }
+        .sidebar { 
+            width: 280px; background: rgba(10, 11, 16, 0.98); padding: 20px; display: flex; flex-direction: column; gap: 15px; 
+            border-left: 1px solid var(--cyan); transition: 0.3s ease; z-index: 1050; height: 100%;
+        }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .timer-box { background: rgba(0, 229, 255, 0.05); border: 1px solid var(--cyan); border-radius: 12px; padding: 10px; text-align: center; }
+        #timer { font-family: monospace; color: var(--cyan); font-size: 22px; display: block; }
+
+        .chat-container { flex: 1; display: flex; flex-direction: column; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); position: relative; }
+        #chatBox { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; padding-bottom: 100px; }
+
+        .message { max-width: 85%; padding: 12px 16px; border-radius: 15px; font-size: 14px; line-height: 1.6; word-wrap: break-word; }
+        .user-msg { align-self: flex-start; background: var(--cyan); color: #000; border-bottom-left-radius: 2px; }
+        .ai-msg { align-self: flex-end; background: rgba(255,255,255,0.1); border: 1px solid var(--cyan); border-bottom-right-radius: 2px; color: white; }
+
+        .input-area { 
+            position: absolute; bottom: 0; width: 100%; background: #0a0b10; padding: 12px 15px; 
+            display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--cyan);
+        }
+        #aiInput { flex: 1; height: 45px; background: rgba(255,255,255,0.05); border: 1px solid var(--cyan); border-radius: 22px; color: white; padding: 10px 18px; outline: none; resize: none; }
+        .btn-send { background: var(--cyan); border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        .history-item { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 12px; display: flex; justify-content: space-between; cursor: pointer; border: 1px solid transparent; }
+        .history-item:hover { border-color: var(--cyan); }
+
+        @media (max-width: 768px) { .sidebar { position: absolute; right: -280px; } .sidebar.active { right: 0; } }
     </style>
 </head>
 <body>
 
 <div class="top-bar">
-    <div class="logo-text">AUST SMART PULSE v2.0</div>
-    <div class="user-name">المهندسة شهد الخالد</div>
+    <button onclick="toggleSidebar()" style="background:none; border:none; color:var(--cyan); font-size:28px;">☰</button>
+    <div style="color: var(--cyan); font-weight: bold; font-size: 14px;">AUST SMART PULSE</div>
+    <div style="width: 24px;"></div>
 </div>
 
 <div class="dashboard">
-    <aside class="sidebar">
-        <div class="timer-box" id="timer">00:00:00</div>
-        <div style="display:flex; justify-content: space-between;">
-            <button onclick="startT()" style="color:var(--cyan); background:none; border:none; font-size:20px; cursor:pointer;">▶</button>
-            <button onclick="stopT()" style="color:var(--gold); background:none; border:none; font-size:20px; cursor:pointer;">⏸</button>
-            <button onclick="resetT()" style="color:#ff4444; background:none; border:none; font-size:20px; cursor:pointer;">🔄</button>
+    <aside class="sidebar" id="sidebar">
+        <h2 id="userNameDisplay" style="color:var(--gold); font-size:18px;">شهد الخالد</h2>
+        <div class="timer-box">
+            <span id="timer">00:00:00</span>
+            <div style="margin-top:5px;">
+                <button onclick="startT()" style="color:var(--cyan); background:none; border:none; cursor:pointer;">▶</button>
+                <button onclick="stopT()" style="color:var(--gold); background:none; border:none; cursor:pointer; margin:0 10px;">⏸</button>
+                <button onclick="resetT()" style="color:var(--red); background:none; border:none; cursor:pointer;">🔄</button>
+            </div>
         </div>
-        <hr style="border: 0.5px solid rgba(0,229,255,0.2);">
-        <p style="font-size: 12px; color: #888; text-align: center;">قسم هندسة البرمجيات</p>
-        <button class="sidebar-btn" onclick="location.reload()">محادثة جديدة</button>
+        <button onclick="startNewChat()" style="width:100%; padding:10px; background:var(--gold); border:none; border-radius:8px; font-weight:bold;">محادثة جديدة</button>
+        <select id="majorSelector" onchange="updateGreetingBySelection()" style="width:100%; padding:10px; background:#000; color:white; border:1px solid var(--cyan); border-radius:8px;">
+            <option>هندسة المعلوماتية</option>
+            <option>هندسة البترول</option>
+            <option>هندسة العمارة</option>
+            <option>هندسة الكيمياء</option>
+            <option>طب الأسنان</option>
+            <option>الصيدلة</option>
+            <option>الترجمة واللغات</option>
+        </select>
+        <div id="historyList" style="flex:1; overflow-y:auto;"></div>
+        <a href="dashboard.html" style="text-align:center; color:var(--cyan); text-decoration:none; font-size:11px; padding:10px; border:1px solid var(--cyan); border-radius:8px;">خروج</a>
     </aside>
 
     <main class="chat-container">
         <div id="chatBox"></div>
         <div class="input-area">
-            <input id="aiInput" type="text" placeholder="اكتبي سؤالك الهندسي هنا يا شهد..." onkeypress="if(event.key==='Enter') askAI()">
-            <button class="btn-send" onclick="askAI()">🚀</button>
+            <label for="fileInput" style="color:var(--cyan); font-size:24px; cursor:pointer;">📎</label>
+            <input type="file" id="fileInput" style="display:none" onchange="handleFile(this)">
+            <textarea id="aiInput" placeholder="اكتبي سؤالك هنا يا شهد..."></textarea>
+            <button class="btn-send" onclick="processAI()">🚀</button>
         </div>
     </main>
 </div>
 
 <script>
-    // ضعي رابط الـ Worker الخاص بكِ هنا بدقة
-    const WORKER_URL = "https://shahed-api-bridge.shahed200632.workers.dev/"; 
+    const API_KEY = "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";
+    const studentID = localStorage.getItem('studentID') || "guest";
+    let currentHistory = [];
+    let tempFileContext = "";
 
-    async function askAI() {
+    window.onload = () => {
+        document.getElementById('userNameDisplay').innerText = localStorage.getItem('studentName') || "شهد الخالد";
+        const m = localStorage.getItem('studentMajor') || "هندسة المعلوماتية";
+        document.getElementById('majorSelector').value = (m === "هندسة البرمجيات") ? "هندسة المعلوماتية" : m;
+        loadHistory();
+        updateGreetingBySelection();
+    };
+
+    function getTitle(m) {
+        if (m === "الترجمة واللغات") return "المترجمة";
+        if (["طب الأسنان", "الصيدلة"].includes(m)) return "الدكتورة";
+        return "المهندسة";
+    }
+
+    function handleFile(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            tempFileContext = `--- بداية محتوى الملف (${file.name}) ---\n${e.target.result}\n--- نهاية محتوى الملف ---`;
+            addMsg(`📂 تم استلام الملف: ${file.name}. بانتظار سؤالك حوله...`, 'user-msg');
+        };
+        reader.readAsText(file);
+    }
+
+    async function processAI() {
         const input = document.getElementById('aiInput');
         const text = input.value.trim();
-        if(!text) return;
+        const major = document.getElementById('majorSelector').value;
+        const name = (localStorage.getItem('studentName') || "شهد").split(' ')[0];
 
-        addMsg(text, "user-msg");
+        if(!text && !tempFileContext) return;
+
+        // دمج محتوى الملف مع النص لضمان المعالجة
+        let finalPrompt = text;
+        if(tempFileContext) {
+            finalPrompt = `${tempFileContext}\n\nالمطلوب من المترجمة/المهندسة شهد الخالد هو: ${text || "اشرح لي محتويات هذا الملف بالتفصيل."}`;
+            tempFileContext = ""; // تصفير الملف بعد الإرسال
+        }
+
+        addMsg(text || "تحليل الملف المرفق", 'user-msg');
+        currentHistory.push({ role: "user", content: finalPrompt });
         input.value = "";
-        const loading = addMsg("جاري التفكير وتحليل البيانات... ✨", "ai-msg");
 
         try {
-            const res = await fetch(WORKER_URL, {
+            const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ messages: [{role: "user", content: text}] })
+                headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    model: "llama-3.3-70b-versatile",
+                    messages: [
+                        { role: "system", content: `أنت مساعد أكاديمي لشهد الخالد. تخصصها ${major}. ناديها بلقب ${getTitle(major)} شهد. أنت خبير في تحليل الملفات والأكواد التي ترسلها لك.` },
+                        ...currentHistory
+                    ],
+                    temperature: 0.5
+                })
             });
-            
             const data = await res.json();
-            loading.remove();
-
-            // التعديل الجوهري: استلام الرد من متغير response كما يرسله الجسر
-            if(data && data.response) {
-                addMsg(data.response, "ai-msg");
-            } else {
-                addMsg("تنبيه: الجسر متصل ولكن الرد لم يصل بشكل صحيح. تأكدي من تفعيل الجسر.", "ai-msg");
-            }
-        } catch (e) {
-            loading.innerText = "فشل الاتصال بالخادم. تأكدي من رابط الـ Worker.";
-        }
+            const reply = data.choices[0].message.content;
+            currentHistory.push({ role: "assistant", content: reply });
+            typeText(reply);
+            saveHistory();
+        } catch (e) { addMsg("حدث خطأ في الاتصال، حاولي مجدداً.", 'ai-msg'); }
     }
 
     function addMsg(t, c) {
-        const cb = document.getElementById('chatBox');
-        const d = document.createElement('div');
-        d.className = `message ${c}`;
-        d.innerText = t;
-        cb.appendChild(d);
-        cb.scrollTop = cb.scrollHeight;
-        return d;
+        const box = document.getElementById('chatBox');
+        const div = document.createElement('div');
+        div.className = `message ${c}`;
+        div.innerText = t;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
     }
 
-    // دوال المؤقت (Timer)
-    let sec=0, tInt=null;
-    function startT() { if(!tInt) tInt=setInterval(()=>{sec++; let h=Math.floor(sec/3600).toString().padStart(2,'0'), m=Math.floor((sec%3600)/60).toString().padStart(2,'0'), s=(sec%60).toString().padStart(2,'0'); document.getElementById('timer').innerText=`${h}:${m}:${s}`;},1000); }
-    function stopT() { clearInterval(tInt); tInt=null; }
-    function resetT() { stopT(); sec=0; document.getElementById('timer').innerText="00:00:00"; }
+    function typeText(t) {
+        const div = document.createElement('div');
+        div.className = 'message ai-msg';
+        document.getElementById('chatBox').appendChild(div);
+        let i = 0;
+        function type() {
+            if (i < t.length) {
+                div.innerHTML += t.charAt(i) === '\n' ? '<br>' : t.charAt(i);
+                i++;
+                document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
+                setTimeout(type, 10);
+            }
+        }
+        type();
+    }
+
+    function saveHistory() {
+        let logs = JSON.parse(localStorage.getItem(`logs_${studentID}`) || "[]");
+        const title = (currentHistory[0]?.content.substring(0, 20) || "محادثة") + "...";
+        logs = logs.filter(l => l.title !== title);
+        logs.unshift({ title, data: [...currentHistory] });
+        localStorage.setItem(`logs_${studentID}`, JSON.stringify(logs.slice(0, 15)));
+        loadHistory();
+    }
+
+    function loadHistory() {
+        const list = document.getElementById('historyList');
+        const logs = JSON.parse(localStorage.getItem(`logs_${studentID}`) || "[]");
+        list.innerHTML = '<p style="color:var(--gold); font-size:11px; margin-bottom:5px;">سجل المحادثات:</p>';
+        logs.forEach((log, i) => {
+            const d = document.createElement('div');
+            d.className = 'history-item';
+            d.innerHTML = `<span onclick="openHistory(${i})">${log.title}</span>`;
+            list.appendChild(d);
+        });
+    }
+
+    function openHistory(i) {
+        const logs = JSON.parse(localStorage.getItem(`logs_${studentID}`) || "[]");
+        currentHistory = logs[i].data;
+        document.getElementById('chatBox').innerHTML = "";
+        currentHistory.forEach(m => {
+            let display = m.content.includes("--- بداية محتوى الملف") ? "تحليل ملف مرفوع" : m.content;
+            addMsg(display, m.role === 'user' ? 'user-msg' : 'ai-msg');
+        });
+    }
+
+    function updateGreetingBySelection() {
+        const m = document.getElementById('majorSelector').value;
+        const name = (localStorage.getItem('studentName') || "شهد").split(' ')[0];
+        document.getElementById('chatBox').innerHTML = `<div class="message ai-msg">مرحباً ${getTitle(m)} ${name}. أنا جاهز لتحليل أي كود أو ملف نصي ترسلينه لي الآن.</div>`;
+        currentHistory = [];
+    }
+
+    function startNewChat() { updateGreetingBySelection(); }
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
     
-    // ترحيب أولي
-    window.onload = () => addMsg("مرحباً بكِ مهندسة شهد. نظام الذكاء الاصطناعي في AUST جاهز للعمل.", "ai-msg");
+    let sec = 0, tInt = null;
+    function startT() { if(!tInt) tInt = setInterval(() => { sec++; let h=Math.floor(sec/3600).toString().padStart(2,'0'), m=Math.floor((sec%3600)/60).toString().padStart(2,'0'), s=(sec%60).toString().padStart(2,'0'); document.getElementById('timer').innerText = `${h}:${m}:${s}`; }, 1000); }
+    function stopT() { clearInterval(tInt); tInt = null; }
+    function resetT() { stopT(); sec = 0; document.getElementById('timer').innerText = "00:00:00"; }
 </script>
 </body>
 </html>
