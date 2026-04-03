@@ -75,7 +75,7 @@
     .form-group { margin-top: 15px; text-align: right; position: relative; }
     label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: var(--gold); font-weight: bold; }
     
-    input { 
+    input, select { 
         width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); 
         background: rgba(255, 255, 255, 0.95); color: #222; font-size: 1rem; outline: none; transition: 0.3s; 
     }
@@ -123,6 +123,19 @@
             <div class="form-group">
                 <label>رقم الطالب (ID)</label>
                 <input type="text" id="idInput" placeholder="2026XXXX">
+            </div>
+
+            <div class="form-group" id="majorGroup" style="display:none;">
+                <label>الكلية / القسم</label>
+                <select id="majorInput">
+                    <option value="it">هندسة المعلوماتية</option>
+                    <option value="dent">طب الأسنان</option>
+                    <option value="pharm">كلية الصيدلة</option>
+                    <option value="arch">الهندسة المعمارية</option>
+                    <option value="petro">هندسة البترول</option>
+                    <option value="chemical">الكيمياء الصناعية</option>
+                    <option value="trans">كلية الترجمة</option>
+                </select>
             </div>
             
             <div class="form-group" id="emailGroup" style="display:none;">
@@ -196,10 +209,12 @@
         if (mode === 'login' || mode === 'forgot' || mode === 'verify') {
             mode = 'register';
             updateUI("إنشاء حساب", "تأكيد الحساب", "block", "block", "block", "لديك حساب؟ <b>سجل دخولك</b>");
+            document.getElementById('majorGroup').style.display = 'block';
             document.getElementById('forgotLink').style.display = 'none';
         } else {
             mode = 'login';
             updateUI("تسجيل الدخول", "دخول المنصة", "none", "none", "block", "إنشاء حساب جديد");
+            document.getElementById('majorGroup').style.display = 'none';
             document.getElementById('forgotLink').style.display = 'block';
         }
     }
@@ -223,6 +238,7 @@
         const pass = document.getElementById('passInput').value;
         const name = document.getElementById('nameInput').value.trim();
         const email = document.getElementById('emailInput').value.trim();
+        const major = document.getElementById('majorInput').value;
         const userEnteredCode = document.getElementById('verifyCodeInput').value.trim();
 
         if (!id) { notify("أدخل رقم الطالب"); return; }
@@ -236,7 +252,7 @@
                 .then((userCredential) => {
                     return database.ref('users/' + id).set({
                         id, pass, name, email,
-                        major: "هندسة البرمجيات",
+                        major: major, // تم ربطه بالاختيار
                         createdAt: new Date().toISOString()
                     });
                 })
@@ -251,11 +267,12 @@
             database.ref('users/' + id).once('value').then((snapshot) => {
                 const data = snapshot.val();
                 if (data) {
-                    // التحقق من الباسورد المخزن
                     if (data.pass === pass) {
-                        // تخزين البيانات للتناغم مع الماركت والشات
+                        // التخزين الموحد لكل المنصة
                         localStorage.setItem("userName", data.name);
-                        localStorage.setItem("userID", data.id);
+                        localStorage.setItem("userID", data.id); // المعرف القديم
+                        localStorage.setItem("universityID", data.id); // المعرف الجديد
+                        localStorage.setItem("userMajor", data.major); // لتحديد مواد الكلية تلقائياً
                         
                         notify("مرحباً مهندس/ة " + data.name);
                         setTimeout(() => { window.location.href = "dashboard.html"; }, 1200);
