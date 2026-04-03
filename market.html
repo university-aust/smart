@@ -3,175 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المعرض السريع | نبض AUST</title>
+    <title>Smart Pulse | لوحة التحكم</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        :root { 
-            --cyan-neon: #00e5ff; 
-            --blue-glass: rgba(0, 40, 80, 0.6); 
-            --red-glass: rgba(139, 0, 0, 0.5); 
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --neon-glow: 0 0 15px rgba(0, 229, 255, 0.4);
-        }
-
-        body { 
-            background: linear-gradient(rgba(10, 10, 15, 0.7), rgba(10, 10, 15, 0.7)), url('67260.jpg') no-repeat center center fixed;
-            background-size: cover; color: white; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; overflow-x: hidden;
-        }
-
-        .header-nav { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 15px 5%; background: rgba(0, 0, 0, 0.8); 
-            border-bottom: 1px solid var(--glass-border); backdrop-filter: blur(15px);
-            position: sticky; top: 0; z-index: 1000;
-        }
-
-        .btn-back { 
-            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--cyan-neon); 
-            color: var(--cyan-neon); padding: 6px 15px; border-radius: 10px; 
-            text-decoration: none; font-weight: bold; transition: 0.3s;
-            display: flex; align-items: center; gap: 5px; font-size: 0.8rem;
-        }
-
-        .search-container { padding: 12px 5%; display: flex; gap: 8px; flex-wrap: wrap; background: rgba(0,0,0,0.4); }
-        .search-input { 
-            flex: 1; min-width: 120px; padding: 10px; border-radius: 10px; 
-            border: 1px solid var(--glass-border); background: rgba(0, 0, 0, 0.5); 
-            color: white; outline: none; font-size: 0.85rem;
-        }
-
-        .market-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 15px 3%; }
-
-        .tool-card {
-            backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid var(--glass-border);
-            padding: 12px; display: flex; flex-direction: column; position: relative;
-            transition: 0.2s; min-height: 220px; background: var(--blue-glass);
-        }
-        .tool-card:hover { transform: translateY(-3px); border-color: var(--cyan-neon); }
-
-        .sos-card { background: var(--red-glass) !important; border-color: rgba(255, 77, 77, 0.3) !important; }
-
-        .category-tag { background: rgba(255, 255, 255, 0.1); color: #fff; padding: 2px 6px; border-radius: 6px; font-size: 10px; }
-        .post-time { font-size: 9px; color: rgba(255,255,255,0.5); margin: 8px 0; }
-        .post-owner { color: var(--cyan-neon); font-size: 10px; font-weight: bold; }
+        :root { --cyan: #00d4ff; --cyan-glow: rgba(0, 212, 255, 0.5); --navy-deep: #1e293b; --glass: rgba(10, 15, 30, 0.75); --input-bg: rgba(255, 255, 255, 0.95); }
+        h2, label, .ticker-content, .profile-btn { text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { min-height: 100vh; background: #030712 url('67260.jpg') center/cover fixed no-repeat; color: white; overflow-x: hidden; }
         
-        .explanation-box {
-            background: rgba(0, 0, 0, 0.2); padding: 8px; border-radius: 8px;
-            margin: 8px 0; font-size: 0.75rem; border-right: 3px solid var(--cyan-neon);
+        .pulse-ticker { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); color: var(--cyan); padding: 12px; white-space: nowrap; overflow: hidden; border-bottom: 2px solid var(--cyan); font-weight: bold; box-shadow: 0 0 15px var(--cyan-glow); }
+        .ticker-content { display: inline-block; animation: marquee-rtl 25s linear infinite; }
+        @keyframes marquee-rtl { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+        .header-nav { padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; background: var(--glass); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(0, 212, 255, 0.3); flex-wrap: wrap; gap: 15px; }
+        .nav-links { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; justify-content: center; }
+        
+        .profile-container { position: relative; }
+        .notification-dot { 
+            position: absolute; top: -2px; right: -2px; width: 12px; height: 12px; 
+            background: #ff4d4d; border-radius: 50%; border: 2px solid white; 
+            box-shadow: 0 0 10px #ff4d4d; display: none; animation: pulse-red 1.5s infinite; z-index: 10; 
         }
+        @keyframes pulse-red { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.4); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
 
-        .contact-btn { 
-            width: 100%; margin-top: auto; padding: 10px; border-radius: 12px; 
-            font-weight: bold; cursor: pointer; font-size: 0.8rem; 
-            background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid var(--glass-border);
-        }
-        .contact-btn:hover:not(:disabled) { background: #fff; color: #000; }
-
-        .admin-del-icon { position: absolute; top: 10px; left: 10px; color: rgba(255,255,255,0.3); cursor: pointer; }
-
-        @media (min-width: 768px) { .market-grid { grid-template-columns: repeat(4, 1fr); } }
+        .profile-btn { text-decoration: none; color: var(--cyan); padding: 8px 18px; border-radius: 12px; border: 2px solid var(--cyan); transition: 0.3s; font-weight: bold; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+        .profile-btn:hover { background: var(--cyan); color: black; box-shadow: 0 0 20px var(--cyan); }
+        
+        .card { background: var(--glass); backdrop-filter: blur(25px); border: 1px solid rgba(0, 212, 255, 0.2); border-radius: 35px; padding: 30px; transition: 0.4s; box-shadow: 0 10px 30px rgba(0,0,0,0.4); display: flex; flex-direction: column; }
+        .card:hover { transform: translateY(-8px); border-color: var(--cyan); box-shadow: 0 10px 40px var(--cyan-glow); }
+        
+        h2 { color: var(--cyan); font-size: 1.3rem; margin-bottom: 20px; border-right: 5px solid var(--cyan); padding-right: 15px; }
+        label { display: block; margin: 10px 0 5px; color: var(--cyan); font-size: 0.85rem; font-weight: bold; }
+        select, input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 12px; border: none; background: var(--input-bg); color: #1e293b; font-size: 0.95rem; outline: none; font-weight: 800; }
+        
+        .btn-main { width: 100%; padding: 14px; border: none; border-radius: 15px; font-weight: 900; cursor: pointer; transition: 0.3s; background: linear-gradient(45deg, var(--cyan), var(--navy-deep)); color: #fff; box-shadow: 0 4px 15px var(--cyan-glow); margin-top: 10px; }
+        .btn-main:hover { transform: scale(1.02); box-shadow: 0 0 25px var(--cyan); }
+        .btn-market { background: rgba(39, 174, 96, 0.9); border: 1px solid #27ae60; }
+        
+        .footer { text-align: center; padding: 40px; background: rgba(0,0,0,0.7); margin-top: 50px; border-top: 2px solid var(--cyan); }
     </style>
 </head>
 <body>
 
-    <div class="header-nav">
-        <h1>🌐 معرض <span style="color:var(--cyan-neon)">AUST</span></h1>
-        <a href="dashboard.html" class="btn-back">الرئيسية</a>
+    <div class="pulse-ticker">
+        <div class="ticker-content"> ✨ أهلاً بكِ في Smart Pulse | تم تحديث كافة المواد والوظائف بنجاح • النظام يعمل الآن بكفاءة 100% 🚀 </div>
     </div>
 
-    <div class="search-container">
-        <input type="text" id="searchInput" class="search-input" placeholder="بحث سريع..." oninput="renderMarket()">
-        <select id="filterCollege" class="search-input" style="flex:0" onchange="renderMarket()">
-            <option value="all">الكل</option>
-            <option value="it">IT</option>
-            <option value="lost">مفقودات</option>
-        </select>
+    <nav class="header-nav">
+        <h1>AUST <span style="color:var(--cyan)">Smart Pulse</span></h1>
+        <div class="nav-links">
+            <p>مرحباً، <span id="userDisplayName" style="color:var(--cyan); font-weight:bold;">جاري التحميل...</span></p>
+            <div class="profile-container">
+                <div id="notifyDot" class="notification-dot"></div>
+                <a href="profile.html" class="profile-btn"><i class="fas fa-user-graduate"></i> الملف الشخصي</a>
+            </div>
+        </div>
+    </nav>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; padding: 40px 5%;">
+        
+        <div class="card">
+            <h2>📡 رادار المساعدة (SOS)</h2>
+            <label>الكلية:</label>
+            <select id="collegeSOS" onchange="updateSubjects()"></select>
+            <label>السنة الدراسية:</label>
+            <select id="yearSOS" onchange="updateSubjects()">
+                <option value="1">السنة الأولى</option>
+                <option value="2">السنة الثانية</option>
+                <option value="3">السنة الثالثة</option>
+                <option value="4">السنة الرابعة</option>
+                <option value="5">السنة الخامسة</option>
+            </select>
+            <label>المادة:</label>
+            <select id="subjectSelect"></select>
+            <label>كيف يمكن مساعدتك؟</label>
+            <input type="text" id="customSOS" placeholder="مثال: أحتاج شرح لفقرة التوريث...">
+            <button class="btn-main" style="background: linear-gradient(45deg, #ff4d4d, var(--navy-deep));" onclick="sendSOS()">إرسال نداء SOS 🆘</button>
+            <button class="btn-main btn-market" onclick="location.href='market.html'"><i class="fas fa-store"></i> دخول المعرض العام</button>
+        </div>
+
+        <div class="card">
+            <h2>♻️ التبادل والمفقودات</h2>
+            <label>نوع الإعلان:</label>
+            <select id="itemType">
+                <option value="مبادلة">🔄 غرض للمبادلة/الإعارة</option>
+                <option value="مفقود">🔍 مفقودات (أبحث عن...)</option>
+                <option value="موجود">📍 موجودات (وجدت غرضاً...)</option>
+            </select>
+            <label>الكلية التابع لها الغرض:</label>
+            <select id="itemCollege"></select>
+            <label>اسم الغرض:</label>
+            <input type="text" id="newToolName" placeholder="مثال: مسطرة T، نظارة...">
+            <button class="btn-main" onclick="addNewTool()">نشر في المعرض ✅</button>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px;">
+                <button onclick="location.href='library.html'" style="background:rgba(41, 128, 185, 0.8); color:white; border:none; padding:12px; border-radius:10px; cursor:pointer; font-weight:bold;">📚 مكتبة المحاضرات</button>
+                <button onclick="location.href='AI.html'" style="background:rgba(41, 128, 126, 0.8); color:white; border:none; padding:12px; border-radius:10px; cursor:pointer; font-weight:bold;">🤖 الذكاء المساعد</button>
+            </div>
+            <button class="btn-main btn-market" onclick="location.href='market.html'" style="margin-top:10px;"><i class="fas fa-store"></i> المعرض العام</button>
+        </div>
     </div>
 
-    <div id="marketGrid" class="market-grid"></div>
+    <footer class="footer">
+        <a href="about.html" style="color: var(--cyan); text-decoration: none; font-weight: bold; border: 1px solid var(--cyan); padding: 10px 20px; border-radius: 20px;">📖 حول القسم والموقع</a>
+    </footer>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 
 <script>
-    const ADMIN_ID = "20241600060";
-    const firebaseConfig = {
-        apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
-        authDomain: "nabd-aust.firebaseapp.com",
-        databaseURL: "https://nabd-aust-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "nabd-aust",
-        storageBucket: "nabd-aust.firebasestorage.app",
-        messagingSenderId: "921777725948",
-        appId: "1:921777725948:web:7b024d0aa101068bef9279"
+    const firebaseConfig = { 
+        apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo", 
+        authDomain: "nabd-aust.firebaseapp.com", 
+        databaseURL: "https://nabd-aust-default-rtdb.europe-west1.firebasedatabase.app", 
+        projectId: "nabd-aust", 
+        storageBucket: "nabd-aust.firebasestorage.app", 
+        messagingSenderId: "921777725948", 
+        appId: "1:921777725948:web:7b024d0aa101068bef9279" 
+    };
+    
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const auth = firebase.auth();
+
+    const currentUserName = localStorage.getItem("userName") || "مستخدم جديد";
+    const currentUserID = localStorage.getItem("universityID") || "0000";
+
+    const allAUSTSubjects = {
+        it: { name: "💻 هندسة المعلوماتية", 1: ["البرمجة 1", "الفيزياء 1", "الرياضيات 1", "الرسم الهندسي", "مهارات الحاسوب", "البرمجة 2", "الفيزياء 2", "الرياضيات 2"], 2: ["خوارزميات 1", "برمجة ويب", "رياضيات متقطعة", "احتمالات", "OOP 1", "قواعد بيانات 1"], 3: ["هندسة برمجيات 1", "تطوير ويب", "معمارية حاسوب", "نظم تشغيل 1", "تحليل نظم"], 4: ["تنقيب بيانات", "رسم حاسوبي", "شبكات 1", "إدارة قواعد بيانات"], 5: ["مشروع تخرج 1", "إدارة مشاريع", "أمن معلومات"] },
+        chemical: { name: "🧪 الكيمياء الصناعية", 1: ["الرياضيات 1", "الفيزياء", "كيمياء عامة"], 2: ["برامج حاسوبية", "رياضيات تطبيقية"], 3: ["جريان موائع", "انتقال حرارة"], 4: ["انتقال كتلة", "تقانة أسمدة"], 5: ["ديناميك وتحكم", "أمن صناعي"] },
+        dent: { name: "🦷 طب الأسنان", 1: ["كيمياء عامة", "تشريح عام 1", "بيولوجيا"], 2: ["تعويضات ثابتة 1", "مواد ترميمية"], 3: ["تعويضات متحركة 2", "أدوية"], 4: ["تقويم 1", "مداواة لبية 1"], 5: ["زرع أسنان", "جراحة فم وفكين"] },
+        pharm: { name: "💊 كلية الصيدلة", 1: ["تشريح", "فيزياء طبية"], 2: ["صيدلانيات 1", "كيمياء تحليلية"], 3: ["تكنولوجيا صيدلانية", "عقاقير 2"], 4: ["صيدلة صناعية 1", "سموم"], 5: ["إسعاف أولي", "كيمياء دوائية"] },
+        arch: { name: "📐 الهندسة المعمارية", 1: ["رسم هندسي", "تصميم 1"], 2: ["تصميم معماري 1", "تنفيذ مباني"], 3: ["تجهيزات 1", "تخطيط مدن"], 4: ["أبنية سكنية", "بيتون مسلح"], 5: ["مشروع التخرج النهائي"] },
+        petro: { name: "🛢️ هندسة البترول", 1: ["رياضيات 1", "جيولوجيا"], 2: ["كيمياء نفط", "صخور"], 3: ["جريان موائع", "جيولوجيا بترول"], 4: ["إنتاج نفط", "حفر 1"], 5: ["حفر موجه", "مشروع 2"] },
+        trans: { name: "📖 كلية الترجمة", 1: ["صوتيات", "ترجمة 1"], 2: ["مسرح نهضة", "ترجمة 2"], 3: ["مقالة نقدية", "ترجمة 3"], 4: ["نقد أدبي", "مشروع تخرج"] }
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-    const myID = localStorage.getItem("universityID") || "";
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            document.getElementById("userDisplayName").innerText = currentUserName;
+            initSelectors();
+            checkUnreadMessages();
+        } else {
+            window.location.href = "login.html";
+        }
+    });
 
-    // 1. استرجاع البيانات من الكاش فوراً للسرعة
-    let cachedData = JSON.parse(localStorage.getItem("market_cache") || "[]");
-    
-    // تنفيذ الرندر الأولي فوراً إذا وجد كاش
-    if(cachedData.length > 0) renderMarket();
+    function initSelectors() {
+        const sosCol = document.getElementById('collegeSOS');
+        const itemCol = document.getElementById('itemCollege');
+        let options = "";
+        for (let key in allAUSTSubjects) {
+            options += `<option value="${key}">${allAUSTSubjects[key].name}</option>`;
+        }
+        sosCol.innerHTML = options;
+        itemCol.innerHTML = `<option value="عام">كل الكليات (عام)</option>` + options;
+        updateSubjects();
+    }
 
-    // 2. الاستماع لقاعدة البيانات (تحديث ذكي)
-    function startListening() {
-        database.ref('globalMarket/').on('value', (snapshot) => {
-            const data = snapshot.val();
-            cachedData = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })).reverse() : [];
-            
-            // تحديث الكاش للزيارة القادمة
-            localStorage.setItem("market_cache", JSON.stringify(cachedData));
-            
-            // رندر فعلي بالبيانات الجديدة
-            renderMarket();
+    function updateSubjects() {
+        const college = document.getElementById('collegeSOS').value;
+        const year = document.getElementById('yearSOS').value;
+        const select = document.getElementById('subjectSelect');
+        const subjects = (allAUSTSubjects[college] && allAUSTSubjects[college][year]) 
+                         ? allAUSTSubjects[college][year] 
+                         : ["عام"];
+        select.innerHTML = subjects.map(s => `<option value="${s}">${s}</option>`).join('');
+    }
+
+    function checkUnreadMessages() {
+        const notifyDot = document.getElementById("notifyDot");
+        database.ref('chats').on('value', (snapshot) => {
+            let hasUnread = false;
+            snapshot.forEach((chatRoom) => {
+                chatRoom.forEach((msg) => {
+                    const data = msg.val();
+                    if (data.receiverID === currentUserID && data.seen === false) {
+                        hasUnread = true;
+                    }
+                });
+            });
+            notifyDot.style.display = hasUnread ? "block" : "none";
         });
     }
 
-    function renderMarket() {
-        const grid = document.getElementById("marketGrid");
-        const searchTerm = document.getElementById("searchInput").value.toLowerCase();
-        const filterCol = document.getElementById("filterCollege").value;
+    function sendSOS() {
+        const subject = document.getElementById('subjectSelect').value;
+        const explanation = document.getElementById('customSOS').value.trim();
+        if(!explanation) return Swal.fire('تنبيه', 'يرجى كتابة شرح للمساعدة المطلوبة', 'warning');
 
-        const filtered = cachedData.filter(item => {
-            const matchesSearch = (item.name || "").toLowerCase().includes(searchTerm);
-            const matchesCol = (filterCol === "all") || (item.college === filterCol);
-            return matchesSearch && matchesCol;
+        database.ref('globalMarket/').push({
+            name: `🆘 SOS: ${subject}`,
+            explanation: explanation,
+            college: document.getElementById('collegeSOS').value,
+            owner: currentUserName,
+            ownerID: currentUserID,
+            fullTime: new Date().toLocaleString('ar-EG'),
+            isSOS: true,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        }).then(() => {
+            Swal.fire({ icon: 'success', title: 'تم إرسال النداء', timer: 1500, showConfirmButton: false });
+            document.getElementById('customSOS').value = "";
+        }).catch(err => Swal.fire('خطأ', err.message, 'error'));
+    }
+
+    function addNewTool() {
+        const name = document.getElementById('newToolName').value.trim();
+        if (!name) return Swal.fire('خطأ', 'يرجى كتابة اسم الغرض', 'error');
+        
+        database.ref('globalMarket/').push({
+            name: `${document.getElementById('itemType').value}: ${name}`,
+            college: document.getElementById('itemCollege').value,
+            owner: currentUserName,
+            ownerID: currentUserID,
+            fullTime: new Date().toLocaleString('ar-EG'),
+            isSOS: false,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        }).then(() => {
+            Swal.fire({ icon: 'success', title: 'تم النشر بنجاح', timer: 1500, showConfirmButton: false });
+            document.getElementById('newToolName').value = "";
         });
-
-        grid.innerHTML = filtered.map(item => {
-            const isOwner = (item.ownerID === myID);
-            return `
-                <div class="tool-card ${item.isSOS ? 'sos-card' : ''}">
-                    ${(myID === ADMIN_ID || isOwner) ? `<i class="fas fa-trash admin-del-icon" onclick="deleteItem('${item.id}')"></i>` : ''}
-                    <span class="category-tag">${item.college || 'AUST'}</span>
-                    <div class="post-time">${item.fullTime || ''}</div>
-                    <div class="post-owner">👤 ${item.owner}</div>
-                    <h3 style="font-size:0.9rem">${item.name}</h3>
-                    <div class="explanation-box">${item.explanation || ''}</div>
-                    <button onclick="goToChat('${item.owner}', '${item.ownerID}', '${item.name}')" 
-                            class="contact-btn" ${isOwner ? 'disabled' : ''}>
-                        ${isOwner ? 'منشوري' : 'تواصل'}
-                    </button>
-                </div>
-            `;
-        }).join('');
     }
-
-    function deleteItem(id) {
-        Swal.fire({ title: 'حذف؟', icon: 'warning', showCancelButton: true }).then(r => {
-            if(r.isConfirmed) database.ref('globalMarket/' + id).remove();
-        });
-    }
-
-    function goToChat(name, id, item) {
-        if (id === myID) return;
-        window.location.href = `chat.html?to=${encodeURIComponent(name)}&toID=${id}&item=${encodeURIComponent(item)}`;
-    }
-
-    window.onload = startListening;
 </script>
 </body>
 </html>
