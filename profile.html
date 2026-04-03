@@ -3,109 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الملف الشخصي | Shahd Al-Khaled</title>
+    <title>الملف الشخصي | نبض AUST</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        :root {
-            --gold: #00d4ff; --gold-glow: rgba(0, 212, 255, 0.5);
-            --navy-deep: #1e293b; --glass: rgba(10, 15, 30, 0.85); 
-        }
+        :root { --gold: #ffcf4d; --dark-bg: #050a18; --glass: rgba(255, 255, 255, 0.05); }
         body {
-            margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(rgba(3, 7, 18, 0.6), rgba(3, 7, 18, 0.6)), url('67260.jpg') no-repeat center center fixed;
-            background-size: cover; min-height: 100vh; display: flex; align-items: center; justify-content: center; color: white;
-            padding: 15px;
+            background: linear-gradient(rgba(5, 10, 24, 0.9), rgba(5, 10, 24, 0.9)), url('67260.jpg') no-repeat center center fixed;
+            background-size: cover; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px;
         }
-        .profile-container { width: 100%; max-width: 850px; }
-        .profile-card {
-            background: var(--glass); padding: 25px; border-radius: 30px;
-            backdrop-filter: blur(25px); border: 1px solid rgba(0, 212, 255, 0.2);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.6); text-align: center;
+
+        .profile-header {
+            background: linear-gradient(to bottom, rgba(0, 212, 255, 0.2), transparent);
+            padding: 40px 20px; text-align: center; border-bottom: 1px solid var(--glass);
         }
-        .avatar {
-            width: 80px; height: 80px; background: linear-gradient(135deg, var(--gold), var(--navy-deep));
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 35px; margin: 0 auto 15px; border: 3px solid var(--gold); box-shadow: 0 0 20px var(--gold-glow);
-            position: relative;
+
+        .avatar-main {
+            width: 100px; height: 100px; border-radius: 50%; background: var(--gold);
+            margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;
+            font-size: 40px; color: #000; box-shadow: 0 0 20px rgba(255, 207, 77, 0.4);
+            border: 4px solid rgba(255,255,255,0.1);
         }
-        .unread-badge {
-            position: absolute; top: -5px; right: -5px; background: #ff4d4d; color: white;
-            font-size: 10px; padding: 3px 7px; border-radius: 10px; font-weight: bold;
-            box-shadow: 0 0 10px #ff4d4d; border: 2px solid var(--navy-deep);
+
+        .stats-container {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 20px;
         }
-        .stat-box {
-            background: rgba(30, 41, 59, 0.7); padding: 10px 20px; border-radius: 15px;
-            border: 1px solid var(--gold); display: inline-block; margin: 10px; min-width: 100px;
+
+        .stat-card {
+            background: var(--glass); padding: 15px; border-radius: 15px;
+            text-align: center; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);
         }
-        .chats-container {
-            margin-top: 15px; text-align: right; max-height: 300px; overflow-y: auto;
-            padding: 10px; border-radius: 15px; background: rgba(0,0,0,0.3);
-            scrollbar-width: thin; scrollbar-color: var(--gold) transparent;
-        }
+
+        .section-title { padding: 0 20px; margin-top: 20px; font-size: 1.1rem; color: var(--gold); display: flex; align-items: center; gap: 10px; }
+
+        .chats-list { padding: 10px 20px; }
+
         .chat-item-card {
-            display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.05);
-            padding: 12px; border-radius: 15px; margin-bottom: 10px; cursor: pointer; 
-            border-right: 4px solid var(--gold); transition: 0.3s;
+            background: var(--glass); margin-bottom: 12px; padding: 15px;
+            border-radius: 18px; display: flex; align-items: center;
+            border: 1px solid rgba(255,255,255,0.05); transition: 0.3s;
+            cursor: pointer; position: relative; overflow: hidden;
         }
-        .chat-item-card.has-new { border-right-color: #ff4d4d; background: rgba(255, 77, 77, 0.15); }
-        .chat-item-card:hover { background: rgba(255,255,255,0.12); transform: scale(1.01); }
-        
-        .activity-item {
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(0,0,0,0.3); padding: 12px 18px; border-radius: 12px; 
-            margin-bottom: 8px; border-left: 3px solid var(--gold); gap: 10px;
+
+        .chat-item-card:hover { background: rgba(255, 255, 255, 0.1); transform: scale(1.02); }
+        .chat-item-card.has-new::before {
+            content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 4px; background: #00d4ff;
         }
-        .nav-btn {
-            background: rgba(10, 15, 30, 0.8); border: 1px solid var(--gold); color: var(--gold);
-            padding: 8px 15px; border-radius: 12px; text-decoration: none; font-weight: bold; 
-            cursor: pointer; font-size: 0.9rem;
+
+        .unread-badge {
+            background: #ff4d4d; color: white; min-width: 18px; height: 18px;
+            border-radius: 10px; font-size: 10px; display: flex; align-items: center;
+            justify-content: center; position: absolute; top: -5px; right: -5px; border: 2px solid var(--dark-bg);
         }
-        .del-btn { background: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; flex-shrink: 0; }
-        .edit-btn { background: none; border: 1px solid var(--gold); color: var(--gold); padding: 5px 15px; border-radius: 10px; cursor: pointer; font-size: 0.8rem; margin-top: 5px; }
+
+        .nav-bar {
+            position: fixed; bottom: 0; width: 100%; background: rgba(10, 15, 30, 0.95);
+            display: flex; justify-content: space-around; padding: 15px 0;
+            backdrop-filter: blur(20px); border-top: 1px solid var(--glass); z-index: 1000;
+        }
+
+        .nav-item { color: rgba(255,255,255,0.5); text-decoration: none; font-size: 1.2rem; transition: 0.3s; }
+        .nav-item.active { color: var(--gold); text-shadow: 0 0 10px var(--gold); }
+
+        .logout-btn { color: #ff4d4d; background: none; border: none; font-size: 1.2rem; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="profile-container">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; align-items: center;">
-            <a href="dashboard.html" class="nav-btn"><i class="fas fa-arrow-right"></i> عودة</a>
-            <span id="welcomeTitle" class="nav-btn" style="border-color: transparent; cursor: default; background: transparent;">...</span>
+    <div class="profile-header">
+        <div class="avatar-main" id="userInitial">S</div>
+        <h2 id="profileName" style="margin: 5px 0 0; font-size: 1.4rem;">جاري التحميل...</h2>
+        <p id="profileID" style="opacity: 0.6; font-size: 0.8rem; margin: 5px 0;"></p>
+    </div>
+
+    <div class="stats-container">
+        <div class="stat-card">
+            <div style="font-size: 1.2rem; color: var(--gold);" id="msgCount">0</div>
+            <div style="font-size: 0.7rem; opacity: 0.7;">رسائل نشطة</div>
+        </div>
+        <div class="stat-card">
+            <div style="font-size: 1.2rem; color: var(--gold);" id="toolCount">0</div>
+            <div style="font-size: 0.7rem; opacity: 0.7;">أدواتي المعروضة</div>
+        </div>
+    </div>
+
+    <div class="section-title"><i class="fas fa-comments"></i> آخر المحادثات</div>
+    <div id="myChatsList" class="chats-list">
         </div>
 
-        <div class="profile-card">
-            <div id="avatar" class="avatar">👤</div>
-            <h2 id="userNameDisplay" style="margin: 5px 0; font-size: 1.5rem;">...</h2>
-            <p id="userMajorDisplay" style="color: var(--gold); margin-bottom: 5px; font-size: 0.9rem;"></p>
-            <button class="edit-btn" onclick="editMajor()">🛠️ تعديل الاختصاص</button>
-            
-            <div style="margin-top: 15px;">
-                <div class="stat-box">
-                    <span id="itemsCount" style="font-size: 1.3rem; font-weight: bold;">0</span><br><small>أدواتي</small>
-                </div>
-            </div>
-
-            <div style="text-align: right; margin-top: 25px;">
-                <h3 style="color: var(--gold); font-size: 1.1rem;"><i class="fas fa-comments"></i> المحادثات النشطة:</h3>
-                <div id="myChatsList" class="chats-container">
-                    <p style="text-align:center; opacity:0.5; font-size: 0.8rem;">جاري مزامنة الرسائل...</p>
-                </div>
-            </div>
-
-            <div style="text-align: right; margin-top: 25px;">
-                <h3 style="color: var(--gold); font-size: 1.1rem;"><i class="fas fa-box"></i> إعلاناتي الأخيرة:</h3>
-                <div id="myActivityList" style="max-height: 250px; overflow-y: auto;"></div>
-            </div>
-
-            <button onclick="logout()" style="background:none; border:1px solid #ff4d4d; color:#ff4d4d; padding:12px; width:100%; border-radius:15px; margin-top:30px; cursor:pointer; font-weight:bold;">تسجيل الخروج</button>
-        </div>
+    <div class="nav-bar">
+        <a href="market.html" class="nav-item"><i class="fas fa-store"></i></a>
+        <a href="profile.html" class="nav-item active"><i class="fas fa-user-circle"></i></a>
+        <button class="logout-btn" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i></button>
     </div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-    // --- إعدادات Firebase ---
     const firebaseConfig = {
         apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
         authDomain: "nabd-aust.firebaseapp.com",
@@ -119,167 +114,119 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    function getActiveUser() {
-        return localStorage.getItem("userName") || "مستخدم";
+    const currentID = localStorage.getItem("universityID");
+    const currentName = localStorage.getItem("userName");
+
+    // التحقق من الجلسة للأمان
+    if (!currentID) {
+        window.location.href = "index.html";
     }
 
-    window.onload = function() {
-        refreshProfile();
-    };
-
-    function refreshProfile() {
-        const name = getActiveUser();
-        const major = localStorage.getItem("userMajor") || "هندسة البرمجيات";
+    function initProfile() {
+        document.getElementById('profileName').innerText = currentName;
+        document.getElementById('profileID').innerText = "ID: " + currentID;
+        document.getElementById('userInitial').innerText = currentName.charAt(0).toUpperCase();
         
-        document.getElementById("userNameDisplay").innerText = name;
-        document.getElementById("welcomeTitle").innerText = "ملف " + name;
-        document.getElementById("userMajorDisplay").innerText = major;
-        document.getElementById("avatar").innerText = name.charAt(0).toUpperCase();
-        
-        renderMyItems(name);
-        loadMyChatsFromFirebase(); 
+        loadMyChats();
+        countMyTools();
     }
 
-    // --- تعديل: منطق جلب المحادثات لضمان الظهور ---
-    function loadMyChatsFromFirebase() {
+    function loadMyChats() {
         const chatListDiv = document.getElementById("myChatsList");
-        const currentName = getActiveUser();
-        const currentID = localStorage.getItem("universityID"); // هام جداً للربط
-        
-        // المفتاح الذي نستخدمه للفلترة هو الاسم بدون فراغات
-        const safeKey = currentName.replace(/\s/g, '');
 
         database.ref('chats').on('value', (snapshot) => {
             const allChats = snapshot.val();
             chatListDiv.innerHTML = "";
             let chatArray = [];
+            let totalActiveChats = 0;
 
             if (allChats) {
-                Object.keys(allChats).forEach(chatId => {
-                    // التحقق إذا كان اسمك جزء من المعرف البرمجي للغرفة
-                    if (chatId.includes(safeKey)) {
-                        const messages = allChats[chatId];
-                        const msgKeys = Object.keys(messages);
-                        const lastMsg = messages[msgKeys[msgKeys.length - 1]];
+                Object.keys(allChats).forEach(chatKey => {
+                    // التحقق إذا كان رقمي الجامعي طرفاً في المحادثة
+                    if (chatKey.includes(currentID)) {
+                        const messages = allChats[chatKey];
+                        const keys = Object.keys(messages);
+                        const lastMsg = messages[keys[keys.length - 1]];
                         
+                        // تحديد من هو الشخص الآخر
+                        let otherName = (lastMsg.senderID === currentID) ? lastMsg.receiverName : lastMsg.sender;
+                        let otherID = (lastMsg.senderID === currentID) ? lastMsg.receiverID : lastMsg.senderID;
+
                         chatArray.push({
-                            chatId: chatId,
-                            lastMsg: lastMsg,
-                            msgKeys: msgKeys,
-                            messages: messages,
-                            timestamp: lastMsg.timestamp || 0 // للترتيب الصحيح
+                            id: chatKey,
+                            otherName: otherName || "زميل",
+                            otherID: otherID,
+                            text: lastMsg.text,
+                            time: lastMsg.time,
+                            timestamp: lastMsg.timestamp,
+                            item: lastMsg.item,
+                            unread: Object.values(messages).filter(m => m.senderID !== currentID && !m.seen).length
                         });
+                        totalActiveChats++;
                     }
                 });
 
-                // ترتيب: الأحدث يظهر في الأعلى
+                // ترتيب المحادثات: الأحدث أولاً
                 chatArray.sort((a, b) => b.timestamp - a.timestamp);
 
-                chatArray.forEach(chatObj => {
-                    const messages = chatObj.messages;
-                    // حساب غير المقروء (أي رسالة لستِ أنتِ مرسلها ولم تُقرأ بعد)
-                    const unreadCount = chatObj.msgKeys.filter(k => messages[k].sender !== currentName && !messages[k].seen).length;
-                    
-                    // استخراج اسم الشخص الآخر من عنوان الغرفة
-                    const parts = chatObj.chatId.split('_');
-                    let otherPersonRaw = parts.find(p => p !== safeKey) || "زميل";
-
+                chatArray.forEach(chat => {
                     chatListDiv.innerHTML += `
-                        <div class="chat-item-card ${unreadCount > 0 ? 'has-new' : ''}" 
-                             onclick="window.location.href='chat.html?to=${encodeURIComponent(otherPersonRaw)}&item=${encodeURIComponent(chatObj.lastMsg.item || 'عام')}'">
-                            <div class="avatar" style="width:45px; height:45px; font-size:20px; margin:0; flex-shrink:0;">
-                                ${otherPersonRaw.charAt(0).toUpperCase()}
-                                ${unreadCount > 0 ? `<div class="unread-badge">${unreadCount}</div>` : ''}
+                        <div class="chat-item-card ${chat.unread > 0 ? 'has-new' : ''}" 
+                             onclick="window.location.href='chat.html?to=${encodeURIComponent(chat.otherName)}&toID=${chat.otherID}&item=${encodeURIComponent(chat.item || 'عام')}'">
+                            <div class="avatar-main" style="width:45px; height:45px; margin:0; font-size:18px; position:relative;">
+                                ${chat.otherName.charAt(0).toUpperCase()}
+                                ${chat.unread > 0 ? `<div class="unread-badge">${chat.unread}</div>` : ''}
                             </div>
-                            <div style="flex:1; min-width:0; margin-right:10px;">
-                                <div style="font-weight:bold; color:var(--gold); font-size:0.95rem;">${otherPersonRaw}</div>
-                                <div style="font-size:0.8rem; opacity:0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                    ${chatObj.lastMsg.sender === currentName ? 'أنتِ: ' : ''}${chatObj.lastMsg.text}
+                            <div style="flex:1; margin-right:12px; min-width:0;">
+                                <div style="font-weight:bold; color:var(--gold); font-size:0.9rem;">${chat.otherName}</div>
+                                <div style="font-size:0.75rem; opacity:0.6; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                    ${chat.text}
                                 </div>
                             </div>
-                            <div style="font-size:0.65rem; opacity:0.5; flex-shrink:0;">${chatObj.lastMsg.time || ''}</div>
+                            <div style="font-size:0.6rem; opacity:0.4;">${chat.time}</div>
                         </div>
                     `;
                 });
             }
-            
+
+            document.getElementById('msgCount').innerText = totalActiveChats;
             if (chatArray.length === 0) {
-                chatListDiv.innerHTML = "<p style='text-align:center; opacity:0.5; font-size:0.8rem; margin-top:20px;'>لا توجد محادثات نشطة حالياً.</p>";
+                chatListDiv.innerHTML = "<p style='text-align:center; opacity:0.4; font-size:0.8rem;'>لا توجد محادثات نشطة</p>";
             }
         });
     }
 
-    // --- تعديل: عرض المنشورات لضمان التحديث اللحظي ---
-    function renderMyItems(currentName) {
-        database.ref('globalMarket/').on('value', (snapshot) => {
-            const data = snapshot.val();
-            const list = document.getElementById("myActivityList");
-            if (!data) {
-                document.getElementById("itemsCount").innerText = "0";
-                list.innerHTML = "<p style='text-align:center; opacity:0.5; font-size: 0.8rem;'>لا يوجد منشورات.</p>";
-                return;
+    function countMyTools() {
+        database.ref('globalMarket').once('value', (snap) => {
+            const data = snap.val();
+            let count = 0;
+            if (data) {
+                Object.values(data).forEach(item => {
+                    if (item.ownerID === currentID) count++;
+                });
             }
-
-            const myItems = [];
-            Object.keys(data).forEach(key => {
-                if (data[key].owner === currentName) {
-                    myItems.push({ id: key, ...data[key] });
-                }
-            });
-
-            myItems.reverse(); // الأحدث أولاً
-            document.getElementById("itemsCount").innerText = myItems.length;
-            
-            if(myItems.length === 0) {
-                list.innerHTML = "<p style='text-align:center; opacity:0.5; font-size: 0.8rem;'>لم تنشري شيئاً بعد.</p>";
-                return;
-            }
-
-            list.innerHTML = myItems.map(item => `
-                <div class="activity-item">
-                    <span style="font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                        ${item.isSOS ? '🆘' : '📦'} ${item.name}
-                    </span>
-                    <button class="del-btn" onclick="deleteMyItem('${item.id}')">حذف</button>
-                </div>
-            `).join('');
+            document.getElementById('toolCount').innerText = count;
         });
     }
 
-    async function editMajor() {
-        const { value: newMajor } = await Swal.fire({
-            title: 'تعديل الاختصاص',
-            input: 'text',
-            inputValue: localStorage.getItem("userMajor") || "هندسة البرمجيات",
-            confirmButtonColor: '#00d4ff',
-            showCancelButton: true,
-            background: '#0a0f1e',
-            color: '#fff'
-        });
-        if (newMajor) {
-            localStorage.setItem("userMajor", newMajor);
-            refreshProfile();
-        }
-    }
-
-    function deleteMyItem(key) {
+    function handleLogout() {
         Swal.fire({
-            title: 'حذف المنشور؟',
-            icon: 'warning',
+            title: 'تسجيل الخروج؟',
+            icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#ff4d4d',
-            background: '#0a0f1e',
+            confirmButtonText: 'خروج',
+            background: '#050a18',
             color: '#fff'
-        }).then(res => {
-            if (res.isConfirmed) database.ref('globalMarket/' + key).remove();
+        }).then(r => {
+            if (r.isConfirmed) {
+                localStorage.clear();
+                window.location.href = "index.html";
+            }
         });
     }
 
-    function logout() { 
-        localStorage.removeItem("userName");
-        localStorage.removeItem("universityID"); 
-        window.location.href = "index.html"; 
-    }
+    window.onload = initProfile;
 </script>
 </body>
 </html>
