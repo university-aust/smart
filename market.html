@@ -8,86 +8,96 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root { 
-            --cyan-neon: #00e5ff; --blue-glass: rgba(0, 40, 80, 0.6); 
-            --red-glass: rgba(139, 0, 0, 0.5); --glass-border: rgba(255, 255, 255, 0.1);
+            --cyan-neon: #00e5ff; 
+            --blue-glass: rgba(0, 40, 80, 0.6); 
+            --red-glass: rgba(139, 0, 0, 0.5); 
+            --glass-border: rgba(255, 255, 255, 0.1);
             --neon-glow: 0 0 15px rgba(0, 229, 255, 0.4);
         }
 
         body { 
-            background: #0a0a0f url('67260.jpg') no-repeat center center fixed;
-            background-size: cover; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; 
+            background: linear-gradient(rgba(10, 10, 15, 0.7), rgba(10, 10, 15, 0.7)), url('67260.jpg') no-repeat center center fixed;
+            background-size: cover; color: white; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; 
         }
 
-        /* هيدر ثابت وسريع */
         .header-nav { 
             display: flex; justify-content: space-between; align-items: center; 
-            padding: 12px 5%; background: rgba(0, 0, 0, 0.85); 
-            border-bottom: 1px solid var(--glass-border); backdrop-filter: blur(10px);
+            padding: 15px 5%; background: rgba(0, 0, 0, 0.8); 
+            border-bottom: 1px solid var(--glass-border); backdrop-filter: blur(15px);
             position: sticky; top: 0; z-index: 1000;
         }
 
         .btn-back { 
-            background: transparent; border: 1px solid var(--cyan-neon); 
-            color: var(--cyan-neon); padding: 7px 15px; border-radius: 10px; 
-            text-decoration: none; font-weight: bold; font-size: 0.85rem;
+            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--cyan-neon); 
+            color: var(--cyan-neon); padding: 8px 18px; border-radius: 10px; 
+            text-decoration: none; font-weight: bold; transition: 0.3s; font-size: 0.85rem;
         }
+        .btn-back:hover { background: var(--cyan-neon); color: #000; box-shadow: var(--neon-glow); }
 
-        .search-container { padding: 10px 5%; display: flex; gap: 8px; background: rgba(0,0,0,0.3); }
+        .search-container { padding: 12px 5%; display: flex; gap: 10px; flex-wrap: wrap; background: rgba(0,0,0,0.4); }
         .search-input { 
-            flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--glass-border); 
-            background: rgba(255,255,255,0.1); color: white; outline: none;
+            flex: 1; min-width: 120px; padding: 10px; border-radius: 10px; 
+            border: 1px solid var(--glass-border); background: rgba(0, 0, 0, 0.5); 
+            color: white; outline: none; font-size: 0.9rem;
         }
 
         .market-grid { 
             display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 15px; padding: 20px 5%; 
+            gap: 15px; padding: 20px 3%; 
         }
 
         .tool-card {
-            background: var(--blue-glass); backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px) saturate(150%);
             border-radius: 20px; border: 1px solid var(--glass-border);
-            padding: 18px; display: flex; flex-direction: column; position: relative;
-            transition: 0.3s; min-height: 220px;
+            padding: 15px; display: flex; flex-direction: column;
+            position: relative; transition: 0.3s; min-height: 240px;
         }
+        .tool-card:hover { transform: translateY(-5px); border-color: var(--cyan-neon); box-shadow: var(--neon-glow); }
 
-        .tool-card:hover { border-color: var(--cyan-neon); box-shadow: var(--neon-glow); }
-        .sos-card { background: var(--red-glass); border-color: rgba(255, 77, 77, 0.3); }
+        .exchange-card { background: var(--blue-glass); }
+        .sos-card { background: var(--red-glass) !important; border-color: rgba(255, 77, 77, 0.3) !important; }
 
-        .admin-del-icon {
-            position: absolute; top: 12px; left: 12px; color: #ff4d4d;
-            cursor: pointer; font-size: 1.1rem; opacity: 0.7; transition: 0.3s;
-        }
-        .admin-del-icon:hover { opacity: 1; transform: scale(1.2); }
-
-        .post-owner { color: var(--cyan-neon); font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; }
-        .explanation-box { 
-            background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px; 
-            font-size: 0.8rem; margin: 10px 0; border-right: 3px solid var(--cyan-neon);
+        .category-tag { background: rgba(255, 255, 255, 0.1); color: #fff; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: bold; }
+        .post-time { font-size: 10px; color: rgba(255,255,255,0.5); margin: 10px 0; }
+        .post-owner { color: var(--cyan-neon); font-size: 12px; font-weight: bold; margin-bottom: 5px; }
+        
+        .explanation-box {
+            background: rgba(0, 0, 0, 0.2); padding: 10px; border-radius: 10px;
+            margin: 10px 0; font-size: 0.8rem; color: #eee; 
+            border-right: 4px solid var(--cyan-neon); line-height: 1.4;
         }
 
         .contact-btn { 
-            width: 100%; padding: 10px; border: 1px solid var(--cyan-neon);
-            border-radius: 12px; background: transparent; color: var(--cyan-neon);
-            font-weight: bold; cursor: pointer; margin-top: auto;
+            width: 100%; margin-top: auto; padding: 12px; border: none; 
+            border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; 
+            font-size: 0.85rem; background: rgba(255, 255, 255, 0.1); color: #fff;
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        .contact-btn:hover { background: var(--cyan-neon); color: black; }
+        .contact-btn:hover { background: #fff; color: #000; }
+
+        .admin-del-icon {
+            position: absolute; top: 12px; left: 12px; color: rgba(255,255,255,0.4);
+            cursor: pointer; font-size: 16px; transition: 0.3s; z-index: 10;
+        }
+        .admin-del-icon:hover { color: #ff4d4d; transform: scale(1.2); }
     </style>
 </head>
 <body>
 
-    <nav class="header-nav">
+    <div class="header-nav">
         <h1>🌐 معرض <span style="color:var(--cyan-neon)">AUST</span></h1>
-        <a href="dashboard.html" class="btn-back">الرئيسية</a>
-    </nav>
+        <a href="dashboard.html" class="btn-back"><i class="fas fa-home"></i> الرئيسية</a>
+    </div>
 
     <div class="search-container">
-        <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث..." oninput="renderMarket()">
-        <select id="filterCollege" class="search-input" style="flex:0; min-width:100px;" onchange="renderMarket()">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث بالاسم أو الغرض..." oninput="renderMarket()">
+        <select id="filterCollege" class="search-input" style="flex: 0; min-width: 110px;" onchange="renderMarket()">
             <option value="all">الكل</option>
             <option value="it">IT</option>
             <option value="dent">أسنان</option>
             <option value="pharm">صيدلة</option>
-            <option value="lost">مفقودات</option>
+            <option value="arch">عمارة</option>
+            <option value="lost">🔍 مفقودات</option>
         </select>
     </div>
 
@@ -97,9 +107,11 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-    // بيانات الأدمن (شهد)
+    // --- بيانات الأدمن والمستخدم (مستخرجة من تسجيل الدخول) ---
     const ADMIN_ID = "20241600060"; 
-    const currentUserID = localStorage.getItem("userID");
+    const ADMIN_PASS = "shjkshjk"; 
+    const currentUserID = (localStorage.getItem("userID") || "").trim();
+    const currentUserName = (localStorage.getItem("userName") || "").trim();
 
     const firebaseConfig = {
         apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
@@ -109,15 +121,22 @@
 
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
+
+    const collegeMap = { 'it': 'IT', 'dent': 'أسنان', 'pharm': 'صيدلة', 'arch': 'عمارة', 'عام': 'عام' };
     let cachedData = [];
 
-    // جلب البيانات فوراً بدون انتظار شاشات تحميل
-    function startApp() {
-        if (!currentUserID) { window.location.href = "login.html"; return; }
+    // جلب الكاش أولاً للسرعة
+    const localSaved = localStorage.getItem("marketCache");
+    if (localSaved) {
+        cachedData = JSON.parse(localSaved);
+        renderMarket();
+    }
 
+    function startListening() {
         database.ref('globalMarket/').on('value', (snapshot) => {
             const data = snapshot.val();
             cachedData = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })).reverse() : [];
+            localStorage.setItem("marketCache", JSON.stringify(cachedData));
             renderMarket();
         });
     }
@@ -126,62 +145,75 @@
         const grid = document.getElementById("marketGrid");
         const searchTerm = document.getElementById("searchInput").value.toLowerCase();
         const filterCol = document.getElementById("filterCollege").value;
+        
+        const isSuperAdmin = (currentUserID === ADMIN_ID);
 
-        let html = "";
+        let htmlContent = "";
+
         const filtered = cachedData.filter(item => {
-            const matchSearch = (item.name || "").toLowerCase().includes(searchTerm);
-            const matchCol = (filterCol === "all") || (item.college === filterCol);
-            return matchSearch && matchCol;
+            const matchesSearch = (item.name || "").toLowerCase().includes(searchTerm) || (item.owner || "").toLowerCase().includes(searchTerm);
+            let matchesCollege = (filterCol === "all") || (item.college === filterCol);
+            if (filterCol === "lost") matchesCollege = (item.name || "").includes("مفقود") || (item.name || "").includes("موجود");
+            return matchesSearch && matchesCollege;
         });
 
         filtered.forEach(item => {
-            const isOwner = (item.ownerID === currentUserID || currentUserID === ADMIN_ID);
-            const cardType = item.isSOS ? 'sos-card' : '';
+            const isSOS = item.isSOS === true;
+            const isOwner = (item.ownerID === currentUserID); // الأمان يعتمد على الـ ID
+            const cardClass = isSOS ? 'sos-card' : 'exchange-card';
 
-            html += `
-                <div class="tool-card ${cardType}">
-                    ${isOwner ? `<i class="fas fa-trash-alt admin-del-icon" onclick="deleteItem('${item.id}')"></i>` : ''}
+            htmlContent += `
+                <div class="tool-card ${cardClass}">
+                    ${(isSuperAdmin || isOwner) ? `<i class="fas fa-trash-alt admin-del-icon" onclick="handleDelete('${item.id}', ${isSuperAdmin})"></i>` : ''}
+                    <span class="category-tag">${collegeMap[item.college] || 'AUST'}</span>
+                    <div class="post-time"><i class="far fa-clock"></i> ${item.fullTime || 'الآن'}</div>
                     <div class="post-owner">👤 ${item.owner}</div>
-                    <div style="font-size:0.7rem; opacity:0.6;">${item.fullTime || ''}</div>
-                    <h3 style="font-size:0.9rem; margin:10px 0;">${item.name}</h3>
+                    <h3 style="font-size: 0.9rem; margin:5px 0;">${item.name}</h3>
                     ${item.explanation ? `<div class="explanation-box">${item.explanation}</div>` : ''}
-                    <button class="contact-btn" onclick="goToChat('${item.owner}', '${item.ownerID}')">تواصل الآن</button>
+                    <button onclick="goToChat('${item.owner}', '${item.ownerID}', '${item.name}')" class="contact-btn">تواصل</button>
                 </div>`;
         });
-        grid.innerHTML = html || `<p style="text-align:center; grid-column:1/-1;">لا يوجد منشورات حالياً</p>`;
+        grid.innerHTML = htmlContent || `<p style="grid-column:1/-1; text-align:center; opacity:0.5;">لا يوجد نتائج حالياً..</p>`;
     }
 
-    // دالة الحذف النهائية والأكيدة
-    function deleteItem(id) {
-        Swal.fire({
-            title: 'هل أنتِ متأكدة؟',
-            text: "سيتم حذف المنشور نهائياً من القاعدة",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ff4d4d',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'نعم، احذف',
-            cancelButtonText: 'إلغاء'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // الحذف الفعلي من السيرفر
-                database.ref('globalMarket/' + id).remove()
-                .then(() => {
-                    Swal.fire('تم الحذف!', 'اختفى المنشور من العرض.', 'success');
-                })
-                .catch((error) => {
-                    Swal.fire('خطأ!', 'فشل الحذف: ' + error.message, 'error');
-                });
-            }
-        });
+    function handleDelete(itemId, isGlobalAdmin) {
+        if (isGlobalAdmin) {
+            Swal.fire({
+                title: 'حذف كمسؤول',
+                input: 'password',
+                placeholder: 'أدخل رمز الآدمن',
+                showCancelButton: true,
+                confirmButtonColor: '#ff4d4d',
+                background: '#0a0a0f', color: '#fff'
+            }).then(res => {
+                if(res.value === ADMIN_PASS) {
+                    database.ref('globalMarket/' + itemId).remove();
+                } else if(res.value) {
+                    Swal.fire('خطأ', 'الرمز غير صحيح', 'error');
+                }
+            });
+        } else {
+            Swal.fire({
+                title: 'حذف المنشور؟',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ff4d4d',
+                background: '#0a0a0f', color: '#fff'
+            }).then(res => {
+                if(res.isConfirmed) database.ref('globalMarket/' + itemId).remove();
+            });
+        }
     }
 
-    function goToChat(name, id) {
-        if (id === currentUserID) return Swal.fire('تنبيه', 'هذا منشورك!', 'info');
-        window.location.href = `chat.html?toID=${id}&toName=${encodeURIComponent(name)}`;
+    function goToChat(ownerName, ownerID, itemName) {
+        if (ownerID === currentUserID) {
+            Swal.fire({ text: 'هذا منشورك!', icon: 'info', background: '#0a0a0f', color: '#fff', timer: 1000, showConfirmButton: false });
+            return;
+        }
+        window.location.href = `chat.html?toID=${ownerID}&toName=${encodeURIComponent(ownerName)}&item=${encodeURIComponent(itemName)}`;
     }
 
-    startApp();
+    window.onload = startListening;
 </script>
 </body>
 </html>
