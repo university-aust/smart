@@ -164,7 +164,7 @@
 
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-    const auth = firebase.auth(); // تعريف خدمة الـ Authentication
+    const auth = firebase.auth(); 
 
     let mode = 'login';
     let savedRecoveryCode = null;
@@ -238,49 +238,49 @@
             notify("جاري إنشاء الحساب...");
             
             try {
-                // 1. التحقق من عدم تكرار الـ ID في قاعدة البيانات
                 const snapshot = await database.ref('users/' + id).once('value');
                 if (snapshot.exists()) {
                     notify("رقم الطالب مسجل مسبقاً!");
                     return;
                 }
 
-                // 2. إنشاء المستخدم في Firebase Auth
+                // 1. إنشاء المستخدم في Firebase Auth
                 const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
                 const user = userCredential.user;
 
-                // 3. إرسال إيميل التحقق فوراً
+                // 2. إرسال إيميل التحقق فوراً
                 await user.sendEmailVerification();
                 notify("تم إرسال رابط تفعيل لإيميلك ✅");
 
-                // 4. حفظ البيانات في Realtime Database
+                // 3. حفظ البيانات في Realtime Database
                 await database.ref('users/' + id).set({ 
                     id, pass, name, email, 
                     major: "هندسة البرمجيات", 
-                    createdAt: new Date().toISOString(),
-                    isVerified: false // سنحدثها لاحقاً عند تسجيل الدخول
+                    createdAt: new Date().toISOString()
                 });
 
                 notify("حسابك جاهز! يرجى تفعيل الإيميل قبل الدخول.");
+                
+                // 4. تسجيل الخروج لضمان عدم الدخول إلا بعد التفعيل
+                await auth.signOut();
+                
                 setTimeout(toggleMode, 2000);
 
             } catch (error) {
                 if (error.code === 'auth/email-already-in-use') notify("هذا البريد مستخدم بالفعل!");
                 else notify("خطأ: " + error.message);
+                console.error(error);
             }
         } 
         else if (mode === 'login') {
             try {
-                // 1. جلب بيانات المستخدم من القاعدة
                 const snapshot = await database.ref('users/' + id).once('value');
                 const data = snapshot.val();
 
                 if (data && data.pass === pass) {
-                    // 2. تسجيل الدخول في Auth للتأكد من حالة الإيميل
                     const userCredential = await auth.signInWithEmailAndPassword(data.email, pass);
                     const user = userCredential.user;
 
-                    // 3. الشرط الجوهري: هل الإيميل مفعل؟
                     if (user.emailVerified) {
                         localStorage.setItem("userName", data.name.trim());
                         localStorage.setItem("userID", data.id.trim());
@@ -289,13 +289,13 @@
                         setTimeout(() => { window.location.href = "dashboard.html"; }, 1200);
                     } else {
                         notify("⚠️ حسابك غير مفعل! اضغط على الرابط في إيميلك.");
-                        // اختيارياً: إرسال الرابط مرة أخرى إذا رغبتِ
+                        await auth.signOut(); // تسجيل خروج إذا لم يفعل الإيميل
                     }
                 } else {
                     notify("رقم الطالب أو كلمة المرور خطأ");
                 }
             } catch (error) {
-                notify("خطأ في الدخول: تأكد من بياناتك");
+                notify("خطأ في الدخول: تأكد من التفعيل أو صحة البيانات");
             }
         }
         else if (mode === 'forgot') {
@@ -321,12 +321,7 @@
         else if (mode === 'verify') {
             if (userEnteredCode == savedRecoveryCode) {
                 if (pass.length < 8) { notify("الرمز الجديد قصير جداً"); return; }
-                // تحديث الرمز في القاعدة وفي Auth
                 try {
-                    const snapshot = await database.ref('users/' + id).once('value');
-                    const userEmail = snapshot.val().email;
-                    
-                    // تحديث في القاعدة
                     await database.ref('users/' + id).update({pass: pass});
                     notify("تم التحديث! يرجى الانتظار...");
                     setTimeout(() => location.reload(), 1500);
