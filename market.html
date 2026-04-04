@@ -8,118 +8,86 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root { 
-            --cyan-neon: #00e5ff; 
-            --blue-glass: rgba(0, 40, 80, 0.6); 
-            --red-glass: rgba(139, 0, 0, 0.5); 
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --cyan-neon: #00e5ff; --blue-glass: rgba(0, 40, 80, 0.6); 
+            --red-glass: rgba(139, 0, 0, 0.5); --glass-border: rgba(255, 255, 255, 0.1);
             --neon-glow: 0 0 15px rgba(0, 229, 255, 0.4);
         }
 
         body { 
-            background: linear-gradient(rgba(10, 10, 15, 0.7), rgba(10, 10, 15, 0.7)), url('67260.jpg') no-repeat center center fixed;
-            background-size: cover;
-            color: white; 
-            font-family: 'Segoe UI', Tahoma, sans-serif; 
-            margin: 0; 
-            overflow-x: hidden;
+            background: #0a0a0f url('67260.jpg') no-repeat center center fixed;
+            background-size: cover; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; 
         }
 
-        /* حاجز الحماية */
-        #secure-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #0a0a0f; z-index: 9999; display: flex;
-            justify-content: center; align-items: center;
-        }
-
+        /* هيدر ثابت وسريع */
         .header-nav { 
             display: flex; justify-content: space-between; align-items: center; 
-            padding: 15px 5%; background: rgba(0, 0, 0, 0.8); 
-            border-bottom: 1px solid var(--glass-border); backdrop-filter: blur(15px);
+            padding: 12px 5%; background: rgba(0, 0, 0, 0.85); 
+            border-bottom: 1px solid var(--glass-border); backdrop-filter: blur(10px);
             position: sticky; top: 0; z-index: 1000;
         }
 
         .btn-back { 
-            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--cyan-neon); 
-            color: var(--cyan-neon); padding: 8px 18px; border-radius: 12px; 
-            text-decoration: none; font-weight: bold; transition: 0.3s;
-            display: flex; align-items: center; gap: 8px; font-size: 0.9rem;
+            background: transparent; border: 1px solid var(--cyan-neon); 
+            color: var(--cyan-neon); padding: 7px 15px; border-radius: 10px; 
+            text-decoration: none; font-weight: bold; font-size: 0.85rem;
         }
-        .btn-back:hover { background: var(--cyan-neon); color: #000; box-shadow: var(--neon-glow); }
 
-        .search-container { padding: 15px 5%; display: flex; gap: 10px; flex-wrap: wrap; background: rgba(0,0,0,0.4); }
+        .search-container { padding: 10px 5%; display: flex; gap: 8px; background: rgba(0,0,0,0.3); }
         .search-input { 
-            flex: 1; min-width: 150px; padding: 12px; border-radius: 12px; 
-            border: 1px solid var(--glass-border); background: rgba(0, 0, 0, 0.5); 
-            color: white; outline: none; font-size: 0.9rem; transition: 0.3s;
+            flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--glass-border); 
+            background: rgba(255,255,255,0.1); color: white; outline: none;
         }
-        .search-input:focus { border-color: var(--cyan-neon); box-shadow: var(--neon-glow); }
 
         .market-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 20px; padding: 25px 5%; 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 15px; padding: 20px 5%; 
         }
 
         .tool-card {
-            backdrop-filter: blur(15px);
-            border-radius: 25px;
-            border: 1px solid var(--glass-border);
-            padding: 20px;
-            display: flex; flex-direction: column;
-            position: relative;
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            min-height: 250px;
+            background: var(--blue-glass); backdrop-filter: blur(10px);
+            border-radius: 20px; border: 1px solid var(--glass-border);
+            padding: 18px; display: flex; flex-direction: column; position: relative;
+            transition: 0.3s; min-height: 220px;
         }
 
-        .tool-card:hover { transform: translateY(-8px); border-color: var(--cyan-neon); box-shadow: var(--neon-glow); }
-
-        .exchange-card { background: var(--blue-glass); }
-        .sos-card { background: var(--red-glass) !important; border-color: rgba(255, 77, 77, 0.3) !important; }
-
-        .category-tag { background: rgba(255, 255, 255, 0.15); color: #fff; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
-        .post-time { font-size: 11px; color: rgba(255,255,255,0.6); margin: 12px 0; }
-        .post-owner { color: var(--cyan-neon); font-size: 12px; font-weight: bold; margin-bottom: 6px; }
-        
-        .explanation-box {
-            background: rgba(0, 0, 0, 0.25); padding: 12px; border-radius: 12px;
-            margin: 10px 0; font-size: 0.85rem; color: #eee; 
-            border-right: 4px solid var(--cyan-neon); line-height: 1.4;
-        }
-        .sos-card .explanation-box { border-right-color: #ff4d4d; }
-
-        .contact-btn { 
-            width: 100%; margin-top: auto; padding: 12px; border: none; 
-            border-radius: 15px; font-weight: bold; cursor: pointer; transition: 0.3s; 
-            font-size: 0.9rem; background: rgba(255, 255, 255, 0.1); color: #fff;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .contact-btn:hover { background: var(--cyan-neon); color: #000; border-color: var(--cyan-neon); }
+        .tool-card:hover { border-color: var(--cyan-neon); box-shadow: var(--neon-glow); }
+        .sos-card { background: var(--red-glass); border-color: rgba(255, 77, 77, 0.3); }
 
         .admin-del-icon {
-            position: absolute; top: 15px; left: 15px; color: rgba(255,255,255,0.5);
-            cursor: pointer; font-size: 18px; z-index: 10; transition: 0.3s;
+            position: absolute; top: 12px; left: 12px; color: #ff4d4d;
+            cursor: pointer; font-size: 1.1rem; opacity: 0.7; transition: 0.3s;
         }
-        .admin-del-icon:hover { color: #ff4d4d; transform: scale(1.2); }
+        .admin-del-icon:hover { opacity: 1; transform: scale(1.2); }
+
+        .post-owner { color: var(--cyan-neon); font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; }
+        .explanation-box { 
+            background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px; 
+            font-size: 0.8rem; margin: 10px 0; border-right: 3px solid var(--cyan-neon);
+        }
+
+        .contact-btn { 
+            width: 100%; padding: 10px; border: 1px solid var(--cyan-neon);
+            border-radius: 12px; background: transparent; color: var(--cyan-neon);
+            font-weight: bold; cursor: pointer; margin-top: auto;
+        }
+        .contact-btn:hover { background: var(--cyan-neon); color: black; }
     </style>
 </head>
 <body>
 
-    <div id="secure-overlay"><h2>جاري مزامنة البيانات...</h2></div>
-
-    <div class="header-nav">
+    <nav class="header-nav">
         <h1>🌐 معرض <span style="color:var(--cyan-neon)">AUST</span></h1>
-        <a href="dashboard.html" class="btn-back"><i class="fas fa-arrow-right"></i> لوحة التحكم</a>
-    </div>
+        <a href="dashboard.html" class="btn-back">الرئيسية</a>
+    </nav>
 
     <div class="search-container">
-        <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث عن مادة، غرض، أو طالب..." oninput="renderMarket()">
-        <select id="filterCollege" class="search-input" style="flex: 0; min-width: 140px;" onchange="renderMarket()">
-            <option value="all">كل الكليات</option>
-            <option value="it">المعلوماتية</option>
-            <option value="dent">الأسنان</option>
-            <option value="pharm">الصيدلة</option>
-            <option value="arch">العمارة</option>
-            <option value="lost">🔍 مفقودات</option>
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث..." oninput="renderMarket()">
+        <select id="filterCollege" class="search-input" style="flex:0; min-width:100px;" onchange="renderMarket()">
+            <option value="all">الكل</option>
+            <option value="it">IT</option>
+            <option value="dent">أسنان</option>
+            <option value="pharm">صيدلة</option>
+            <option value="lost">مفقودات</option>
         </select>
     </div>
 
@@ -129,18 +97,9 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-    // --- إعدادات الأمان (Security Logic) ---
-    const sessionToken = localStorage.getItem("sessionToken");
-    const currentUserID = localStorage.getItem("userID");
-    const currentUserName = (localStorage.getItem("userName") || "").trim();
-
-    // التحقق الفوري من الهوية
-    if (!sessionToken || !currentUserID) {
-        window.location.href = "login.html";
-    }
-
+    // بيانات الأدمن (شهد)
     const ADMIN_ID = "20241600060"; 
-    const ADMIN_PASS = "shjkshjk"; 
+    const currentUserID = localStorage.getItem("userID");
 
     const firebaseConfig = {
         apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
@@ -150,23 +109,16 @@
 
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-
-    const collegeMap = { 'it': 'IT', 'dent': 'أسنان', 'pharm': 'صيدلة', 'arch': 'عمارة', 'chemical': 'كيمياء', 'petro': 'بترول', 'trans': 'ترجمة', 'عام': 'عام' };
     let cachedData = [];
 
-    // جلب البيانات مع نظام الكاش السريع
-    function startListening() {
-        // فحص وجود المستخدم في القاعدة لزيادة الأمان
-        database.ref('users/' + currentUserID).once('value').then(snap => {
-            if(!snap.exists()) { localStorage.clear(); window.location.href="login.html"; }
-            
-            document.getElementById("secure-overlay").remove();
+    // جلب البيانات فوراً بدون انتظار شاشات تحميل
+    function startApp() {
+        if (!currentUserID) { window.location.href = "login.html"; return; }
 
-            database.ref('globalMarket/').on('value', (snapshot) => {
-                const data = snapshot.val();
-                cachedData = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })).reverse() : [];
-                renderMarket();
-            });
+        database.ref('globalMarket/').on('value', (snapshot) => {
+            const data = snapshot.val();
+            cachedData = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })).reverse() : [];
+            renderMarket();
         });
     }
 
@@ -174,95 +126,62 @@
         const grid = document.getElementById("marketGrid");
         const searchTerm = document.getElementById("searchInput").value.toLowerCase();
         const filterCol = document.getElementById("filterCollege").value;
-        
-        // التحقق من صلاحية الأدمن
-        const isSuperAdmin = (currentUserID === ADMIN_ID);
 
-        let htmlContent = "";
-
+        let html = "";
         const filtered = cachedData.filter(item => {
-            const matchesSearch = (item.name || "").toLowerCase().includes(searchTerm) || (item.owner || "").toLowerCase().includes(searchTerm);
-            let matchesCollege = (filterCol === "all") || (item.college === filterCol);
-            if (filterCol === "lost") matchesCollege = item.name.includes("مفقود") || item.name.includes("موجود");
-            return matchesSearch && matchesCollege;
+            const matchSearch = (item.name || "").toLowerCase().includes(searchTerm);
+            const matchCol = (filterCol === "all") || (item.college === filterCol);
+            return matchSearch && matchCol;
         });
-
-        if (filtered.length === 0) {
-            grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 50px; opacity: 0.5;">
-                <i class="fas fa-box-open" style="font-size: 3rem; display: block; margin-bottom: 10px;"></i>
-                لا توجد منشورات حالياً..
-            </div>`;
-            return;
-        }
 
         filtered.forEach(item => {
-            const isSOS = item.isSOS === true;
-            const isOwner = (item.ownerID === currentUserID); // الأمان يعتمد على الـ ID وليس الاسم
-            const cardClass = isSOS ? 'sos-card' : 'exchange-card';
+            const isOwner = (item.ownerID === currentUserID || currentUserID === ADMIN_ID);
+            const cardType = item.isSOS ? 'sos-card' : '';
 
-            htmlContent += `
-                <div class="tool-card ${cardClass}">
-                    ${(isSuperAdmin || isOwner) ? `<i class="fas fa-trash-alt admin-del-icon" onclick="handleDelete('${item.id}', ${isSuperAdmin})"></i>` : ''}
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span class="category-tag">${collegeMap[item.college] || 'AUST'}</span>
-                        ${isOwner ? '<span style="font-size:10px; color:var(--cyan-neon)">● منشورك</span>' : ''}
-                    </div>
-                    <div class="post-time"><i class="far fa-clock"></i> ${item.fullTime || 'الآن'}</div>
+            html += `
+                <div class="tool-card ${cardType}">
+                    ${isOwner ? `<i class="fas fa-trash-alt admin-del-icon" onclick="deleteItem('${item.id}')"></i>` : ''}
                     <div class="post-owner">👤 ${item.owner}</div>
-                    <h3 style="margin:5px 0; font-size: 1rem; color: #fff;">${item.name}</h3>
-                    
+                    <div style="font-size:0.7rem; opacity:0.6;">${item.fullTime || ''}</div>
+                    <h3 style="font-size:0.9rem; margin:10px 0;">${item.name}</h3>
                     ${item.explanation ? `<div class="explanation-box">${item.explanation}</div>` : ''}
-                    
-                    <button onclick="goToChat('${item.owner}', '${item.name}', '${item.ownerID}')" class="contact-btn">
-                        <i class="fas fa-comments"></i> مراسلة صاحب المنشور
-                    </button>
+                    <button class="contact-btn" onclick="goToChat('${item.owner}', '${item.ownerID}')">تواصل الآن</button>
                 </div>`;
         });
-        grid.innerHTML = htmlContent;
+        grid.innerHTML = html || `<p style="text-align:center; grid-column:1/-1;">لا يوجد منشورات حالياً</p>`;
     }
 
-    function handleDelete(itemId, isGlobalAdmin) {
-        if (isGlobalAdmin) {
-            Swal.fire({ 
-                title: 'حذف المسؤول', 
-                text: 'أدخل رمز الحماية للتأكيد',
-                input: 'password', 
-                showCancelButton: true, 
-                confirmButtonColor: '#ff4d4d',
-                background: '#0a0a0f', 
-                color: '#fff' 
-            }).then(res => { 
-                if(res.value === ADMIN_PASS) {
-                    database.ref('globalMarket/' + itemId).remove();
-                } else if (res.value) {
-                    Swal.fire('خطأ', 'رمز الحماية غير صحيح', 'error');
-                }
-            });
-        } else {
-            Swal.fire({ 
-                title: 'حذف المنشور؟', 
-                icon: 'warning', 
-                showCancelButton: true, 
-                confirmButtonText: 'نعم، احذف',
-                cancelButtonText: 'إلغاء',
-                background: '#0a0a0f', 
-                color: '#fff' 
-            }).then(res => { 
-                if(res.isConfirmed) database.ref('globalMarket/' + itemId).remove();
-            });
-        }
+    // دالة الحذف النهائية والأكيدة
+    function deleteItem(id) {
+        Swal.fire({
+            title: 'هل أنتِ متأكدة؟',
+            text: "سيتم حذف المنشور نهائياً من القاعدة",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ff4d4d',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'نعم، احذف',
+            cancelButtonText: 'إلغاء'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // الحذف الفعلي من السيرفر
+                database.ref('globalMarket/' + id).remove()
+                .then(() => {
+                    Swal.fire('تم الحذف!', 'اختفى المنشور من العرض.', 'success');
+                })
+                .catch((error) => {
+                    Swal.fire('خطأ!', 'فشل الحذف: ' + error.message, 'error');
+                });
+            }
+        });
     }
 
-    function goToChat(ownerName, itemName, ownerID) {
-        if (ownerID === currentUserID) {
-            Swal.fire({ text: 'لا يمكنك مراسلة نفسك!', icon: 'info', background: '#0a0a0f', color: '#fff', timer: 1500, showConfirmButton: false });
-            return;
-        }
-        // التوجيه للدردشة باستخدام الـ ID لضمان الدقة
-        window.location.href = `chat.html?toID=${ownerID}&toName=${encodeURIComponent(ownerName)}&item=${encodeURIComponent(itemName)}`;
+    function goToChat(name, id) {
+        if (id === currentUserID) return Swal.fire('تنبيه', 'هذا منشورك!', 'info');
+        window.location.href = `chat.html?toID=${id}&toName=${encodeURIComponent(name)}`;
     }
 
-    window.onload = startListening;
+    startApp();
 </script>
 </body>
 </html>
