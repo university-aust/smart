@@ -2,218 +2,145 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المعرض العام | نبض AUST</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>نبض الحوار الخاص | AUST</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        :root { 
-            --cyan-neon: #00e5ff; 
-            --blue-glass: rgba(0, 40, 80, 0.6); 
-            --red-glass: rgba(139, 0, 0, 0.5); 
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --neon-glow: 0 0 15px rgba(0, 229, 255, 0.4);
+        :root { --cyan: #00d4ff; --navy-deep: #1e293b; --glass: rgba(10, 15, 30, 0.95); }
+        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; width: 100%; position: fixed; }
+        body {
+            background: linear-gradient(rgba(3, 7, 18, 0.7), rgba(3, 7, 18, 0.7)), url('67260.jpg') no-repeat center center;
+            background-size: cover; color: white; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; flex-direction: column;
         }
-
-        body { 
-            background: linear-gradient(rgba(10, 10, 15, 0.7), rgba(10, 10, 15, 0.7)), url('67260.jpg') no-repeat center center fixed;
-            background-size: cover; color: white; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; 
-        }
-
-        .header-nav { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 15px 5%; background: rgba(0, 0, 0, 0.8); 
-            border-bottom: 1px solid var(--glass-border); backdrop-filter: blur(15px);
-            position: sticky; top: 0; z-index: 1000;
-        }
-
-        .btn-back { 
-            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--cyan-neon); 
-            color: var(--cyan-neon); padding: 8px 18px; border-radius: 10px; 
-            text-decoration: none; font-weight: bold; transition: 0.3s; font-size: 0.85rem;
-        }
-        .btn-back:hover { background: var(--cyan-neon); color: #000; box-shadow: var(--neon-glow); }
-
-        .search-container { padding: 12px 5%; display: flex; gap: 10px; flex-wrap: wrap; background: rgba(0,0,0,0.4); }
-        .search-input { 
-            flex: 1; min-width: 120px; padding: 10px; border-radius: 10px; 
-            border: 1px solid var(--glass-border); background: rgba(0, 0, 0, 0.5); 
-            color: white; outline: none; font-size: 0.9rem;
-        }
-
-        .market-grid { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 15px; padding: 20px 3%; 
-        }
-
-        .tool-card {
-            backdrop-filter: blur(15px) saturate(150%);
-            border-radius: 20px; border: 1px solid var(--glass-border);
-            padding: 15px; display: flex; flex-direction: column;
-            position: relative; transition: 0.3s; min-height: 240px;
-        }
-        .tool-card:hover { transform: translateY(-5px); border-color: var(--cyan-neon); box-shadow: var(--neon-glow); }
-
-        .exchange-card { background: var(--blue-glass); }
-        .sos-card { background: var(--red-glass) !important; border-color: rgba(255, 77, 77, 0.3) !important; }
-
-        .category-tag { background: rgba(255, 255, 255, 0.1); color: #fff; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: bold; }
-        .post-time { font-size: 10px; color: rgba(255,255,255,0.5); margin: 10px 0; }
-        .post-owner { color: var(--cyan-neon); font-size: 12px; font-weight: bold; margin-bottom: 5px; }
-        
-        .explanation-box {
-            background: rgba(0, 0, 0, 0.2); padding: 10px; border-radius: 10px;
-            margin: 10px 0; font-size: 0.8rem; color: #eee; 
-            border-right: 4px solid var(--cyan-neon); line-height: 1.4;
-        }
-
-        .contact-btn { 
-            width: 100%; margin-top: auto; padding: 12px; border: none; 
-            border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; 
-            font-size: 0.85rem; background: rgba(255, 255, 255, 0.1); color: #fff;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .contact-btn:hover { background: var(--cyan-neon); color: #000; box-shadow: var(--neon-glow); }
-
-        .admin-del-icon {
-            position: absolute; top: 12px; left: 12px; color: rgba(255,255,255,0.4);
-            cursor: pointer; font-size: 16px; transition: 0.3s; z-index: 10;
-        }
-        .admin-del-icon:hover { color: #ff4d4d; transform: scale(1.2); }
+        .chat-header { height: 60px; padding: 0 20px; background: var(--glass); backdrop-filter: blur(20px); border-bottom: 2px solid var(--cyan); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; z-index: 100; }
+        #chatBox { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; -webkit-overflow-scrolling: touch; }
+        .msg { max-width: 80%; padding: 12px 18px; border-radius: 20px; font-size: 0.95rem; cursor: pointer; position: relative; word-wrap: break-word; }
+        .my-msg { align-self: flex-start; background: linear-gradient(135deg, var(--cyan), var(--navy-deep)); border-bottom-right-radius: 2px; color: #111; font-weight: 500;}
+        .other-msg { align-self: flex-end; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(0, 212, 255, 0.2); border-bottom-left-radius: 2px; }
+        .user-tag { font-size: 0.75rem; font-weight: 800; color: var(--cyan); margin-bottom: 5px; display: block; }
+        .time { font-size: 0.65rem; opacity: 0.7; }
+        .status-bolt-sent { color: #666; font-size: 0.8rem; margin-right: 5px; } 
+        .status-bolt-seen { color: var(--cyan); font-size: 0.8rem; margin-right: 5px; filter: drop-shadow(0 0 3px var(--cyan)); }
+        .input-area { background: var(--glass); padding: 10px 15px; display: flex; gap: 10px; border-top: 1px solid var(--cyan); flex-shrink: 0; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+        input { flex: 1; padding: 12px 20px; border-radius: 25px; border: 1px solid rgba(0, 212, 255, 0.3); outline: none; font-size: 16px; background: rgba(255, 255, 255, 0.05); color: white; }
+        .send-btn { background: var(--cyan); border: none; width: 45px; height: 45px; border-radius: 50%; color: #111; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; }
     </style>
 </head>
 <body>
-
-    <div class="header-nav">
-        <h1>🌐 معرض <span style="color:var(--cyan-neon)">AUST</span></h1>
-        <a href="dashboard.html" class="btn-back"><i class="fas fa-home"></i> الرئيسية</a>
+    <div class="chat-header">
+        <a href="market.html" style="color:var(--cyan); font-size: 1.2rem;"><i class="fas fa-chevron-right"></i></a>
+        <div style="text-align: center;">
+            <h2 id="chatWith" style="margin:0; font-size:1rem;">دردشة</h2>
+            <div id="itemContext" style="font-size:0.7rem; color:var(--cyan);"></div>
+        </div>
+        <button onclick="clearFullChat()" style="background:none; border:none; color:var(--cyan);"><i class="fas fa-trash-alt"></i></button>
     </div>
 
-    <div class="search-container">
-        <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث بالاسم أو الغرض..." oninput="renderMarket()">
-        <select id="filterCollege" class="search-input" style="flex: 0; min-width: 110px;" onchange="renderMarket()">
-            <option value="all">الكل</option>
-            <option value="it">IT</option>
-            <option value="dent">أسنان</option>
-            <option value="pharm">صيدلة</option>
-            <option value="arch">عمارة</option>
-            <option value="lost">🔍 مفقودات</option>
-        </select>
-    </div>
+    <div id="chatBox"></div>
 
-    <div id="marketGrid" class="market-grid"></div>
+    <div class="input-area">
+        <input type="text" id="msgInput" placeholder="اكتب رسالتك..." autocomplete="off">
+        <button class="send-btn" onclick="send()"><i class="fas fa-bolt"></i></button>
+    </div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
 <script>
-    const ADMIN_ID = "20241600060"; 
-    const ADMIN_PASS = "shjkshjk"; 
-    const currentUserID = (localStorage.getItem("userID") || "").trim();
-    const currentUserName = (localStorage.getItem("userName") || "").trim();
-
     const firebaseConfig = {
         apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
         databaseURL: "https://nabd-aust-default-rtdb.europe-west1.firebasedatabase.app",
         projectId: "nabd-aust"
     };
-
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    const collegeMap = { 'it': 'IT', 'dent': 'أسنان', 'pharm': 'صيدلة', 'arch': 'عمارة', 'عام': 'عام' };
-    let cachedData = [];
+    // جلب المعرفات (IDs) لضمان الأمان وعدم تداخل المحادثات
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetName = urlParams.get('to') || "الزميل";
+    const targetID = urlParams.get('toID'); // الرقم الجامعي للطرف الآخر
+    const itemName = urlParams.get('item') || "طلب";
+    
+    const myID = localStorage.getItem("userID"); // رقمك الجامعي
+    const myName = localStorage.getItem("userName") || "شهد الخالد";
 
-    function startListening() {
-        database.ref('globalMarket/').on('value', (snapshot) => {
-            const data = snapshot.val();
-            cachedData = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })).reverse() : [];
-            renderMarket();
+    // بناء chatId آمن يعتمد على الأرقام الجامعية
+    const chatId = [myID, targetID].sort().join("_").replace(/\s/g, '');
+
+    document.getElementById('chatWith').innerText = `دردشة مع ${targetName}`;
+    document.getElementById('itemContext').innerText = `بخصوص: ${itemName}`;
+
+    function send() {
+        const input = document.getElementById('msgInput');
+        const text = input.value.trim();
+        if (!text || !targetID) return;
+        
+        database.ref('chats/' + chatId).push({
+            sender: myName,
+            senderID: myID,      // مطلوب للأمان
+            receiverID: targetID, // مطلوب للأمان
+            text: text,
+            msg: text,           // مطلوب للقواعد
+            seen: false,
+            time: new Date().toLocaleTimeString('ar-SY', {hour: '2-digit', minute:'2-digit'}),
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        }).then(() => {
+            input.value = "";
+            input.focus();
+        }).catch(err => {
+            Swal.fire('خطأ أمان', 'تأكدي من الضغط على Publish في Firebase Rules', 'error');
         });
     }
 
-    function renderMarket() {
-        const grid = document.getElementById("marketGrid");
-        const searchTerm = document.getElementById("searchInput").value.toLowerCase();
-        const filterCol = document.getElementById("filterCollege").value;
-        const isSuperAdmin = (currentUserID === ADMIN_ID);
-
-        let htmlContent = "";
-
-        const filtered = cachedData.filter(item => {
-            const matchesSearch = (item.name || "").toLowerCase().includes(searchTerm) || (item.owner || "").toLowerCase().includes(searchTerm);
-            let matchesCollege = (filterCol === "all") || (item.college === filterCol);
-            if (filterCol === "lost") matchesCollege = (item.name || "").includes("مفقود") || (item.name || "").includes("موجود");
-            return matchesSearch && matchesCollege;
-        });
-
-        filtered.forEach(item => {
-            const isSOS = item.isSOS === true;
-            const isOwner = (String(item.ownerID) === String(currentUserID));
-            const cardClass = isSOS ? 'sos-card' : 'exchange-card';
-
-            htmlContent += `
-                <div class="tool-card ${cardClass}">
-                    ${(isSuperAdmin || isOwner) ? `<i class="fas fa-trash-alt admin-del-icon" onclick="handleDelete('${item.id}', ${isSuperAdmin})"></i>` : ''}
-                    <span class="category-tag">${collegeMap[item.college] || 'AUST'}</span>
-                    <div class="post-time"><i class="far fa-clock"></i> ${item.fullTime || 'الآن'}</div>
-                    <div class="post-owner">👤 ${item.owner}</div>
-                    <h3 style="font-size: 0.9rem; margin:5px 0;">${item.name}</h3>
-                    ${item.explanation ? `<div class="explanation-box">${item.explanation}</div>` : ''}
-                    <button onclick="goToChat('${item.owner}', '${item.ownerID}', '${item.name}')" class="contact-btn">
-                        <i class="fas fa-comment-dots"></i> تواصل مع الطالب
-                    </button>
-                </div>`;
-        });
-        grid.innerHTML = htmlContent || `<p style="grid-column:1/-1; text-align:center; opacity:0.5;">لا يوجد نتائج حالياً..</p>`;
-    }
-
-    function goToChat(ownerName, ownerID, itemName) {
-        if (!currentUserID) {
-            Swal.fire('تنبيه', 'يجب تسجيل الدخول أولاً', 'warning');
-            return;
-        }
-        if (String(ownerID) === String(currentUserID)) {
-            Swal.fire({ text: 'هذا منشورك!', icon: 'info', background: '#0a0a0f', color: '#fff', timer: 1500, showConfirmButton: false });
-            return;
-        }
-        // الربط المحدث: نستخدم "to" و "toID" لتتوافق مع صفحة الشات
-        window.location.href = `chat.html?to=${encodeURIComponent(ownerName)}&toID=${ownerID}&item=${encodeURIComponent(itemName)}`;
-    }
-
-    function handleDelete(itemId, isGlobalAdmin) {
-        Swal.fire({
-            title: isGlobalAdmin ? 'حذف كمسؤول؟' : 'حذف المنشور؟',
-            text: "لا يمكن التراجع عن هذه الخطوة",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ff4d4d',
-            cancelButtonText: 'إلغاء',
-            confirmButtonText: 'نعم، احذف',
-            background: '#0a0a0f', color: '#fff'
-        }).then(res => {
-            if(res.isConfirmed) {
-                if (isGlobalAdmin) {
-                    Swal.fire({
-                        title: 'رمز التأكيد',
-                        input: 'password',
-                        inputPlaceholder: 'أدخل الرمز الخاص',
-                        background: '#0a0a0f', color: '#fff'
-                    }).then(passRes => {
-                        if(passRes.value === ADMIN_PASS) {
-                            database.ref('globalMarket/' + itemId).remove();
-                        } else if(passRes.value) {
-                            Swal.fire('خطأ', 'الرمز غير صحيح', 'error');
-                        }
-                    });
-                } else {
-                    database.ref('globalMarket/' + itemId).remove();
-                }
+    function listenForMessages() {
+        database.ref('chats/' + chatId).on('value', (snap) => {
+            const chatBox = document.getElementById('chatBox');
+            chatBox.innerHTML = "";
+            const data = snap.val();
+            if (data) {
+                Object.keys(data).forEach(k => {
+                    const m = data[k];
+                    const isMe = m.senderID === myID;
+                    const bolt = `<span class="${m.seen ? 'status-bolt-seen' : 'status-bolt-sent'}"><i class="fas fa-bolt"></i></span>`;
+                    chatBox.innerHTML += `
+                        <div class="msg ${isMe ? 'my-msg' : 'other-msg'}" onclick="deleteSingleMsg('${k}')">
+                            <span class="user-tag">${isMe ? 'أنا' : m.sender}</span>
+                            <div>${m.text}</div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+                                <span class="time">${m.time}</span>
+                                ${isMe ? bolt : ''}
+                            </div>
+                        </div>`;
+                });
+                chatBox.scrollTop = chatBox.scrollHeight;
+                markAsSeen();
             }
         });
     }
 
-    window.onload = startListening;
+    function markAsSeen() {
+        database.ref('chats/' + chatId).once('value', (snap) => {
+            const messages = snap.val();
+            if (messages) {
+                Object.keys(messages).forEach(key => {
+                    if (messages[key].senderID !== myID && !messages[key].seen) {
+                        database.ref('chats/' + chatId + '/' + key).update({ seen: true });
+                    }
+                });
+            }
+        });
+    }
+
+    function deleteSingleMsg(msgId) {
+        Swal.fire({ title: 'حذف؟', icon: 'warning', showCancelButton: true }).then(r => { if (r.isConfirmed) database.ref('chats/' + chatId + '/' + msgId).remove(); });
+    }
+
+    function clearFullChat() {
+        Swal.fire({ title: 'مسح الكل؟', icon: 'warning', showCancelButton: true }).then(r => { if (r.isConfirmed) database.ref('chats/' + chatId).remove(); });
+    }
+
+    document.getElementById('msgInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') send(); });
+    window.onload = listenForMessages;
 </script>
 </body>
 </html>
