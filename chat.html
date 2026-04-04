@@ -74,11 +74,10 @@
     const database = firebase.database();
 
     const urlParams = new URLSearchParams(window.location.search);
-    const otherUser = urlParams.get('to') || "زميل"; 
-    const itemName = urlParams.get('item') || "موضوع عام";
-    const currentUser = localStorage.getItem("userName") || "مستخدِم";
+    const otherUser = urlParams.get('to') || "الزميل"; // جلب الاسم من الرابط
+    const itemName = urlParams.get('item') || "طلب مساعدة";
+    const currentUser = localStorage.getItem("userName") || "مستخدم";
     
-    // الأمان العالي: استخدام الـ ID لتمزيق المحادثات برقم جامعي فريد
     const myID = localStorage.getItem("userID") || "Unknown";
     const toID = urlParams.get('toID') || otherUser; 
     const chatId = [myID, toID].sort().join("_").replace(/\s/g, '');
@@ -86,18 +85,18 @@
     document.getElementById('chatWith').innerText = `دردشة مع ${otherUser}`;
     document.getElementById('itemContext').innerText = `بخصوص: ${itemName}`;
 
-    // دالة الإرسال المؤمنة (المتوافقة مع القواعد)
     function send() {
         const input = document.getElementById('msgInput');
         const text = input.value.trim();
         if (!text) return;
         
+        // البيانات المرسلة تطابق تماماً متطلبات قواعد الحماية (Rules)
         const messagePayload = {
             sender: currentUser,
-            senderID: myID,      // مطلوب للقواعد
-            receiverID: toID,    // مطلوب للقواعد
-            msg: text,           // الحقل الذي يطلبه الـ .validate في Firebase
-            text: text,          // للعرض الداخلي
+            senderID: myID,      
+            receiverID: toID,    
+            msg: text,           
+            text: text,          
             seen: false,
             time: new Date().toLocaleTimeString('ar-SY', {hour: '2-digit', minute:'2-digit'}),
             timestamp: firebase.database.ServerValue.TIMESTAMP
@@ -110,8 +109,8 @@
             input.focus();
         })
         .catch(err => {
-            console.error("Firebase Auth/Rule Error:", err);
-            Swal.fire('فشل الإرسال', 'تحقق من قواعد الحماية في فايربيس', 'error');
+            console.error("خطأ أمان:", err);
+            Swal.fire('فشل الإرسال', 'تحقق من قواعد الحماية أو سجل دخولك مجدداً', 'error');
         });
     }
 
@@ -123,7 +122,6 @@
             if (data) {
                 Object.keys(data).forEach(k => {
                     const m = data[k];
-                    // نعتمد على الـ senderID للمقارنة بدقة
                     const isMe = m.senderID === myID;
                     const bolt = `<span class="${m.seen ? 'status-bolt-seen' : 'status-bolt-sent'}"><i class="fas fa-bolt"></i></span>`;
                     chatBox.innerHTML += `
@@ -168,19 +166,11 @@
     }
 
     function clearFullChat() {
-        Swal.fire({ title: 'مسح المحادثة؟', icon: 'warning', showCancelButton: true, confirmButtonText: 'مسح' }).then(r => { if (r.isConfirmed) database.ref('chats/' + chatId).remove(); });
+        Swal.fire({ title: 'مسح المحادثة بالكامل؟', icon: 'warning', showCancelButton: true, confirmButtonText: 'مسح' }).then(r => { if (r.isConfirmed) database.ref('chats/' + chatId).remove(); });
     }
 
     document.getElementById('msgInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') send(); });
     window.onload = listenForMessages;
-
-    if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', () => {
-            document.body.style.height = window.visualViewport.height + 'px';
-            const chatBox = document.getElementById('chatBox');
-            chatBox.scrollTop = chatBox.scrollHeight;
-        });
-    }
 </script>
 </body>
 </html>
