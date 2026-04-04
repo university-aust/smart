@@ -17,23 +17,39 @@
 
     body {
         height: 100vh; display: flex; justify-content: center; align-items: center;
-        background-color: #030712; background-image: url('67260.jpg');
+        background-color: #030712;
+        background-image: url('67260.jpg');
         background-size: cover; background-position: center; background-attachment: fixed;
         overflow: hidden; position: relative;
     }
 
-    body::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3); z-index: 0; }
+    body::before { 
+        content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 0; 
+    }
 
     .glass-container {
         position: relative; z-index: 1; width: 420px; padding: 35px;
-        background: var(--glass); backdrop-filter: blur(15px) saturate(160%); 
-        border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 45px;
-        text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+        background: var(--glass); 
+        backdrop-filter: blur(15px) saturate(160%); 
+        -webkit-backdrop-filter: blur(15px) saturate(160%);
+        border: 1px solid rgba(0, 212, 255, 0.3); 
+        border-radius: 45px;
+        text-align: center; 
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5);
         transition: all 0.5s ease-in-out;
     }
 
     .top-line { width: 60px; height: 4px; background: var(--gold); margin: 0 auto 15px; border-radius: 10px; box-shadow: 0 0 15px var(--gold); }
-    .brand-h1 { font-size: 2.8rem; margin: 0; background: linear-gradient(to bottom, #fff 40%, var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
+    
+    .brand-h1 { 
+        font-size: 2.8rem; margin: 0; 
+        background: linear-gradient(to bottom, #fff 40%, var(--gold)); 
+        -webkit-background-clip: text; background-clip: text;
+        -webkit-text-fill-color: transparent; 
+        font-weight: 900; filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5)); 
+    }
 
     .wisdom-container { margin: 20px 0; padding: 25px; background: rgba(0, 0, 0, 0.4); border-radius: 25px; border-right: 4px solid var(--gold); }
     .wisdom-text { font-size: 1.1rem; line-height: 1.6; color: #fff; font-style: italic; }
@@ -53,11 +69,19 @@
         background: rgba(255, 255, 255, 0.95); color: #222; font-size: 1rem; outline: none; 
     }
 
-    .pass-toggle { position: absolute; left: 12px; bottom: 12px; color: #666; cursor: pointer; z-index: 10;}
+    .pass-toggle { position: absolute; left: 12px; bottom: 12px; color: #666; cursor: pointer; z-index: 10; }
     .footer { margin-top: 25px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.75rem; color: #fff; }
+    
+    #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; }
+    .toast { 
+        background: rgba(10, 15, 30, 0.9); backdrop-filter: blur(10px); color: white; padding: 12px 25px; border-radius: 15px; border: 1px solid var(--gold); margin-bottom: 10px; animation: slideDown 0.4s ease-out;
+    }
+    @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body>
+
+    <div id="toast-container"></div>
 
     <div class="glass-container" id="welcomeSection">
         <div class="top-line"></div>
@@ -82,7 +106,7 @@
 
             <div class="form-group">
                 <label>رقم الطالب (ID)</label>
-                <input type="text" id="idInput" placeholder="2026XXXX">
+                <input type="text" id="idInput" placeholder="2026XXXX" inputmode="numeric">
             </div>
             
             <div class="form-group" id="emailGroup" style="display:none;">
@@ -97,7 +121,7 @@
 
             <div class="form-group" id="passGroup">
                 <label id="passLabel">الرمز السري (8 محارف على الأقل)</label>
-                <input type="password" id="passInput" placeholder="********">
+                <input type="password" id="passInput" placeholder="أحرف، أرقام، رموز">
                 <i class="fas fa-eye pass-toggle" onclick="togglePass(this)"></i>
             </div>
 
@@ -127,6 +151,21 @@
     let mode = 'login';
     let savedRecoveryCode = null;
 
+    function notify(msg) {
+        const container = document.getElementById('toast-container');
+        if(!container) return; 
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = msg;
+        container.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
+    }
+
+    // منع الحروف والرموز في حقل ID - أرقام فقط
+    document.getElementById('idInput').addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+
     function showAuth() {
         document.getElementById('welcomeSection').style.display = 'none';
         document.getElementById('authSection').style.display = 'block';
@@ -141,6 +180,7 @@
     function toggleMode() {
         document.getElementById('verifyCodeGroup').style.display = 'none';
         document.getElementById('passGroup').style.display = 'block';
+        document.getElementById('passLabel').innerText = "الرمز السري (8 محارف على الأقل)";
         if (mode === 'login' || mode === 'forgot' || mode === 'verify') {
             mode = 'register';
             updateUI("إنشاء حساب", "تأكيد الحساب", "block", "block", "block", "لديك حساب؟ <b>سجل دخولك</b>");
@@ -173,58 +213,70 @@
         const email = document.getElementById('emailInput').value.trim();
         const userEnteredCode = document.getElementById('verifyCodeInput').value.trim();
 
-        if (!id) { Swal.fire('تنبيه', 'يرجى إدخال الرقم الجامعي', 'warning'); return; }
+        if (!id) { notify("يرجى إدخال الرقم الجامعي"); return; }
 
         try {
             if (mode === 'register') {
-                if (name.split(' ').length < 3) { Swal.fire('خطأ', 'الاسم الثلاثي مطلوب', 'error'); return; }
-                if (pass.length < 8) { Swal.fire('خطأ', 'الرمز 8 محارف على الأقل', 'error'); return; }
-                
-                Swal.showLoading();
+                const nameParts = name.split(/\s+/).filter(p => p.length > 0);
+                if (nameParts.length < 3) { notify("الاسم الثلاثي مطلوب (الاسم، الأب، الكنية)"); return; }
+                if (pass.length < 8) { notify("الرمز يجب أن يكون 8 محارف على الأقل"); return; }
+                if (!email.toLowerCase().endsWith("@gmail.com")) { notify("يجب استخدام Gmail فقط"); return; }
+
+                notify("جاري فحص الرقم الجامعي...");
                 const snapshot = await database.ref('users/' + id).once('value');
+                
                 if (snapshot.exists()) {
-                    Swal.fire('خطأ', 'الرقم مسجل مسبقاً', 'error');
+                    notify("هذا الرقم مسجل مسبقاً! لا يمكنك إنشاء حسابين");
                 } else {
                     await database.ref('users/' + id).set({
-                        id, pass, name, email, major: "هندسة البرمجيات", role: "student", createdAt: firebase.database.ServerValue.TIMESTAMP
+                        id, pass, name, email, 
+                        major: "Software Engineering", 
+                        role: "student", 
+                        createdAt: firebase.database.ServerValue.TIMESTAMP 
                     });
-                    Swal.fire('نجاح', 'تم إنشاء الحساب!', 'success');
-                    toggleMode();
+                    notify("تم إنشاء الحساب بنجاح! تفضل بالدخول");
+                    setTimeout(toggleMode, 1500);
                 }
             } 
             else if (mode === 'login') {
-                Swal.showLoading();
+                if (!pass) { notify("يرجى إدخال كلمة المرور"); return; }
                 const snapshot = await database.ref('users/' + id).once('value');
                 const data = snapshot.val();
                 if (data && data.pass === pass) {
                     localStorage.setItem("userName", data.name);
                     localStorage.setItem("userID", data.id);
-                    Swal.fire({ icon: 'success', title: 'مرحباً ' + data.name.split(' ')[0], timer: 1500, showConfirmButton: false });
-                    setTimeout(() => window.location.href = "dashboard.html", 1600);
-                } else { Swal.fire('خطأ', 'البيانات غير صحيحة', 'error'); }
+                    localStorage.setItem("userMajor", data.major);
+                    notify("أهلاً بك يا " + data.name.split(' ')[0]);
+                    setTimeout(() => { window.location.href = "dashboard.html"; }, 1200);
+                } else { notify("عذراً، الرقم أو كلمة المرور غير صحيحة"); }
             }
             else if (mode === 'forgot') {
-                Swal.showLoading();
+                if (!id || !email) { notify("أدخل الرقم والإيميل للتحقق"); return; }
                 const snapshot = await database.ref('users/' + id).once('value');
                 const data = snapshot.val();
-                if (data && data.email === email) {
+                if (data && data.email.toLowerCase() === email.toLowerCase()) {
                     savedRecoveryCode = Math.floor(100000 + Math.random() * 900000);
+                    notify("جاري إرسال الكود...");
                     await emailjs.send("service_cgm7d0c", "template_xi6oxl7", { to_name: data.name, to_email: email, recovery_code: savedRecoveryCode });
-                    Swal.fire('تم الإرسال', 'تفقد بريدك الإلكتروني', 'success');
+                    notify("تم إرسال الكود لبريدك ✅");
                     mode = 'verify';
                     updateUI("تأكيد الرمز", "تحديث كلمة المرور", "none", "none", "block", "إلغاء");
                     document.getElementById('verifyCodeGroup').style.display = 'block';
                     document.getElementById('passLabel').innerText = "كلمة المرور الجديدة";
-                } else { Swal.fire('خطأ', 'البيانات غير متطابقة', 'error'); }
+                } else { notify("البيانات غير متطابقة مع سجلاتنا"); }
             }
             else if (mode === 'verify') {
                 if (userEnteredCode == savedRecoveryCode) {
+                    if (pass.length < 8) { notify("الرمز الجديد قصير جداً"); return; }
                     await database.ref('users/' + id).update({ pass: pass });
-                    Swal.fire('نجاح', 'تم تغيير كلمة المرور', 'success');
+                    notify("تم التحديث! سجل دخولك بالرمز الجديد");
                     setTimeout(() => location.reload(), 1500);
-                } else { Swal.fire('خطأ', 'كود التحقق خاطئ', 'error'); }
+                } else { notify("كود التحقق خاطئ ❌"); }
             }
-        } catch (e) { Swal.fire('فشل', 'تأكد من اتصالك بالإنترنت وقواعد Firebase', 'error'); }
+        } catch (e) { 
+            console.error(e);
+            notify("حدث خطأ في الاتصال بالقاعدة"); 
+        }
     }
 </script>
 </body>
