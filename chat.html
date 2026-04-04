@@ -8,47 +8,37 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root { --cyan: #00d4ff; --navy-deep: #1e293b; --glass: rgba(10, 15, 30, 0.95); }
-
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; width: 100%; position: fixed; }
-
         body {
             background: linear-gradient(rgba(3, 7, 18, 0.7), rgba(3, 7, 18, 0.7)), url('67260.jpg') no-repeat center center;
             background-size: cover; color: white; font-family: 'Segoe UI', Tahoma, sans-serif;
             display: flex; flex-direction: column;
         }
-
         .chat-header {
             height: 60px; padding: 0 20px; background: var(--glass); 
             backdrop-filter: blur(20px); border-bottom: 2px solid var(--cyan); 
             display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; z-index: 100;
         }
-
         #chatBox { 
             flex: 1; padding: 20px; overflow-y: auto; display: flex; 
             flex-direction: column; gap: 15px; -webkit-overflow-scrolling: touch; 
         }
-
         .msg { max-width: 80%; padding: 12px 18px; border-radius: 20px; font-size: 0.95rem; cursor: pointer; position: relative; word-wrap: break-word; }
         .my-msg { align-self: flex-start; background: linear-gradient(135deg, var(--cyan), var(--navy-deep)); border-bottom-right-radius: 2px; color: #111; font-weight: 500;}
         .other-msg { align-self: flex-end; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(0, 212, 255, 0.2); border-bottom-left-radius: 2px; }
-        
         .user-tag { font-size: 0.75rem; font-weight: 800; color: var(--cyan); margin-bottom: 5px; display: block; }
         .time { font-size: 0.65rem; opacity: 0.7; }
-
         .status-bolt-sent { color: #666; font-size: 0.8rem; margin-right: 5px; } 
         .status-bolt-seen { color: var(--cyan); font-size: 0.8rem; margin-right: 5px; filter: drop-shadow(0 0 3px var(--cyan)); }
-
         .input-area { 
             background: var(--glass); padding: 10px 15px; display: flex; gap: 10px; 
             border-top: 1px solid var(--cyan); flex-shrink: 0; 
             padding-bottom: calc(10px + env(safe-area-inset-bottom));
         }
-
         input { 
             flex: 1; padding: 12px 20px; border-radius: 25px; border: 1px solid rgba(0, 212, 255, 0.3); 
             outline: none; font-size: 16px; background: rgba(255, 255, 255, 0.05); color: white; 
         }
-
         .send-btn { 
             background: var(--cyan); border: none; width: 45px; height: 45px; 
             border-radius: 50%; color: #111; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; 
@@ -83,54 +73,46 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    // استلام البيانات من الرابط (المعرض يرسل المعامل باسم to)
     const urlParams = new URLSearchParams(window.location.search);
-    const otherUser = urlParams.get('to') || "زميل"; // هذا سيجلب اسم الشخص الذي نقرتِ عليه
+    const otherUser = urlParams.get('to') || "زميل"; 
     const itemName = urlParams.get('item') || "موضوع عام";
-    const currentUser = localStorage.getItem("userName") || "مستخدم";
+    const currentUser = localStorage.getItem("userName") || "مستخدِم";
     
-    // الأمان: نستخدم الـ ID إذا توفر لتمزيق المحادثات، وإذا لم يتوفر نعتمد الأسماء كبديل مؤقت
-    const myID = localStorage.getItem("userID") || currentUser;
-    const toID = urlParams.get('toID') || otherUser;
+    // الأمان العالي: استخدام الـ ID لتمزيق المحادثات برقم جامعي فريد
+    const myID = localStorage.getItem("userID") || "Unknown";
+    const toID = urlParams.get('toID') || otherUser; 
     const chatId = [myID, toID].sort().join("_").replace(/\s/g, '');
 
     document.getElementById('chatWith').innerText = `دردشة مع ${otherUser}`;
     document.getElementById('itemContext').innerText = `بخصوص: ${itemName}`;
 
-    // تثبيت الكيبورد والمظهر
-    if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', () => {
-            document.body.style.height = window.visualViewport.height + 'px';
-            const chatBox = document.getElementById('chatBox');
-            chatBox.scrollTop = chatBox.scrollHeight;
-        });
-    }
-
+    // دالة الإرسال المؤمنة (المتوافقة مع القواعد)
     function send() {
         const input = document.getElementById('msgInput');
         const text = input.value.trim();
         if (!text) return;
         
-        database.ref('chats/' + chatId).push({
-            sender: currentUser, 
-            senderID: myID,
-            text: text, 
+        const messagePayload = {
+            sender: currentUser,
+            senderID: myID,      // مطلوب للقواعد
+            receiverID: toID,    // مطلوب للقواعد
+            msg: text,           // الحقل الذي يطلبه الـ .validate في Firebase
+            text: text,          // للعرض الداخلي
             seen: false,
             time: new Date().toLocaleTimeString('ar-SY', {hour: '2-digit', minute:'2-digit'}),
             timestamp: firebase.database.ServerValue.TIMESTAMP
-        }).then(() => {
+        };
+
+        database.ref('chats/' + chatId).push(messagePayload)
+        .then(() => {
             updateChatIndex(text);
             input.value = "";
             input.focus();
+        })
+        .catch(err => {
+            console.error("Firebase Auth/Rule Error:", err);
+            Swal.fire('فشل الإرسال', 'تحقق من قواعد الحماية في فايربيس', 'error');
         });
-    }
-
-    function updateChatIndex(lastText) {
-        let chatIndex = JSON.parse(localStorage.getItem("AUST_CHAT_INDEX") || "[]");
-        const chatData = { targetName: otherUser, lastMsg: lastText, item: itemName, chatUrl: window.location.href, time: new Date().toLocaleTimeString('ar-SY', {hour: '2-digit', minute:'2-digit'}) };
-        const existing = chatIndex.findIndex(c => c.targetName === otherUser);
-        if (existing > -1) chatIndex[existing] = chatData; else chatIndex.unshift(chatData);
-        localStorage.setItem("AUST_CHAT_INDEX", JSON.stringify(chatIndex));
     }
 
     function listenForMessages() {
@@ -141,12 +123,13 @@
             if (data) {
                 Object.keys(data).forEach(k => {
                     const m = data[k];
-                    const isMe = m.sender === currentUser;
+                    // نعتمد على الـ senderID للمقارنة بدقة
+                    const isMe = m.senderID === myID;
                     const bolt = `<span class="${m.seen ? 'status-bolt-seen' : 'status-bolt-sent'}"><i class="fas fa-bolt"></i></span>`;
                     chatBox.innerHTML += `
                         <div class="msg ${isMe ? 'my-msg' : 'other-msg'}" onclick="deleteSingleMsg('${k}')">
                             <span class="user-tag">${isMe ? 'أنا' : m.sender}</span>
-                            <div>${m.text}</div>
+                            <div>${m.msg || m.text}</div>
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
                                 <span class="time">${m.time}</span>
                                 ${isMe ? bolt : ''}
@@ -159,12 +142,20 @@
         });
     }
 
+    function updateChatIndex(lastText) {
+        let chatIndex = JSON.parse(localStorage.getItem("AUST_CHAT_INDEX") || "[]");
+        const chatData = { targetName: otherUser, lastMsg: lastText, item: itemName, chatUrl: window.location.href, time: new Date().toLocaleTimeString('ar-SY', {hour: '2-digit', minute:'2-digit'}) };
+        const existing = chatIndex.findIndex(c => c.targetName === otherUser);
+        if (existing > -1) chatIndex[existing] = chatData; else chatIndex.unshift(chatData);
+        localStorage.setItem("AUST_CHAT_INDEX", JSON.stringify(chatIndex));
+    }
+
     function markAsSeen() {
         database.ref('chats/' + chatId).once('value', (snap) => {
             const messages = snap.val();
             if (messages) {
                 Object.keys(messages).forEach(key => {
-                    if (messages[key].sender !== currentUser && !messages[key].seen) {
+                    if (messages[key].senderID !== myID && !messages[key].seen) {
                         database.ref('chats/' + chatId + '/' + key).update({ seen: true });
                     }
                 });
@@ -182,6 +173,14 @@
 
     document.getElementById('msgInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') send(); });
     window.onload = listenForMessages;
+
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', () => {
+            document.body.style.height = window.visualViewport.height + 'px';
+            const chatBox = document.getElementById('chatBox');
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+    }
 </script>
 </body>
 </html>
