@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AUST Smart Pulse | تسجيل الدخول </title>
+    <title>AUST Smart Pulse | تسجيل الدخول الآمن</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
     :root {
         --gold: #00d4ff; 
@@ -152,20 +153,15 @@
 
     const firebaseConfig = {
         apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
-        authDomain: "nabd-aust.firebaseapp.com",
         databaseURL: "https://nabd-aust-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "nabd-aust",
-        storageBucket: "nabd-aust.firebasestorage.app",
-        messagingSenderId: "921777725948",
-        appId: "1:921777725948:web:7b024d0aa101068bef9279",
-        measurementId: "G-HC2TSQ70V2"
+        projectId: "nabd-aust"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
     let mode = 'login';
-    let savedRecoveryCode = null; // لحفظ الكود برمجياً
+    let savedRecoveryCode = null;
 
     function notify(msg) {
         const container = document.getElementById('toast-container');
@@ -189,9 +185,9 @@
     }
 
     function toggleMode() {
-        // تصفير الواجهة عند التبديل
         document.getElementById('verifyCodeGroup').style.display = 'none';
         document.getElementById('passGroup').style.display = 'block';
+        document.getElementById('passLabel').innerText = "الرمز السري (8 محارف على الأقل)";
 
         if (mode === 'login' || mode === 'forgot' || mode === 'verify') {
             mode = 'register';
@@ -219,7 +215,7 @@
         document.getElementById('toggleTxt').innerHTML = sw;
     }
 
-    function handleAction() {
+    async function handleAction() {
         const id = document.getElementById('idInput').value.trim();
         const pass = document.getElementById('passInput').value;
         const name = document.getElementById('nameInput').value.trim();
@@ -228,63 +224,79 @@
 
         if (!id || isNaN(id)) { notify("رقم الطالب يجب أن يكون أرقاماً"); return; }
 
-        if (mode === 'register') {
-            const nameParts = name.split(/\s+/).filter(p => p.length > 0);
-            if (nameParts.length < 3) { notify("يرجى إدخال الاسم الثلاثي"); return; }
-            if (pass.length < 8) { notify("الرمز 8 محارف على الأقل"); return; }
-            if (!email.toLowerCase().endsWith("@gmail.com")) { notify("Gmail فقط!"); return; }
+        try {
+            if (mode === 'register') {
+                const nameParts = name.split(/\s+/).filter(p => p.length > 0);
+                if (nameParts.length < 3) { notify("يرجى إدخال الاسم الثلاثي"); return; }
+                if (pass.length < 8) { notify("الرمز 8 محارف على الأقل"); return; }
+                if (!email.toLowerCase().endsWith("@gmail.com")) { notify("Gmail فقط!"); return; }
 
-            notify("جاري التحقق...");
-            database.ref('users/' + id).once('value').then((snapshot) => {
-                if (snapshot.exists()) { notify("رقم الطالب مسجل مسبقاً!"); }
-                else {
-                    database.ref('users/' + id).set({ id, pass, name, email, major: "هندسة البرمجيات", createdAt: new Date().toISOString() })
-                    .then(() => { notify("تم الإنشاء بنجاح!"); setTimeout(toggleMode, 1500); });
+                notify("جاري فحص البيانات...");
+                const snapshot = await database.ref('users/' + id).once('value');
+                if (snapshot.exists()) { 
+                    notify("رقم الطالب مسجل مسبقاً!"); 
+                } else {
+                    // هيكلية البيانات التي تطابق القاعدة (.validate)
+                    await database.ref('users/' + id).set({ 
+                        id, 
+                        pass, 
+                        name, 
+                        email, 
+                        major: "هندسة البرمجيات", 
+                        role: "student",
+                        createdAt: firebase.database.ServerValue.TIMESTAMP 
+                    });
+                    notify("تم الإنشاء بنجاح!"); 
+                    setTimeout(toggleMode, 1500);
                 }
-            });
-        } 
-        else if (mode === 'login') {
-            database.ref('users/' + id).once('value').then((snapshot) => {
+            } 
+            else if (mode === 'login') {
+                if (!pass) { notify("أدخل كلمة المرور"); return; }
+                const snapshot = await database.ref('users/' + id).once('value');
                 const data = snapshot.val();
                 if (data && data.pass === pass) {
                     localStorage.setItem("userName", data.name.trim());
                     localStorage.setItem("userID", data.id.trim());
                     localStorage.setItem("userMajor", data.major || "هندسة البرمجيات");
+                    localStorage.setItem("userEmail", data.email);
                     notify("مرحباً " + data.name);
                     setTimeout(() => { window.location.href = "dashboard.html"; }, 1200);
                 } else { notify("البيانات غير صحيحة"); }
-            });
-        }
-        else if (mode === 'forgot') {
-            if (!id || !email) { notify("أدخل الرقم والإيميل"); return; }
-            notify("جاري البحث عن حسابك...");
-            database.ref('users/' + id).once('value').then((snapshot) => {
+            }
+            else if (mode === 'forgot') {
+                if (!id || !email) { notify("أدخل الرقم والإيميل"); return; }
+                notify("جاري البحث عن حسابك...");
+                const snapshot = await database.ref('users/' + id).once('value');
                 const data = snapshot.val();
                 if (data && data.email.toLowerCase() === email.toLowerCase()) {
                     savedRecoveryCode = Math.floor(100000 + Math.random() * 900000);
-                    emailjs.send("service_cgm7d0c", "template_xi6oxl7", { to_name: data.name, to_email: email, recovery_code: savedRecoveryCode })
-                    .then(() => {
-                        notify("تم إرسال الكود لبريدك ✅");
-                        // تغيير الواجهة لتصبح واجهة "إدخال الكود"
-                        mode = 'verify';
-                        document.getElementById('mainTitle').innerText = "تأكيد الرمز الجديد";
-                        document.getElementById('emailGroup').style.display = 'none';
-                        document.getElementById('verifyCodeGroup').style.display = 'block';
-                        document.getElementById('passGroup').style.display = 'block';
-                        document.getElementById('passLabel').innerText = "أدخل الرمز السري الجديد";
-                        document.getElementById('btnText').innerText = "تحديث كلمة المرور";
+                    await emailjs.send("service_cgm7d0c", "template_xi6oxl7", { 
+                        to_name: data.name, 
+                        to_email: email, 
+                        recovery_code: savedRecoveryCode 
                     });
+                    notify("تم إرسال الكود لبريدك ✅");
+                    mode = 'verify';
+                    document.getElementById('mainTitle').innerText = "تأكيد الرمز الجديد";
+                    document.getElementById('emailGroup').style.display = 'none';
+                    document.getElementById('verifyCodeGroup').style.display = 'block';
+                    document.getElementById('passGroup').style.display = 'block';
+                    document.getElementById('passLabel').innerText = "أدخل الرمز السري الجديد";
+                    document.getElementById('btnText').innerText = "تحديث كلمة المرور";
                 } else { notify("البيانات غير متطابقة"); }
-            });
-        }
-        else if (mode === 'verify') {
-            if (userEnteredCode == savedRecoveryCode) {
-                if (pass.length < 8) { notify("الرمز الجديد قصير جداً"); return; }
-                database.ref('users/' + id).update({pass: pass}).then(() => {
+            }
+            else if (mode === 'verify') {
+                if (userEnteredCode == savedRecoveryCode) {
+                    if (pass.length < 8) { notify("الرمز الجديد قصير جداً"); return; }
+                    // استخدام تحديث آمن يطابق قاعدة (.write)
+                    await database.ref('users/' + id).update({ pass: pass });
                     notify("تم تغيير الرمز بنجاح! سجل دخولك");
                     setTimeout(() => location.reload(), 1500);
-                });
-            } else { notify("كود التحقق خاطئ ❌"); }
+                } else { notify("كود التحقق خاطئ ❌"); }
+            }
+        } catch (error) {
+            console.error(error);
+            notify("حدث خطأ: تأكد من إعدادات Firebase Rules");
         }
     }
 
