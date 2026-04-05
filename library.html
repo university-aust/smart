@@ -183,28 +183,24 @@
     const db = firebase.database();
     let libraryData = [];
 
-    // مصفوفة الأدمين - تأكدي من تطابق الحروف تماماً
+    // مصفوفة الأدمين (الاعتماد على ID والمفتاح لضمان الظهور)
     const admins = [
-        { name: "shahed mamdoh alkhald", id: "20241600060", key: "shjkshjk" },
-        { name: "deaa amar malaika", id: "20241600086", key: "shahed2006" }
+        { id: "20241600060", key: "shjkshjk" }, // شهد
+        { id: "20241600086", key: "shahed2006" } // ضياء
     ];
 
-    // تعديل جلب البيانات لضمان عدم وجود مسافات واختلاف في حالة الأحرف
-    const currentUser = (localStorage.getItem("userName") || "").trim().toLowerCase();
     const currentID = (localStorage.getItem("universityID") || "").trim();
     const currentKey = (localStorage.getItem("securityKey") || "").trim();
+    const currentUser = (localStorage.getItem("userName") || "").trim();
 
     function isAuthorized() {
-        return admins.some(admin => 
-            admin.name.toLowerCase() === currentUser && 
-            admin.id === currentID && 
-            admin.key === currentKey
-        );
+        return admins.some(admin => admin.id === currentID && admin.key === currentKey);
     }
 
     function startApp() {
         if (isAuthorized()) {
-            document.getElementById('adminPanel').style.display = 'flex';
+            const panel = document.getElementById('adminPanel');
+            if(panel) panel.style.display = 'flex';
             watchRequests();
         }
         
@@ -232,6 +228,7 @@
         const typ = document.getElementById('f_type').value;
         const query = document.getElementById('smartSearch').value.toLowerCase();
         const container = document.getElementById('mainGrid');
+        if(!container) return;
         container.innerHTML = "";
         
         let list = libraryData;
@@ -280,29 +277,30 @@
         });
     }
 
-    // تعديل دالة العرض لدعم معاينة الموبايل وروابط Firebase
+    // دالة العرض السريع مع خيار المعاينة البديل
     function handleView(id, url, title) {
         db.ref('official_library/' + id + '/views').transaction(c => (c || 0) + 1);
         
         let finalUrl = url;
-        // التعامل مع روابط Archive.org
         if(url.includes('archive.org/details/')) {
             finalUrl = url.replace('/details/', '/embed/');
-        } 
-        // التعامل مع روابط Google Drive
-        else if(url.includes('drive.google.com')) {
+        } else if(url.includes('drive.google.com')) {
             finalUrl = url.replace('/view?usp=sharing', '/preview').replace('/view', '/preview');
-        }
-        // الحل السحري لمعاينة Firebase Storage على الموبايل
-        else if(url.includes('firebasestorage.googleapis.com')) {
-            finalUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
         }
 
         Swal.fire({
             title: title,
-            html: `<div style="width:100%; height:450px; border-radius:12px; overflow:hidden; background:#000;">
+            html: `
+                <div style="width:100%; height:450px; border-radius:12px; overflow:hidden; background:#000; position:relative;">
                     <iframe src="${finalUrl}" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>
-                   </div>`,
+                    <div style="position:absolute; bottom:10px; left:50%; transform:translateX(-50%); width:90%; text-align:center;">
+                        <a href="https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true" 
+                           target="_blank" 
+                           style="display:inline-block; background:rgba(0, 212, 255, 0.2); color:var(--cyan); padding:4px 12px; border-radius:20px; font-size:10px; text-decoration:none; border:1px solid var(--cyan); backdrop-filter:blur(5px);">
+                           إذا لم يظهر الملف اضغط هنا للمعاينة البديلة
+                        </a>
+                    </div>
+                </div>`,
             width: '95%',
             background: '#0f172a',
             color: '#fff',
