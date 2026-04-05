@@ -69,10 +69,6 @@
         .practical { background: var(--practical); }
         .summary { background: var(--summary); }
 
-        .admin-tools { position: absolute; top: 8px; right: 8px; display: flex; gap: 8px; z-index: 5; }
-        .del-icon { color: #ff4d4d; cursor: pointer; }
-        .edit-icon { color: var(--cyan); cursor: pointer; }
-
         .doc-name { font-size: 0.75rem; color: var(--cyan); margin-top: 5px; font-weight: bold; }
         .info-tag { font-size: 0.65rem; color: #ccc; margin-top: 3px; display: block; }
 
@@ -82,13 +78,12 @@
         }
 
         .btn-group { display: flex; gap: 8px; margin-top: 12px; }
-        /* أزرار بروابط مباشرة لضمان عملها على الهاتف */
-        .action-link { 
-            text-decoration: none; text-align: center; font-weight: bold; font-size: 0.75rem;
-            border-radius: 10px; transition: 0.3s; display: flex; align-items: center; justify-content: center;
+        .btn-action { 
+            flex: 1; padding: 10px; border-radius: 10px; font-weight: bold; font-size: 0.75rem;
+            cursor: pointer; border: none; transition: 0.3s; display: flex; align-items: center; justify-content: center;
         }
-        .btn-view { flex: 3; background: var(--cyan); color: #000; height: 40px; }
-        .btn-dl { flex: 1; border: 1px solid var(--cyan); color: var(--cyan); height: 40px; font-size: 1.1rem; }
+        .btn-view { flex: 3; background: var(--cyan); color: #000; }
+        .btn-dl { border: 1px solid var(--cyan); color: var(--cyan); background: transparent; }
 
         .fab-mode { position: fixed; bottom: 20px; left: 20px; width: 45px; height: 45px; border-radius: 50%; background: var(--cyan); border: none; cursor: pointer; z-index: 1001; }
     </style>
@@ -178,20 +173,9 @@
         list.reverse().forEach(item => {
             let bClass = item.type === 'عملي' ? 'practical' : (item.type === 'ملخص' ? 'summary' : 'theory');
             
-            // معالجة الروابط للتحميل والمعاينة
-            let viewUrl = item.url.includes('drive.google.com') ? item.url.replace('/view', '/preview') : item.url;
-            let downloadUrl = item.url;
-            if (item.url.includes('drive.google.com')) {
-                const fId = item.url.split('/d/')[1]?.split('/')[0] || item.url.split('id=')[1]?.split('&')[0];
-                if (fId) downloadUrl = `https://drive.google.com/uc?export=download&id=${fId}`;
-            }
-
             container.innerHTML += `
                 <div class="card">
                     <div class="badge ${bClass}">${item.type || 'نظري'}</div>
-                    <div class="admin-tools" style="${isAuthorized() ? 'display:flex' : 'display:none'}">
-                        <i class="fas fa-trash del-icon" onclick="deleteItem('${item.id}')"></i>
-                    </div>
                     <div>
                         <h3 style="margin-top:20px; font-size:0.85rem; line-height:1.2;">${item.title}</h3>
                         <div class="doc-name">د. ${item.doctor}</div>
@@ -205,23 +189,49 @@
                     </div>
 
                     <div class="btn-group">
-                        <a href="${viewUrl}" target="_blank" class="action-link btn-view" onclick="incStat('${item.id}', 'views')">المعاينة</a>
-                        <a href="${downloadUrl}" target="_blank" class="action-link btn-dl" onclick="incStat('${item.id}', 'downloads')">
+                        <button class="btn-action btn-view" onclick="handleView('${item.id}', '${item.url}')">المعاينة</button>
+                        <button class="btn-action btn-dl" onclick="handleDownload('${item.id}', '${item.url}')">
                             <i class="fas fa-download"></i>
-                        </a>
+                        </button>
                     </div>
                 </div>`;
         });
     }
 
-    // دالة تحديث العدادات عند الضغط المباشر
-    function incStat(id, field) {
-        db.ref('official_library/' + id + '/' + field).transaction(c => (c || 0) + 1);
+    function handleView(id, url) {
+        db.ref('official_library/' + id + '/views').transaction(c => (c || 0) + 1);
+        let viewLink = url.includes('drive.google.com') ? url.replace('/view', '/preview') : url;
+        window.open(viewLink, '_blank');
     }
 
-    function deleteItem(id) {
-        Swal.fire({ title: 'حذف؟', icon: 'warning', showCancelButton: true, background: '#0f172a', color: '#fff' })
-        .then(r => { if(r.isConfirmed) db.ref('official_library/'+id).remove(); });
+    // دالة التحميل الذكية: تعالج درايف وأرشيف
+    function handleDownload(id, url) {
+        db.ref('official_library/' + id + '/downloads').transaction(c => (c || 0) + 1);
+        
+        if (url.includes('drive.google.com')) {
+            // تحميل مباشر من درايف
+            const fId = url.split('/d/')[1]?.split('/')[0] || url.split('id=')[1]?.split('&')[0];
+            if (fId) {
+                window.location.href = `https://drive.google.com/uc?export=download&id=${fId}`;
+            } else {
+                window.open(url, '_blank');
+            }
+        } else if (url.includes('archive.org')) {
+            // توجيه لصفحة أرشيف للتحميل اليدوي (لأن أرشيف يمنع الروابط الخارجية المباشرة للملفات الكبيرة)
+            Swal.fire({
+                icon: 'info',
+                title: 'تنزيل من Archive',
+                text: 'سيتم فتح صفحة الأرشيف، يرجى الضغط على PDF أو DOWNLOAD لبدء التحميل.',
+                confirmButtonText: 'حسناً، انقلني هناك',
+                background: '#0f172a',
+                color: '#fff',
+                confirmButtonColor: 'var(--cyan)'
+            }).then(() => {
+                window.open(url, '_blank');
+            });
+        } else {
+            window.open(url, '_blank');
+        }
     }
 
     function addNewItem() {
