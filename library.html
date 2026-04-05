@@ -101,7 +101,6 @@
         .edit-icon { color: var(--cyan); cursor: pointer; font-size: 0.9rem; }
 
         .doc-name { font-size: 0.7rem; color: var(--cyan); margin-top: 4px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        /* ستايل بيانات الكلية والسنة */
         .info-tag { font-size: 0.6rem; color: #ccc; margin-top: 2px; display: block; }
         
         .stats-bar { display: flex; gap: 6px; font-size: 0.6rem; margin-top: 8px; opacity: 0.8; }
@@ -184,11 +183,13 @@
     const db = firebase.database();
     let libraryData = [];
 
+    // مصفوفة الأدمين - تأكدي من تطابق الحروف تماماً
     const admins = [
         { name: "shahed mamdoh alkhald", id: "20241600060", key: "shjkshjk" },
-        { name: "Deaa amar malaika", id: "20241600086", key: "shahed2006" }
+        { name: "deaa amar malaika", id: "20241600086", key: "shahed2006" }
     ];
 
+    // تعديل جلب البيانات لضمان عدم وجود مسافات واختلاف في حالة الأحرف
     const currentUser = (localStorage.getItem("userName") || "").trim().toLowerCase();
     const currentID = (localStorage.getItem("universityID") || "").trim();
     const currentKey = (localStorage.getItem("securityKey") || "").trim();
@@ -279,6 +280,7 @@
         });
     }
 
+    // تعديل دالة العرض لدعم معاينة الموبايل وروابط Firebase
     function handleView(id, url, title) {
         db.ref('official_library/' + id + '/views').transaction(c => (c || 0) + 1);
         
@@ -290,6 +292,10 @@
         // التعامل مع روابط Google Drive
         else if(url.includes('drive.google.com')) {
             finalUrl = url.replace('/view?usp=sharing', '/preview').replace('/view', '/preview');
+        }
+        // الحل السحري لمعاينة Firebase Storage على الموبايل
+        else if(url.includes('firebasestorage.googleapis.com')) {
+            finalUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
         }
 
         Swal.fire({
