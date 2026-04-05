@@ -6,41 +6,35 @@
     <title>منصة نبض AUST | Shahd Al-Khaled</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" href="data:,">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <style>
         :root {
-            --cyan: #00d4ff;
-            --purple: #a29bfe;
-            --bg-overlay: rgba(2, 6, 23, 0.7);
-            --card-bg: rgba(255, 255, 255, 0.08); 
-            --text-color: #ffffff;
-            --nav-bg: rgba(2, 6, 23, 0.9);
-            --theory: #ff9f43;
-            --practical: #10ac84;
+            --cyan: #00d4ff; --purple: #a29bfe; --bg-overlay: rgba(2, 6, 23, 0.7);
+            --card-bg: rgba(255, 255, 255, 0.08); --text-color: #ffffff;
+            --nav-bg: rgba(2, 6, 23, 0.9); --theory: #ff9f43; --practical: #10ac84;
         }
 
         body.light-mode {
-            --bg-overlay: rgba(241, 245, 249, 0.85);
-            --card-bg: rgba(255, 255, 255, 0.7);
-            --text-color: #1e293b;
-            --nav-bg: rgba(255, 255, 255, 0.95);
+            --bg-overlay: rgba(241, 245, 249, 0.85); --card-bg: rgba(255, 255, 255, 0.7);
+            --text-color: #1e293b; --nav-bg: rgba(255, 255, 255, 0.95);
         }
 
         body {
-            margin: 0; padding: 0;
-            background: var(--bg-overlay) url('67260.jpg') no-repeat center center fixed;
+            margin: 0; padding: 0; background: var(--bg-overlay) url('67260.jpg') no-repeat center center fixed;
             background-size: cover; background-blend-mode: overlay;
             color: var(--text-color); font-family: 'Segoe UI', sans-serif; transition: 0.3s;
         }
 
-        /* شريط تجهيز بسيط يظهر عند التحميل */
-        #loading-info {
-            text-align: center; padding: 10px; color: var(--cyan); font-weight: bold;
+        /* شريط تجهيز نحيف جداً يختفي عند اكتمال جلب البيانات */
+        #loading-line {
+            height: 3px; width: 100%; position: fixed; top: 60px; z-index: 999;
+            background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+            animation: move-line 1.5s infinite; display: block;
         }
+        @keyframes move-line { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 
         .navbar {
             backdrop-filter: blur(20px); background: var(--nav-bg);
@@ -48,8 +42,8 @@
             border-bottom: 2px solid var(--cyan); position: sticky; top: 0; z-index: 1000;
         }
 
+        .logo { font-size: 1.1rem; font-weight: 900; color: var(--cyan); text-decoration: none; }
         .nav-controls { display: flex; gap: 10px; align-items: center; }
-        
         .btn-nav { padding: 8px 12px; border-radius: 10px; font-weight: bold; cursor: pointer; border: none; font-size: 0.8rem; }
         .btn-add { background: var(--cyan); color: #000; }
         .btn-share { background: transparent; border: 1px solid var(--cyan); color: var(--cyan); }
@@ -59,7 +53,7 @@
             background: rgba(0,0,0,0.2); backdrop-filter: blur(10px);
         }
 
-        .search-wrapper { position: relative; grid-column: 1 / -1; margin-bottom: 5px; }
+        .search-wrapper { position: relative; grid-column: 1 / -1; }
         .search-input {
             width: 100%; padding: 12px 40px 12px 12px; border-radius: 12px;
             border: 1px solid rgba(0, 212, 255, 0.4); background: rgba(15, 23, 42, 0.8);
@@ -67,25 +61,16 @@
         }
         .search-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--cyan); }
 
-        .m-select {
-            padding: 10px; border-radius: 10px; border: 1px solid rgba(0, 212, 255, 0.3);
-            background: rgba(15, 23, 42, 0.6); color: white; outline: none; font-size: 0.75rem;
-        }
+        .m-select { padding: 10px; border-radius: 10px; border: 1px solid rgba(0, 212, 255, 0.3); background: rgba(15, 23, 42, 0.6); color: white; outline: none; font-size: 0.75rem; }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; padding: 15px 3%; }
-
-        @media (min-width: 768px) {
-            .grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 20px 4%; }
-        }
+        @media (min-width: 768px) { .grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; } }
 
         .card {
-            background: var(--card-bg); border-radius: 18px; padding: 12px;
-            position: relative; border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            min-height: 200px; display: flex; flex-direction: column; justify-content: space-between;
-            transition: 0.3s;
+            background: var(--card-bg); border-radius: 18px; padding: 12px; border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px); min-height: 200px; display: flex; flex-direction: column; justify-content: space-between;
+            transition: 0.3s; position: relative;
         }
-        .card:hover { transform: translateY(-3px); border-color: var(--cyan); }
 
         .badge { position: absolute; top: 8px; left: 8px; padding: 2px 8px; border-radius: 10px; font-size: 0.55rem; font-weight: bold; color: #fff; z-index: 2; }
         .theory { background: var(--theory); }
@@ -98,19 +83,17 @@
 
         .doc-name { font-size: 0.7rem; color: var(--cyan); margin-top: 4px; font-weight: bold; }
         .info-tag { font-size: 0.6rem; color: #ccc; margin-top: 2px; display: block; }
-        
-        .stats-bar { display: flex; gap: 6px; font-size: 0.65rem; margin-top: 8px; opacity: 0.9; color: var(--practical); font-weight: bold; }
+        .stats-bar { font-size: 0.65rem; margin-top: 8px; color: var(--practical); font-weight: bold; }
 
-        .btn-card-full { 
-            width: 100%; padding: 10px; border-radius: 10px; border: none; 
+        /* تعديل الزر ليصبح رابطاً مباشراً وسريعاً */
+        .btn-card-direct { 
+            display: block; width: 100%; padding: 10px 0; border-radius: 10px; 
             background: var(--cyan); color: #000; font-weight: bold; 
-            cursor: pointer; font-size: 0.8rem; margin-top: 10px;
+            text-align: center; text-decoration: none; font-size: 0.8rem; margin-top: 10px;
+            box-sizing: border-box;
         }
 
-        .fab-mode {
-            position: fixed; bottom: 20px; left: 20px; width: 45px; height: 45px;
-            border-radius: 50%; background: var(--cyan); border: none; cursor: pointer; z-index: 1001;
-        }
+        .fab-mode { position: fixed; bottom: 20px; left: 20px; width: 45px; height: 45px; border-radius: 50%; background: var(--cyan); border: none; cursor: pointer; z-index: 1001; }
     </style>
 </head>
 <body id="appBody">
@@ -118,7 +101,7 @@
     <nav class="navbar">
         <div style="display:flex; align-items:center; gap:8px;">
             <a href="dashboard.html" style="color:var(--text-color); font-size:1.1rem;"><i class="fas fa-arrow-right"></i></a>
-            <div style="font-size: 1.1rem; font-weight: 900; color: var(--cyan);">NABD AUST</div>
+            <div class="logo">NABD AUST</div>
         </div>
         
         <div class="nav-controls">
@@ -133,7 +116,7 @@
         </div>
     </nav>
 
-    <div id="loading-info">جاري تجهيز الملفات... انتظر ثانية</div>
+    <div id="loading-line"></div>
 
     <div class="filter-section">
         <div class="search-wrapper">
@@ -182,7 +165,7 @@
 
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    let libraryData = [];
+    let libraryData = JSON.parse(localStorage.getItem('local_cache')) || [];
 
     const admins = [
         { name: "shahed mamdoh alkhald", id: "20241600060", key: "shjkshjk" },
@@ -194,11 +177,7 @@
     const currentKey = (localStorage.getItem("securityKey") || "").trim();
 
     function isAuthorized() {
-        return admins.some(admin => 
-            admin.name.toLowerCase() === currentUser && 
-            admin.id === currentID && 
-            admin.key === currentKey
-        );
+        return admins.some(a => a.id === currentID && a.key === currentKey);
     }
 
     function startApp() {
@@ -207,10 +186,14 @@
             watchRequests();
         }
         
+        // عرض الكاش فوراً للسرعة
+        if(libraryData.length > 0) runFilter();
+
         db.ref('official_library/').on('value', (snap) => {
-            document.getElementById('loading-info').style.display = 'none';
+            document.getElementById('loading-line').style.display = 'none';
             const val = snap.val();
             libraryData = val ? Object.keys(val).map(k => ({...val[k], id: k})) : [];
+            localStorage.setItem('local_cache', JSON.stringify(libraryData));
             runFilter();
         });
     }
@@ -232,59 +215,45 @@
         const typ = document.getElementById('f_type').value;
         const query = document.getElementById('smartSearch').value.toLowerCase();
         const container = document.getElementById('mainGrid');
-        container.innerHTML = "";
         
-        let list = libraryData;
-        if(fac !== 'الكل') list = list.filter(i => i.category === fac);
-        if(yea !== 'الكل') list = list.filter(i => i.year === yea);
-        if(typ !== 'الكل') list = list.filter(i => i.type === typ);
+        let list = libraryData.filter(i => {
+            const matchFac = (fac === 'الكل' || i.category === fac);
+            const matchYea = (yea === 'الكل' || i.year === yea);
+            const matchTyp = (typ === 'الكل' || i.type === typ);
+            const matchSearch = (!query || (i.title && i.title.toLowerCase().includes(query)) || (i.doctor && i.doctor.toLowerCase().includes(query)));
+            return matchFac && matchYea && matchTyp && matchSearch;
+        });
 
-        if(query !== "") {
-            list = list.filter(i => 
-                (i.title && i.title.toLowerCase().includes(query)) || 
-                (i.doctor && i.doctor.toLowerCase().includes(query))
-            );
-        }
-
+        let html = '';
         list.reverse().forEach(item => {
-            let bClass = 'theory';
-            if(item.type === 'عملي') bClass = 'practical';
-            if(item.type === 'ملخص') bClass = 'summary';
-
-            container.innerHTML += `
+            let bClass = item.type === 'عملي' ? 'practical' : (item.type === 'ملخص' ? 'summary' : 'theory');
+            
+            html += `
                 <div class="card">
                     <div class="badge ${bClass}">${item.type || 'نظري'}</div>
-                    
                     <div class="admin-tools" style="${isAuthorized() ? 'display:flex' : 'display:none'}">
                         <i class="fas fa-edit edit-icon" onclick="editItem('${item.id}')"></i>
                         <i class="fas fa-trash del-icon" onclick="deleteItem('${item.id}')"></i>
                     </div>
-
                     <div>
                         <h3 style="margin:25px 0 3px 0; font-size:0.85rem; line-height:1.2;">${item.title}</h3>
                         <div class="doc-name">د. ${item.doctor || 'غير محدد'}</div>
                         <span class="info-tag"><i class="fas fa-university"></i> ${item.category}</span>
                         <span class="info-tag"><i class="fas fa-calendar-alt"></i> ${item.year}</span>
-                        
-                        <div class="stats-bar">
-                            <span><i class="fas fa-download"></i> التحميلات: ${item.downloads || 0}</span>
-                        </div>
+                        <div class="stats-bar"><i class="fas fa-download"></i> التحميلات: ${item.downloads || 0}</div>
                     </div>
-                    <button class="btn-card-full" onclick="handleOpen('${item.id}', '${item.url}')">فتح وتحميل</button>
+                    <a href="${item.url}" target="_blank" class="btn-card-direct" 
+                       onclick="db.ref('official_library/${item.id}/downloads').transaction(c => (c || 0) + 1);">
+                       فتح وتحميل سريع
+                    </a>
                 </div>`;
         });
-    }
-
-    function handleOpen(id, url) {
-        db.ref('official_library/' + id + '/downloads').transaction(c => (c || 0) + 1);
-        window.open(url, '_blank');
+        container.innerHTML = html;
     }
 
     function addNewItem() {
         if (!isAuthorized()) return;
-        showItemForm('إضافة ملف جديد', {}, (data) => {
-            db.ref('official_library/').push(data);
-        });
+        showItemForm('إضافة ملف جديد', {}, (data) => db.ref('official_library/').push(data));
     }
 
     function editItem(id) {
@@ -298,8 +267,7 @@
 
     function showItemForm(title, item, callback) {
         Swal.fire({
-            title: title,
-            background: '#0f172a', color: '#fff',
+            title: title, background: '#0f172a', color: '#fff',
             html: `
                 <input id="in-t" class="swal2-input" placeholder="اسم المادة" value="${item.title || ''}">
                 <input id="in-d" class="swal2-input" placeholder="اسم الدكتور" value="${item.doctor || ''}">
@@ -340,7 +308,6 @@
     function studentShare() {
         Swal.fire({
             title: 'مساهمة الطلاب',
-            text: 'أدخل رابط الملف لمراجعته من قبل الإدارة',
             input: 'url', inputPlaceholder: 'رابط الملف هنا',
             showCancelButton: true, confirmButtonText: 'إرسال',
             background: '#0f172a', color: '#fff'
@@ -356,9 +323,7 @@
         if (!isAuthorized()) return;
         Swal.fire({ 
             title: 'حذف؟', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ff4d4d', background: '#0f172a', color: '#fff' 
-        }).then(r => {
-            if(r.isConfirmed) db.ref('official_library/'+id).remove();
-        });
+        }).then(r => { if(r.isConfirmed) db.ref('official_library/'+id).remove(); });
     }
 
     window.onload = startApp;
