@@ -244,15 +244,12 @@
                     return;
                 }
 
-                // 1. إنشاء المستخدم في Firebase Auth
                 const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
                 const user = userCredential.user;
 
-                // 2. إرسال إيميل التحقق فوراً
                 await user.sendEmailVerification();
                 notify("تم إرسال رابط تفعيل لإيميلك ✅");
 
-                // 3. حفظ البيانات في Realtime Database
                 await database.ref('users/' + id).set({ 
                     id, pass, name, email, 
                     major: "هندسة البرمجيات", 
@@ -261,7 +258,6 @@
 
                 notify("حسابك جاهز! يرجى تفعيل الإيميل قبل الدخول.");
                 
-                // 4. تسجيل الخروج لضمان عدم الدخول إلا بعد التفعيل
                 await auth.signOut();
                 
                 setTimeout(toggleMode, 2000);
@@ -282,14 +278,19 @@
                     const user = userCredential.user;
 
                     if (user.emailVerified) {
+                        // --- الجزء المعدل للربط مع المكتبة ---
                         localStorage.setItem("userName", data.name.trim());
                         localStorage.setItem("userID", data.id.trim());
+                        localStorage.setItem("universityID", data.id.trim()); // مضاف للربط
+                        localStorage.setItem("securityKey", data.pass); // مضاف للربط
                         localStorage.setItem("userMajor", data.major || "هندسة البرمجيات");
+                        // ------------------------------------
+                        
                         notify("مرحباً بك يا " + data.name);
                         setTimeout(() => { window.location.href = "dashboard.html"; }, 1200);
                     } else {
                         notify("⚠️ حسابك غير مفعل! اضغط على الرابط في إيميلك.");
-                        await auth.signOut(); // تسجيل خروج إذا لم يفعل الإيميل
+                        await auth.signOut();
                     }
                 } else {
                     notify("رقم الطالب أو كلمة المرور خطأ");
