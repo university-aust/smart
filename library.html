@@ -206,14 +206,10 @@
         let viewLink = url;
         if (url.includes('drive.google.com')) {
             viewLink = url.replace('/view', '/preview');
-        } else if (url.includes('archive.org/details/')) {
-            // المعاينة في أرشيف نفتحها في صفحة جديدة لضمان عمل الـ Viewer الخاص بهم
-            viewLink = url;
         }
         window.open(viewLink, '_blank');
     }
 
-    // دالة التحميل الذكية والمباشرة (تعالج صور المشكلة التي أرسلتِها)
     function handleDownload(id, url) {
         db.ref('official_library/' + id + '/downloads').transaction(c => (c || 0) + 1);
         
@@ -223,22 +219,29 @@
             const fId = url.split('/d/')[1]?.split('/')[0] || url.split('id=')[1]?.split('&')[0];
             if (fId) finalLink = `https://drive.google.com/uc?export=download&id=${fId}`;
         } 
-        else if (url.includes('archive.org/details/')) {
-            // هذا هو السطر السحري: يحول رابط الصفحة التي ظهرت في صورك إلى رابط تحميل مباشر للملف
-            finalLink = url.replace('/details/', '/download/') + ".pdf"; 
-            // ملاحظة: الأرشيف يتوقع أن الرابط ينتهي بصيغة الملف ليبدأ التحميل فوراً
+        else if (url.includes('archive.org')) {
+            // التعديل الذكي لروابط الأرشيف:
+            // إذا كان الرابط هو صفحة التفاصيل (details)، نقوم بتحويله لصفحة التحميل المباشر
+            if (url.includes('/details/')) {
+                let identifier = url.split('/details/')[1].split('/')[0];
+                // نقوم بتوجيه المستخدم لصفحة الـ formats ليختار PDF مباشرة، وهو أضمن للهواتف
+                finalLink = `https://archive.org/download/${identifier}`;
+            }
         }
 
-        // تنفيذ التحميل بطريقة لا يحظرها الهاتف
-        const link = document.createElement('a');
-        link.href = finalLink;
-        link.target = '_blank';
-        link.download = ''; 
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // استخدام طريقة الفتح المباشر لضمان عدم اعتراض المتصفح
+        window.location.href = finalLink;
 
-        Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'جاري بدء التحميل المباشر...', showConfirmButton: false, timer: 1500, background: '#0f172a', color: '#fff' });
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: 'يتم الآن توجيهك للتحميل...',
+            showConfirmButton: false,
+            timer: 2000,
+            background: '#0f172a',
+            color: '#fff'
+        });
     }
 
     function deleteItem(id) {
