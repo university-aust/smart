@@ -13,144 +13,158 @@
     <style>
         :root {
             --cyan: #00d4ff;
-            --bg-overlay: rgba(2, 6, 23, 0.7);
-            --card-bg: rgba(255, 255, 255, 0.08); 
-            --text-color: #ffffff;
-            --nav-bg: rgba(2, 6, 23, 0.95);
+            --purple: #a29bfe;
+            --bg-dark: #020617;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --text-main: #ffffff;
             --theory: #ff9f43;
             --practical: #10ac84;
-            --summary: #a29bfe;
         }
 
         body.light-mode {
-            --bg-overlay: rgba(241, 245, 249, 0.85);
-            --card-bg: rgba(255, 255, 255, 0.7);
-            --text-color: #1e293b;
-            --nav-bg: rgba(255, 255, 255, 0.95);
+            --bg-dark: #f1f5f9;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --text-main: #1e293b;
         }
 
         body {
             margin: 0; padding: 0;
-            background: var(--bg-overlay) url('67260.jpg') no-repeat center center fixed;
+            background: var(--bg-dark) url('67260.jpg') no-repeat center center fixed;
             background-size: cover; background-blend-mode: overlay;
-            color: var(--text-color); font-family: 'Segoe UI', sans-serif; transition: 0.3s;
+            color: var(--text-main); font-family: 'Segoe UI', sans-serif;
+            transition: 0.4s;
         }
 
-        /* شريط التنقل */
+        /* Navbar */
         .navbar {
-            backdrop-filter: blur(20px); background: var(--nav-bg);
-            padding: 10px 4%; display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 2px solid var(--cyan); position: sticky; top: 0; z-index: 1000;
+            backdrop-filter: blur(25px); background: rgba(2, 6, 23, 0.8);
+            padding: 12px 5%; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.3); position: sticky; top: 0; z-index: 1000;
         }
 
-        /* قسم التبويب السريع (للملخصات) */
-        .quick-tabs {
-            display: flex; gap: 10px; padding: 10px 4%; justify-content: center;
-            background: rgba(0,0,0,0.1);
+        .logo { font-size: 1.3rem; font-weight: 900; color: var(--cyan); }
+
+        /* شريط التجهيز (Loader) */
+        #loading-bar-container {
+            position: fixed; top: 60px; left: 0; width: 100%; z-index: 999;
+            display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px 0;
+            background: rgba(2, 6, 23, 0.5); backdrop-filter: blur(5px);
         }
+        .progress-line {
+            width: 80%; height: 4px; background: rgba(255,255,255,0.1);
+            border-radius: 10px; overflow: hidden; position: relative;
+        }
+        .progress-line::after {
+            content: ''; position: absolute; left: -50%; width: 50%; height: 100%;
+            background: var(--cyan); box-shadow: 0 0 10px var(--cyan);
+            animation: loading-slide 1.5s infinite linear;
+        }
+        @keyframes loading-slide {
+            from { left: -50%; } to { left: 100%; }
+        }
+        .loading-text { font-size: 0.8rem; color: var(--cyan); font-weight: bold; }
+
+        /* Tabs & Filters */
+        .tab-container { display: flex; justify-content: center; gap: 10px; padding: 15px 0; background: rgba(0,0,0,0.2); }
         .tab-btn {
-            padding: 8px 15px; border-radius: 20px; border: 1px solid var(--cyan);
-            background: transparent; color: var(--cyan); font-weight: bold; cursor: pointer;
-            font-size: 0.8rem; transition: 0.3s;
+            padding: 8px 20px; border-radius: 20px; border: 1px solid rgba(0, 212, 255, 0.4);
+            background: transparent; color: #fff; cursor: pointer; font-size: 0.85rem; transition: 0.3s;
         }
-        .tab-btn.active { background: var(--cyan); color: #000; }
+        .tab-btn.active { background: var(--cyan); color: #000; box-shadow: 0 0 15px rgba(0, 212, 255, 0.4); }
+        .tab-btn.special { border-color: var(--purple); color: var(--purple); }
+        .tab-btn.special.active { background: var(--purple); color: #fff; }
 
-        .filter-section {
-            padding: 10px 4%; display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px;
-        }
-
+        .filter-section { padding: 10px 5%; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
         .search-wrapper { position: relative; grid-column: 1 / -1; }
         .search-input {
-            width: 100%; padding: 12px 40px 12px 12px; border-radius: 12px;
-            border: 1px solid rgba(0, 212, 255, 0.3); background: rgba(15, 23, 42, 0.8);
-            color: white; outline: none; font-size: 0.9rem; box-sizing: border-box;
+            width: 100%; padding: 12px 45px 12px 15px; border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1); background: rgba(15, 23, 42, 0.7);
+            color: white; outline: none;
         }
 
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
-            gap: 12px; padding: 15px 3%; 
-        }
+        .m-select { padding: 10px; border-radius: 12px; background: rgba(15, 23, 42, 0.7); color: white; border: 1px solid rgba(255,255,255,0.1); }
 
-        @media (min-width: 768px) {
-            .grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        }
-
-        /* هيكل التحميل Skeleton */
-        .skeleton {
-            height: 200px; background: rgba(255,255,255,0.05); border-radius: 18px;
-            animation: pulse 1.5s infinite ease-in-out;
-        }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        /* Grid */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 15px; padding: 20px 5%; }
+        @media (min-width: 768px) { .grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; } }
 
         .card {
-            background: var(--card-bg); border-radius: 18px; padding: 15px;
-            position: relative; border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            min-height: 180px; display: flex; flex-direction: column; justify-content: space-between;
+            background: var(--card-bg); border-radius: 24px; padding: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(15px);
+            display: flex; flex-direction: column; justify-content: space-between;
+            transition: 0.4s; position: relative; min-height: 180px;
+        }
+        .card:hover { transform: translateY(-5px); border-color: var(--cyan); }
+
+        .badge { position: absolute; top: 12px; left: 12px; padding: 3px 10px; border-radius: 8px; font-size: 0.6rem; font-weight: 800; }
+        .theory { background: var(--theory); color: #fff; }
+        .practical { background: var(--practical); color: #fff; }
+        .summary-badge { background: var(--purple); color: #fff; }
+
+        .card-content h3 { margin: 30px 0 5px 0; font-size: 0.9rem; color: var(--cyan); }
+        .doctor { font-size: 0.75rem; opacity: 0.8; }
+        .meta { font-size: 0.65rem; opacity: 0.6; margin-top: 5px; display: flex; flex-direction: column; }
+        .download-count { margin-top: 8px; font-size: 0.7rem; color: var(--practical); font-weight: bold; }
+
+        .btn-download {
+            margin-top: 15px; width: 100%; padding: 12px; border-radius: 12px;
+            background: var(--cyan); color: #000; border: none; font-weight: 800;
+            cursor: pointer; font-size: 0.85rem;
         }
 
-        .badge {
-            position: absolute; top: 8px; left: 8px;
-            padding: 2px 8px; border-radius: 10px; font-size: 0.55rem; font-weight: bold; color: #fff;
-        }
-        .theory { background: var(--theory); }
-        .practical { background: var(--practical); }
-        .summary { background: var(--summary); box-shadow: 0 0 10px var(--summary); }
+        .admin-tools { position: absolute; top: 12px; right: 12px; display: flex; gap: 10px; }
+        .admin-tools i { cursor: pointer; font-size: 1rem; }
 
-        .btn-download-full {
-            width: 100%; padding: 12px; border-radius: 10px; 
-            background: var(--cyan); color: #000; text-align: center; 
-            text-decoration: none; font-weight: 900; font-size: 0.85rem;
-            margin-top: 12px; border: none; cursor: pointer;
+        .fab-mode {
+            position: fixed; bottom: 25px; left: 25px; width: 50px; height: 50px;
+            border-radius: 50%; background: var(--cyan); border: none; cursor: pointer;
         }
-
-        .admin-tools { position: absolute; top: 8px; right: 8px; display: flex; gap: 10px; }
     </style>
 </head>
 <body id="appBody">
 
     <nav class="navbar">
-        <div style="display:flex; align-items:center; gap:8px;">
-            <a href="dashboard.html" style="color:var(--text-color);"><i class="fas fa-arrow-right"></i></a>
-            <div style="font-weight: 900; color: var(--cyan);">NABD AUST</div>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <a href="dashboard.html" style="color:var(--text-main);"><i class="fas fa-chevron-right"></i></a>
+            <div class="logo">NABD AUST</div>
         </div>
-        <div id="adminPanel" style="display:none; gap: 10px;">
-            <button onclick="addNewItem()" class="tab-btn active" style="border-radius: 10px;">إضافة +</button>
+        <div id="adminPanel" style="display:none;">
+            <button onclick="addNewItem()" class="tab-btn active">إضافة +</button>
         </div>
     </nav>
 
-    <div class="quick-tabs">
-        <button class="tab-btn active" onclick="filterType('الكل', this)">الكل</button>
-        <button class="tab-btn" onclick="filterType('نظري', this)">محاضرات</button>
-        <button class="tab-btn" onclick="filterType('ملخص', this)">ملخصات ✨</button>
+    <div id="loading-bar-container">
+        <div class="progress-line"></div>
+        <div class="loading-text">جاري تجهيز الملفات... انتظر ثانية</div>
+    </div>
+
+    <div class="tab-container">
+        <button class="tab-btn active" onclick="setSection('الكل', this)">الكل</button>
+        <button class="tab-btn" onclick="setSection('محاضرات', this)">المحاضرات</button>
+        <button class="tab-btn special" onclick="setSection('ملخص', this)">الملخصات ✨</button>
     </div>
 
     <div class="filter-section">
         <div class="search-wrapper">
+            <i class="fas fa-search search-icon"></i>
             <input type="text" id="smartSearch" class="search-input" placeholder="بحث سريع..." onkeyup="runFilter()">
         </div>
         <select id="f_fac" class="m-select" onchange="runFilter()">
             <option value="الكل">جميع الكليات</option>
             <option value="كلية الهندسة المعلوماتية">المعلوماتية</option>
             <option value="كلية الهندسة المعمارية">المعمارية</option>
-            <option value="كلية طب الأسنان">الأسنان</option>
-            <option value="كلية الصيدلة">الصيدلة</option>
         </select>
         <select id="f_year" class="m-select" onchange="runFilter()">
-            <option value="الكل">كل السنين</option>
+            <option value="الكل">كل السنوات</option>
             <option value="سنة أولى">1</option><option value="سنة ثانية">2</option>
-            <option value="سنة ثالثة">3</option><option value="سنة رابعة">4</option>
-            <option value="سنة خامسة">5</option>
         </select>
     </div>
 
-    <div class="grid" id="mainGrid">
-        <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
-    </div>
+    <div class="grid" id="mainGrid"></div>
+
+    <button class="fab-mode" onclick="document.getElementById('appBody').classList.toggle('light-mode')"><i class="fas fa-adjust"></i></button>
 
 <script>
-    // الإعدادات (نفس بياناتك السابقة)
     const firebaseConfig = {
         apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
         authDomain: "nabd-aust.firebaseapp.com",
@@ -164,7 +178,7 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     let libraryData = [];
-    let selectedType = 'الكل';
+    let currentSection = 'الكل';
 
     const admins = [{ id: "20241600060", key: "shjkshjk" }, { id: "20241600086", key: "shahed2006" }];
     const currentID = (localStorage.getItem("universityID") || "").trim();
@@ -173,18 +187,21 @@
     function isAuthorized() { return admins.some(a => a.id === currentID && a.key === currentKey); }
 
     function startApp() {
-        if (isAuthorized()) document.getElementById('adminPanel').style.display = 'flex';
+        if (isAuthorized()) document.getElementById('adminPanel').style.display = 'block';
         
         db.ref('official_library/').on('value', (snap) => {
+            // إخفاء شريط التحميل فور وصول البيانات
+            document.getElementById('loading-bar-container').style.display = 'none';
+            
             const val = snap.val();
             libraryData = val ? Object.keys(val).map(k => ({...val[k], id: k})) : [];
             runFilter();
         });
     }
 
-    function filterType(type, btn) {
-        selectedType = type;
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    function setSection(sec, btn) {
+        currentSection = sec;
+        document.querySelectorAll('.tab-container .tab-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         runFilter();
     }
@@ -196,93 +213,82 @@
         const container = document.getElementById('mainGrid');
         
         let list = libraryData;
+        if(currentSection === 'محاضرات') list = list.filter(i => i.type !== 'ملخص');
+        else if(currentSection === 'ملخص') list = list.filter(i => i.type === 'ملخص');
+
         if(fac !== 'الكل') list = list.filter(i => i.category === fac);
         if(yea !== 'الكل') list = list.filter(i => i.year === yea);
-        if(selectedType !== 'الكل') list = list.filter(i => i.type === selectedType);
         if(query !== "") list = list.filter(i => i.title.toLowerCase().includes(query) || i.doctor.toLowerCase().includes(query));
 
         container.innerHTML = "";
-        if(list.length === 0) {
-            container.innerHTML = "<p style='grid-column:1/-1; text-align:center; opacity:0.5;'>لا توجد ملفات حالياً...</p>";
-            return;
-        }
-
         list.reverse().forEach(item => {
-            let bClass = item.type === 'عملي' ? 'practical' : (item.type === 'ملخص' ? 'summary' : 'theory');
+            const isSummary = item.type === 'ملخص';
+            const badgeClass = isSummary ? 'summary-badge' : (item.type === 'عملي' ? 'practical' : 'theory');
+            
             container.innerHTML += `
                 <div class="card">
-                    <div class="badge ${bClass}">${item.type || 'نظري'}</div>
+                    <div class="badge ${badgeClass}">${item.type}</div>
                     <div class="admin-tools" style="${isAuthorized() ? 'display:flex' : 'display:none'}">
                         <i class="fas fa-edit" style="color:var(--cyan)" onclick="editItem('${item.id}')"></i>
                         <i class="fas fa-trash" style="color:#ff4d4d" onclick="deleteItem('${item.id}')"></i>
                     </div>
-                    <div>
-                        <h3 style="margin:25px 0 5px 0; font-size:0.85rem;">${item.title}</h3>
-                        <div style="font-size:0.7rem; color:var(--cyan)">د. ${item.doctor}</div>
-                        <div style="font-size:0.6rem; opacity:0.7; margin-top:5px;">
-                            <i class="fas fa-download"></i> مرات التحميل: ${item.downloads || 0}
+                    <div class="card-content">
+                        <h3>${item.title}</h3>
+                        <div class="doctor">د. ${item.doctor}</div>
+                        <div class="meta">
+                            <span><i class="fas fa-university"></i> ${item.category}</span>
+                            <span><i class="fas fa-graduation-cap"></i> ${item.year}</span>
                         </div>
+                        <div class="download-count"><i class="fas fa-download"></i> التحميلات: ${item.downloads || 0}</div>
                     </div>
-                    <button class="btn-download-full" onclick="fastOpen('${item.id}', '${item.url}')">
-                        تحميل ${item.type === 'ملخص' ? 'الملخص' : 'المحاضرة'}
-                    </button>
+                    <button class="btn-download" onclick="handleOpen('${item.id}', '${item.url}')">تحميل ${isSummary ? 'الملخص' : 'المحاضرة'}</button>
                 </div>`;
         });
     }
 
-    function fastOpen(id, url) {
-        // تحديث العداد في الخلفية دون انتظار
+    function handleOpen(id, url) {
         db.ref('official_library/' + id + '/downloads').transaction(c => (c || 0) + 1);
-        // فتح فوري للملف
-        const win = window.open(url, '_blank', 'noopener,noreferrer');
-        if (win) win.focus();
+        window.open(url, '_blank');
     }
 
-    // دوال الإدارة (إضافة، حذف، تعديل) تبقى كما هي برمجياً
-    function addNewItem() {
-        showItemForm('إضافة مادة', {}, (data) => db.ref('official_library/').push(data));
-    }
-
+    // دوال الإدارة المعتادة...
+    function addNewItem() { showItemForm('إضافة ملف', {}, (data) => db.ref('official_library/').push(data)); }
     function editItem(id) {
         const item = libraryData.find(i => i.id === id);
-        showItemForm('تعديل', item, (data) => db.ref('official_library/' + id).update(data));
+        showItemForm('تعديل البيانات', item, (data) => db.ref('official_library/' + id).update(data));
     }
-
     function showItemForm(title, item, callback) {
         Swal.fire({
             title: title, background: '#0f172a', color: '#fff',
             html: `
-                <input id="in-t" class="swal2-input" placeholder="العنوان" value="${item.title || ''}">
+                <input id="in-t" class="swal2-input" placeholder="اسم المادة" value="${item.title || ''}">
                 <input id="in-d" class="swal2-input" placeholder="الدكتور" value="${item.doctor || ''}">
                 <input id="in-u" class="swal2-input" placeholder="الرابط" value="${item.url || ''}">
                 <select id="in-c" class="swal2-input">
-                    <option value="كلية الهندسة المعلوماتية" ${item.category === 'كلية الهندسة المعلوماتية' ? 'selected' : ''}>المعلوماتية</option>
-                    <option value="كلية الهندسة المعمارية" ${item.category === 'كلية الهندسة المعمارية' ? 'selected' : ''}>المعمارية</option>
+                    <option value="كلية الهندسة المعلوماتية">المعلوماتية</option>
+                    <option value="كلية الهندسة المعمارية">المعمارية</option>
                 </select>
                 <select id="in-y" class="swal2-input">
-                    <option value="سنة أولى" ${item.year === 'سنة أولى' ? 'selected' : ''}>سنة أولى</option>
-                    <option value="سنة ثانية" ${item.year === 'سنة ثانية' ? 'selected' : ''}>سنة ثانية</option>
+                    <option value="سنة أولى">سنة أولى</option><option value="سنة ثانية">سنة ثانية</option>
                 </select>
                 <select id="in-tp" class="swal2-input">
-                    <option value="نظري" ${item.type === 'نظري' ? 'selected' : ''}>نظري</option>
-                    <option value="عملي" ${item.type === 'عملي' ? 'selected' : ''}>عملي</option>
-                    <option value="ملخص" ${item.type === 'ملخص' ? 'selected' : ''}>ملخص</option>
+                    <option value="نظري">نظري</option><option value="عملي">عملي</option><option value="ملخص">ملخص</option>
                 </select>`,
             preConfirm: () => ({
-                title: document.getElementById('in-t').value,
-                doctor: document.getElementById('in-d').value,
-                url: document.getElementById('in-u').value,
-                category: document.getElementById('in-c').value,
-                year: document.getElementById('in-y').value,
-                type: document.getElementById('in-tp').value,
+                title: document.getElementById('in-t').value, doctor: document.getElementById('in-d').value,
+                url: document.getElementById('in-u').value, category: document.getElementById('in-c').value,
+                year: document.getElementById('in-y').value, type: document.getElementById('in-tp').value,
                 downloads: item.downloads || 0
             })
         }).then(r => { if(r.isConfirmed) callback(r.value); });
     }
-
     function deleteItem(id) {
         Swal.fire({ title: 'حذف؟', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ff4d4d', background: '#0f172a', color: '#fff' })
         .then(r => { if(r.isConfirmed) db.ref('official_library/'+id).remove(); });
+    }
+    function studentShare() {
+        Swal.fire({ title: 'مساهمة الطلاب', input: 'url', inputPlaceholder: 'رابط الملف هنا', background: '#0f172a', color: '#fff' })
+        .then(r => { if(r.isConfirmed && r.value) { db.ref('suggestions/').push({ url: r.value, date: new Date().toLocaleString() }); Swal.fire('شكراً!', 'تم الإرسال للمراجعة.', 'success'); }});
     }
 
     window.onload = startApp;
