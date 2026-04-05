@@ -82,7 +82,6 @@
 
         .doc-name { font-size: 0.7rem; color: var(--cyan); margin-top: 4px; font-weight: bold; }
         .info-tag { font-size: 0.6rem; color: #ccc; margin-top: 2px; display: block; }
-        .stats-bar { display: flex; gap: 10px; font-size: 0.6rem; margin-top: 8px; opacity: 0.8; }
 
         .btn-group { display: flex; gap: 5px; margin-top: 10px; }
         .btn-card-view { flex: 2; padding: 10px; border-radius: 8px; border: none; background: var(--cyan); color: #000; font-weight: bold; cursor: pointer; font-size: 0.75rem; }
@@ -128,6 +127,7 @@
             <option value="كلية الهندسة البترولية">البترول</option>
             <option value="كلية طب الأسنان">الأسنان</option>
             <option value="كلية الصيدلة">الصيدلة</option>
+            <option value="كلية الترجمة واللغات">الترجمة واللغات</option>
         </select>
         <select id="f_year" class="m-select" onchange="runFilter()">
             <option value="الكل">السنوات</option>
@@ -148,7 +148,6 @@
     <button class="fab-mode" onclick="document.getElementById('appBody').classList.toggle('light-mode')"><i class="fas fa-adjust"></i></button>
 
 <script>
-    // تكوين فايربيس
     const firebaseConfig = {
         apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
         authDomain: "nabd-aust.firebaseapp.com",
@@ -163,23 +162,14 @@
     const db = firebase.database();
     let libraryData = [];
 
-    const admins = [
-        { id: "20241600060", key: "shjkshjk" },
-        { id: "20241600086", key: "shahed2006" }
-    ];
-
+    const admins = [{ id: "20241600060", key: "shjkshjk" }, { id: "20241600086", key: "shahed2006" }];
     const currentID = (localStorage.getItem("universityID") || "").trim();
     const currentKey = (localStorage.getItem("securityKey") || "").trim();
 
-    function isAuthorized() {
-        return admins.some(a => a.id === currentID && a.key === currentKey);
-    }
+    function isAuthorized() { return admins.some(a => a.id === currentID && a.key === currentKey); }
 
     function startApp() {
-        if (isAuthorized()) {
-            document.getElementById('adminPanel').style.display = 'flex';
-        }
-        
+        if (isAuthorized()) document.getElementById('adminPanel').style.display = 'flex';
         db.ref('official_library/').on('value', (snap) => {
             const val = snap.val();
             libraryData = val ? Object.keys(val).map(k => ({...val[k], id: k})) : [];
@@ -203,10 +193,7 @@
         });
 
         list.reverse().forEach(item => {
-            let bClass = 'theory';
-            if(item.type === 'عملي') bClass = 'practical';
-            if(item.type === 'ملخص') bClass = 'summary';
-
+            let bClass = item.type === 'عملي' ? 'practical' : (item.type === 'ملخص' ? 'summary' : 'theory');
             container.innerHTML += `
                 <div class="card">
                     <div class="badge ${bClass}">${item.type || 'نظري'}</div>
@@ -230,33 +217,13 @@
         });
     }
 
-    // الحل النهائي للمعاينة: فتح في نافذة جديدة لضمان عملها على الهاتف 100%
     function handleView(id, url) {
         db.ref('official_library/' + id + '/views').transaction(c => (c || 0) + 1);
-        
-        let finalUrl = url;
-        if(url.includes('drive.google.com')) {
-            finalUrl = url.replace('/view', '/preview');
-        } else if(url.includes('archive.org/details/')) {
-            finalUrl = url.replace('/details/', '/embed/');
-        }
-
-        // إشعار سريع للمستخدم ثم فتح الملف
-        Swal.fire({
-            title: 'جاري فتح المعاينة',
-            text: 'سيتم فتح الملف في نافذة جديدة لضمان السرعة',
-            icon: 'info',
-            timer: 1500,
-            showConfirmButton: false,
-            background: '#0f172a',
-            color: '#fff'
-        });
-
-        setTimeout(() => {
-            window.open(finalUrl, '_blank');
-        }, 1000);
+        let finalUrl = url.includes('drive.google.com') ? url.replace('/view', '/preview') : (url.includes('archive.org/details/') ? url.replace('/details/', '/embed/') : url);
+        window.open(finalUrl, '_blank');
     }
 
+    // تفعيل خاصية التحميل التلقائي والمباشر
     function handleDownload(id, url) {
         db.ref('official_library/' + id + '/downloads').transaction(c => (c || 0) + 1);
         let dLink = url;
@@ -264,13 +231,22 @@
             const fId = url.split('/d/')[1]?.split('/')[0] || url.split('id=')[1]?.split('&')[0];
             if (fId) dLink = `https://drive.google.com/uc?export=download&id=${fId}`;
         }
-        window.open(dLink, '_blank');
+        
+        // إنشاء رابط وهمي والضغط عليه برمجياً لبدء التحميل فوراً
+        const a = document.createElement('a');
+        a.href = dLink;
+        a.download = ""; // تلميح للمتصفح بالتحميل
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        Swal.fire({ toast: true, position: 'top', icon: 'success', title: 'بدأ التحميل التلقائي', showConfirmButton: false, timer: 1500 });
     }
 
-    function addNewItem() { showItemForm('إضافة', {}, d => db.ref('official_library/').push(d)); }
+    function addNewItem() { showItemForm('إضافة محاضرة', {}, d => db.ref('official_library/').push(d)); }
     function editItem(id) { 
         const item = libraryData.find(i => i.id === id);
-        showItemForm('تعديل', item, d => db.ref('official_library/'+id).update(d)); 
+        showItemForm('تعديل البيانات', item, d => db.ref('official_library/'+id).update(d)); 
     }
 
     function showItemForm(title, item, callback) {
@@ -281,17 +257,25 @@
                 <input id="in-d" class="swal2-input" placeholder="الدكتور" value="${item.doctor || ''}">
                 <input id="in-u" class="swal2-input" placeholder="الرابط" value="${item.url || ''}">
                 <select id="in-c" class="swal2-input">
-                    <option value="كلية الهندسة المعلوماتية" ${item.category === 'كلية الهندسة المعلوماتية' ? 'selected' : ''}>المعلوماتية</option>
-                    <option value="كلية الهندسة المعمارية" ${item.category === 'كلية الهندسة المعمارية' ? 'selected' : ''}>المعمارية</option>
-                    <option value="كلية طب الأسنان" ${item.category === 'كلية طب الأسنان' ? 'selected' : ''}>الأسنان</option>
+                    <option value="كلية الهندسة المعلوماتية" ${item.category?.includes('المعلوماتية') ? 'selected' : ''}>المعلوماتية</option>
+                    <option value="كلية الهندسة المعمارية" ${item.category?.includes('المعمارية') ? 'selected' : ''}>المعمارية</option>
+                    <option value="كلية الهندسة الكيميائية" ${item.category?.includes('الكيمياء') ? 'selected' : ''}>الكيمياء</option>
+                    <option value="كلية الهندسة البترولية" ${item.category?.includes('البترول') ? 'selected' : ''}>البترول</option>
+                    <option value="كلية طب الأسنان" ${item.category?.includes('الأسنان') ? 'selected' : ''}>الأسنان</option>
+                    <option value="كلية الصيدلة" ${item.category?.includes('الصيدلة') ? 'selected' : ''}>الصيدلة</option>
+                    <option value="كلية الترجمة واللغات" ${item.category?.includes('اللغات') ? 'selected' : ''}>الترجمة واللغات</option>
+                </select>
+                <select id="in-y" class="swal2-input">
+                    <option value="سنة أولى" ${item.year === 'سنة أولى' ? 'selected' : ''}>1</option>
+                    <option value="سنة ثانية" ${item.year === 'سنة ثانية' ? 'selected' : ''}>2</option>
+                    <option value="سنة ثالثة" ${item.year === 'سنة ثالثة' ? 'selected' : ''}>3</option>
+                    <option value="سنة رابعة" ${item.year === 'سنة رابعة' ? 'selected' : ''}>4</option>
+                    <option value="سنة خامسة" ${item.year === 'سنة خامسة' ? 'selected' : ''}>5</option>
                 </select>
                 <select id="in-tp" class="swal2-input">
                     <option value="نظري" ${item.type === 'نظري' ? 'selected' : ''}>نظري</option>
                     <option value="عملي" ${item.type === 'عملي' ? 'selected' : ''}>عملي</option>
                     <option value="ملخص" ${item.type === 'ملخص' ? 'selected' : ''}>ملخص</option>
-                </select>
-                <select id="in-y" class="swal2-input">
-                    <option value="سنة أولى">1</option><option value="سنة ثانية">2</option><option value="سنة ثالثة">3</option>
                 </select>`,
             preConfirm: () => ({
                 title: document.getElementById('in-t').value, doctor: document.getElementById('in-d').value,
