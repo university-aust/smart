@@ -46,7 +46,7 @@
         .search-input {
             width: 100%; padding: 12px; border-radius: 12px; grid-column: 1 / -1;
             border: 1px solid rgba(0, 212, 255, 0.4); background: rgba(15, 23, 42, 0.8);
-            color: white; outline: none; font-size: 0.9rem;
+            color: white; outline: none; box-sizing: border-box;
         }
 
         .m-select {
@@ -61,7 +61,7 @@
             background: var(--card-bg); border-radius: 18px; padding: 15px;
             position: relative; border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            min-height: 260px; display: flex; flex-direction: column; justify-content: space-between; transition: 0.3s;
+            min-height: 260px; display: flex; flex-direction: column; justify-content: space-between;
         }
 
         .badge { position: absolute; top: 8px; left: 8px; padding: 2px 8px; border-radius: 10px; font-size: 0.55rem; font-weight: bold; color: #fff; }
@@ -69,22 +69,28 @@
         .practical { background: var(--practical); }
         .summary { background: var(--summary); }
 
+        .admin-tools { position: absolute; top: 8px; right: 8px; display: flex; gap: 8px; z-index: 5; }
+        .del-icon { color: #ff4d4d; cursor: pointer; }
+        .edit-icon { color: var(--cyan); cursor: pointer; }
+
         .doc-name { font-size: 0.75rem; color: var(--cyan); margin-top: 5px; font-weight: bold; }
         .info-tag { font-size: 0.65rem; color: #ccc; margin-top: 3px; display: block; }
 
-        /* تنسيق عداد المشاهدة والتحميل */
         .stats-footer {
-            display: flex; justify-content: space-around; align-items: center;
-            margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);
-            font-size: 0.7rem; color: #aaa;
+            display: flex; justify-content: space-around; margin-top: 10px; 
+            padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); font-size: 0.7rem; color: #888;
         }
-        .stat-item i { color: var(--cyan); margin-left: 4px; }
 
         .btn-group { display: flex; gap: 8px; margin-top: 12px; }
-        .btn-view { flex: 3; padding: 10px; border-radius: 10px; background: var(--cyan); color: #000; border: none; font-weight: bold; cursor: pointer; }
-        .btn-dl { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--cyan); color: var(--cyan); cursor: pointer; display: flex; justify-content: center; align-items: center; }
+        /* أزرار بروابط مباشرة لضمان عملها على الهاتف */
+        .action-link { 
+            text-decoration: none; text-align: center; font-weight: bold; font-size: 0.75rem;
+            border-radius: 10px; transition: 0.3s; display: flex; align-items: center; justify-content: center;
+        }
+        .btn-view { flex: 3; background: var(--cyan); color: #000; height: 40px; }
+        .btn-dl { flex: 1; border: 1px solid var(--cyan); color: var(--cyan); height: 40px; font-size: 1.1rem; }
 
-        .fab-mode { position: fixed; bottom: 20px; left: 20px; width: 45px; height: 45px; border-radius: 50%; background: var(--cyan); border: none; cursor: pointer; }
+        .fab-mode { position: fixed; bottom: 20px; left: 20px; width: 45px; height: 45px; border-radius: 50%; background: var(--cyan); border: none; cursor: pointer; z-index: 1001; }
     </style>
 </head>
 <body id="appBody">
@@ -97,7 +103,7 @@
     </nav>
 
     <div class="filter-section">
-        <input type="text" id="smartSearch" class="search-input" placeholder="ابحث باسم المادة أو الدكتور..." onkeyup="runFilter()">
+        <input type="text" id="smartSearch" class="search-input" placeholder="ابحث مادة، دكتور..." onkeyup="runFilter()">
         <select id="f_fac" class="m-select" onchange="runFilter()">
             <option value="الكل">جميع الكليات</option>
             <option value="كلية الهندسة المعلوماتية">المعلوماتية</option>
@@ -115,7 +121,7 @@
             <option value="سنة خامسة">سنة 5</option>
         </select>
         <select id="f_type" class="m-select" onchange="runFilter()">
-            <option value="الكل">الكل</option>
+            <option value="الكل">النوع</option>
             <option value="نظري">نظري</option><option value="عملي">عملي</option><option value="ملخص">ملخص</option>
         </select>
     </div>
@@ -171,52 +177,51 @@
 
         list.reverse().forEach(item => {
             let bClass = item.type === 'عملي' ? 'practical' : (item.type === 'ملخص' ? 'summary' : 'theory');
+            
+            // معالجة الروابط للتحميل والمعاينة
+            let viewUrl = item.url.includes('drive.google.com') ? item.url.replace('/view', '/preview') : item.url;
+            let downloadUrl = item.url;
+            if (item.url.includes('drive.google.com')) {
+                const fId = item.url.split('/d/')[1]?.split('/')[0] || item.url.split('id=')[1]?.split('&')[0];
+                if (fId) downloadUrl = `https://drive.google.com/uc?export=download&id=${fId}`;
+            }
+
             container.innerHTML += `
                 <div class="card">
                     <div class="badge ${bClass}">${item.type || 'نظري'}</div>
+                    <div class="admin-tools" style="${isAuthorized() ? 'display:flex' : 'display:none'}">
+                        <i class="fas fa-trash del-icon" onclick="deleteItem('${item.id}')"></i>
+                    </div>
                     <div>
-                        <h3 style="margin-top:20px; font-size:0.9rem;">${item.title}</h3>
+                        <h3 style="margin-top:20px; font-size:0.85rem; line-height:1.2;">${item.title}</h3>
                         <div class="doc-name">د. ${item.doctor}</div>
                         <span class="info-tag"><i class="fas fa-university"></i> ${item.category}</span>
                         <span class="info-tag"><i class="fas fa-calendar-alt"></i> ${item.year}</span>
                     </div>
-                    
+
                     <div class="stats-footer">
-                        <div class="stat-item"><i class="fas fa-eye"></i> ${item.views || 0}</div>
-                        <div class="stat-item"><i class="fas fa-download"></i> ${item.downloads || 0}</div>
+                        <span><i class="fas fa-eye"></i> ${item.views || 0}</span>
+                        <span><i class="fas fa-download"></i> ${item.downloads || 0}</span>
                     </div>
 
                     <div class="btn-group">
-                        <button class="btn-view" onclick="handleView('${item.id}', '${item.url}')">المعاينة</button>
-                        <div class="btn-dl" onclick="handleDownload('${item.id}', '${item.url}')"><i class="fas fa-download"></i></div>
+                        <a href="${viewUrl}" target="_blank" class="action-link btn-view" onclick="incStat('${item.id}', 'views')">المعاينة</a>
+                        <a href="${downloadUrl}" target="_blank" class="action-link btn-dl" onclick="incStat('${item.id}', 'downloads')">
+                            <i class="fas fa-download"></i>
+                        </a>
                     </div>
                 </div>`;
         });
     }
 
-    function handleView(id, url) {
-        db.ref('official_library/' + id + '/views').transaction(c => (c || 0) + 1);
-        window.open(url, '_blank');
+    // دالة تحديث العدادات عند الضغط المباشر
+    function incStat(id, field) {
+        db.ref('official_library/' + id + '/' + field).transaction(c => (c || 0) + 1);
     }
 
-    // طريقة التحميل اليدوي المضمونة للهواتف
-    function handleDownload(id, url) {
-        db.ref('official_library/' + id + '/downloads').transaction(c => (c || 0) + 1);
-        let dLink = url;
-        if (url.includes('drive.google.com')) {
-            const fId = url.split('/d/')[1]?.split('/')[0] || url.split('id=')[1]?.split('&')[0];
-            if (fId) dLink = `https://drive.google.com/uc?export=download&id=${fId}`;
-        }
-
-        Swal.fire({
-            title: 'جاهز للتحميل',
-            html: `<p>اضغط على الزر أدناه إذا لم يبدأ التحميل تلقائياً:</p>
-                   <a href="${dLink}" target="_blank" style="display:inline-block; padding:12px 25px; background:var(--cyan); color:#000; border-radius:10px; text-decoration:none; font-weight:bold;">تحميل الملف الآن</a>`,
-            showConfirmButton: false,
-            showCloseButton: true,
-            background: '#0f172a',
-            color: '#fff'
-        });
+    function deleteItem(id) {
+        Swal.fire({ title: 'حذف؟', icon: 'warning', showCancelButton: true, background: '#0f172a', color: '#fff' })
+        .then(r => { if(r.isConfirmed) db.ref('official_library/'+id).remove(); });
     }
 
     function addNewItem() {
@@ -226,7 +231,7 @@
             html: `
                 <input id="in-t" class="swal2-input" placeholder="اسم المادة">
                 <input id="in-d" class="swal2-input" placeholder="اسم الدكتور">
-                <input id="in-u" class="swal2-input" placeholder="رابط الملف (درايف أو أرشيف)">
+                <input id="in-u" class="swal2-input" placeholder="الرابط">
                 <select id="in-c" class="swal2-input">
                     <option value="كلية الهندسة المعلوماتية">المعلوماتية</option>
                     <option value="كلية الهندسة المعمارية">المعمارية</option>
@@ -237,7 +242,7 @@
                     <option value="كلية الترجمة واللغات">الترجمة واللغات</option>
                 </select>
                 <select id="in-y" class="swal2-input">
-                    <option value="سنة أولى">سنة 1</option><option value="سنة ثانية">سنة 2</option><option value="سنة ثالثة">سنة 3</option><option value="سنة رابعة">سنة 4</option><option value="سنة خامسة">سنة 5</option>
+                    <option value="سنة أولى">1</option><option value="سنة ثانية">2</option><option value="سنة ثالثة">3</option><option value="سنة رابعة">4</option><option value="سنة خامسة">5</option>
                 </select>
                 <select id="in-tp" class="swal2-input">
                     <option value="نظري">نظري</option><option value="عملي">عملي</option><option value="ملخص">ملخص</option>
