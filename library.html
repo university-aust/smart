@@ -19,6 +19,7 @@
             --nav-bg: rgba(2, 6, 23, 0.9);
             --theory: #ff9f43;
             --practical: #10ac84;
+            --summary: #a29bfe; /* لون مميز للملخصات */
         }
 
         body.light-mode {
@@ -92,6 +93,7 @@
         }
         .theory { background: var(--theory); }
         .practical { background: var(--practical); }
+        .summary { background: var(--summary); }
 
         .admin-tools { position: absolute; top: 8px; right: 8px; display: flex; gap: 12px; z-index: 10; }
         .del-icon { color: #ff4d4d; font-size: 1rem; cursor: pointer; }
@@ -109,7 +111,6 @@
             margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;
             border: none; cursor: pointer; transition: 0.2s;
         }
-        .btn-download-full:active { transform: scale(0.95); }
 
         .fab-mode {
             position: fixed; bottom: 20px; left: 20px; width: 45px; height: 45px;
@@ -159,10 +160,10 @@
             <option value="سنة خامسة">5</option>
         </select>
         <select id="f_type" class="m-select" onchange="runFilter()">
-            <option value="الكل">النوع</option>
+            <option value="الكل">جميع التصنيفات</option>
             <option value="نظري">نظري</option>
             <option value="عملي">عملي</option>
-        </select>
+            <option value="ملخص">ملخصات</option> </select>
     </div>
 
     <div class="grid" id="mainGrid"></div>
@@ -242,7 +243,10 @@
         const hasAdminAccess = isAuthorized();
 
         list.reverse().forEach(item => {
-            const badgeClass = item.type === 'عملي' ? 'practical' : 'theory';
+            let badgeClass = 'theory';
+            if(item.type === 'عملي') badgeClass = 'practical';
+            if(item.type === 'ملخص') badgeClass = 'summary';
+
             container.innerHTML += `
                 <div class="card">
                     <div class="badge ${badgeClass}">${item.type || 'نظري'}</div>
@@ -264,30 +268,27 @@
                     </div>
                     
                     <button class="btn-download-full" onclick="handleDownload('${item.id}', '${item.url}')">
-                        تحميل المحاضرة <i class="fas fa-cloud-download-alt"></i>
+                        تحميل ${item.type === 'ملخص' ? 'الملخص' : 'المحاضرة'} <i class="fas fa-cloud-download-alt"></i>
                     </button>
                 </div>`;
         });
     }
 
     function handleDownload(id, url) {
-        // تحديث العدادات في القاعدة
         db.ref('official_library/' + id + '/downloads').transaction(c => (c || 0) + 1);
         db.ref('official_library/' + id + '/views').transaction(c => (c || 0) + 1);
-        // فتح الرابط فوراً
         window.open(url, '_blank');
     }
 
-    // باقي الدوال (Add, Edit, Delete, Share) بقيت كما هي لضمان عملها للأدمن
     function addNewItem() {
-        showItemForm('إضافة محاضرة جديدة', {}, (data) => {
+        showItemForm('إضافة مادة جديدة', {}, (data) => {
             db.ref('official_library/').push(data);
         });
     }
 
     function editItem(id) {
         const item = libraryData.find(i => i.id === id);
-        showItemForm('تعديل بيانات المحاضرة', item, (data) => {
+        showItemForm('تعديل البيانات', item, (data) => {
             db.ref('official_library/' + id).update(data);
             Swal.fire({ icon: 'success', title: 'تم التعديل', background: '#0f172a', color: '#fff' });
         });
@@ -319,6 +320,7 @@
                 <select id="in-tp" class="swal2-input">
                     <option value="نظري" ${item.type === 'نظري' ? 'selected' : ''}>نظري</option>
                     <option value="عملي" ${item.type === 'عملي' ? 'selected' : ''}>عملي</option>
+                    <option value="ملخص" ${item.type === 'ملخص' ? 'selected' : ''}>ملخص</option>
                 </select>`,
             preConfirm: () => ({
                 title: document.getElementById('in-t').value,
@@ -349,7 +351,7 @@
 
     function deleteItem(id) {
         Swal.fire({ 
-            title: 'حذف المحاضرة؟', icon: 'warning', showCancelButton: true, 
+            title: 'حذف؟', icon: 'warning', showCancelButton: true, 
             confirmButtonColor: '#ff4d4d', confirmButtonText: 'حذف',
             background: '#0f172a', color: '#fff' 
         }).then(r => {
