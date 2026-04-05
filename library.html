@@ -28,10 +28,11 @@
             color: var(--text-color); font-family: 'Segoe UI', sans-serif; transition: 0.3s;
         }
 
+        /* خط التحميل العلوي */
         #loading-line {
             height: 3px; width: 100%; position: fixed; top: 60px; z-index: 999;
             background: linear-gradient(90deg, transparent, var(--cyan), transparent);
-            animation: move-line 1.5s infinite; display: block;
+            animation: move-line 1.5s infinite; display: none;
         }
         @keyframes move-line { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 
@@ -45,6 +46,7 @@
         .nav-controls { display: flex; gap: 10px; align-items: center; }
         .btn-nav { padding: 8px 12px; border-radius: 10px; font-weight: bold; cursor: pointer; border: none; font-size: 0.8rem; }
         .btn-add { background: var(--cyan); color: #000; }
+        .btn-share { background: transparent; border: 1px solid var(--cyan); color: var(--cyan); }
 
         .filter-section {
             padding: 15px 4%; display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px;
@@ -59,34 +61,38 @@
         }
         .search-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--cyan); }
 
-        .m-select { padding: 10px; border-radius: 10px; border: 1px solid rgba(0, 212, 255, 0.3); background: rgba(15, 23, 42, 0.6); color: white; font-size: 0.75rem; }
+        .m-select { padding: 10px; border-radius: 10px; border: 1px solid rgba(0, 212, 255, 0.3); background: rgba(15, 23, 42, 0.6); color: white; outline: none; font-size: 0.75rem; }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; padding: 15px 3%; }
         @media (min-width: 768px) { .grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; } }
 
         .card {
             background: var(--card-bg); border-radius: 18px; padding: 12px; border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px); min-height: 250px; display: flex; flex-direction: column; justify-content: space-between;
+            backdrop-filter: blur(15px); min-height: 260px; display: flex; flex-direction: column; justify-content: space-between;
             transition: 0.3s; position: relative;
         }
+        .card:hover { transform: translateY(-5px); border-color: var(--cyan); }
 
-        .badge { position: absolute; top: 8px; left: 8px; padding: 2px 8px; border-radius: 10px; font-size: 0.55rem; font-weight: bold; color: #fff; }
+        .badge { position: absolute; top: 8px; left: 8px; padding: 2px 8px; border-radius: 10px; font-size: 0.55rem; font-weight: bold; color: #fff; z-index: 2; }
         .theory { background: var(--theory); }
         .practical { background: var(--practical); }
         .summary { background: var(--purple); }
 
-        .admin-tools { position: absolute; top: 8px; right: 8px; display: flex; gap: 8px; }
-        .del-icon { color: #ff4d4d; cursor: pointer; }
-        .edit-icon { color: var(--cyan); cursor: pointer; }
+        .admin-tools { position: absolute; top: 8px; right: 8px; display: flex; gap: 8px; z-index: 5; }
+        .del-icon { color: #ff4d4d; cursor: pointer; font-size: 0.9rem; }
+        .edit-icon { color: var(--cyan); cursor: pointer; font-size: 0.9rem; }
 
-        .doc-name { font-size: 0.75rem; color: var(--cyan); margin-top: 5px; font-weight: bold; }
-        .info-tag { font-size: 0.65rem; color: #ccc; margin-top: 3px; display: block; }
-        .stats-container { display: flex; justify-content: space-between; font-size: 0.65rem; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .doc-name { font-size: 0.7rem; color: var(--cyan); margin-top: 4px; font-weight: bold; }
+        .info-tag { font-size: 0.6rem; color: #ccc; margin-top: 2px; display: block; }
         
-        .action-buttons { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-        .btn-view { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid var(--cyan); }
-        .btn-down { background: var(--cyan); color: #000; }
-        .btn-card { padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; border: none; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 5px; width: 100%; }
+        .stats-row { display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.65rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px; }
+        .stat-item { display: flex; align-items: center; gap: 4px; opacity: 0.8; }
+
+        .action-group { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+        .btn-action { padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; border: none; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; }
+        .btn-view { background: rgba(255, 255, 255, 0.1); color: var(--text-color); border: 1px solid var(--cyan); }
+        .btn-download { background: var(--cyan); color: #000; }
+        .btn-action:active { transform: scale(0.95); }
 
         .fab-mode { position: fixed; bottom: 20px; left: 20px; width: 45px; height: 45px; border-radius: 50%; background: var(--cyan); border: none; cursor: pointer; z-index: 1001; }
     </style>
@@ -95,15 +101,19 @@
 
     <nav class="navbar">
         <div style="display:flex; align-items:center; gap:8px;">
-            <a href="dashboard.html" style="color:var(--text-color);"><i class="fas fa-arrow-right"></i></a>
+            <a href="dashboard.html" style="color:var(--text-color); font-size:1.1rem;"><i class="fas fa-arrow-right"></i></a>
             <div class="logo">NABD AUST</div>
         </div>
+        
         <div class="nav-controls">
             <div id="adminPanel" style="display:none; align-items: center; gap: 10px;">
-                <a href="requests.html" style="position: relative; color: var(--text-color);"><i class="fas fa-bell"></i><span id="reqCount" style="display:none; position: absolute; top: -5px; right: -5px; background: #ff4d4d; font-size: 0.55rem; padding: 2px 5px; border-radius: 50%;">0</span></a>
+                <a href="requests.html" style="position: relative; color: var(--text-color); font-size: 1.1rem;">
+                    <i class="fas fa-bell"></i>
+                    <span id="reqCount" style="display:none; position: absolute; top: -5px; right: -5px; background: #ff4d4d; color: white; font-size: 0.55rem; padding: 2px 5px; border-radius: 50%;">0</span>
+                </a>
                 <button onclick="addNewItem()" class="btn-nav btn-add">إضافة</button>
             </div>
-            <button onclick="studentShare()" class="btn-nav" style="background:transparent; border:1px solid var(--cyan); color:var(--cyan);">شارك</button>
+            <button onclick="studentShare()" class="btn-nav btn-share">شارك</button>
         </div>
     </nav>
 
@@ -112,8 +122,9 @@
     <div class="filter-section">
         <div class="search-wrapper">
             <i class="fas fa-search search-icon"></i>
-            <input type="text" id="smartSearch" class="search-input" placeholder="ابحث..." onkeyup="runFilter()">
+            <input type="text" id="smartSearch" class="search-input" placeholder="ابحث مادة، دكتور..." onkeyup="runFilter()">
         </div>
+
         <select id="f_fac" class="m-select" onchange="runFilter()">
             <option value="الكل">جميع الكليات</option>
             <option value="كلية الهندسة المعلوماتية">المعلوماتية</option>
@@ -126,10 +137,15 @@
         </select>
         <select id="f_year" class="m-select" onchange="runFilter()">
             <option value="الكل">السنوات</option>
-            <option value="سنة أولى">1</option><option value="سنة ثانية">2</option><option value="سنة ثالثة">3</option><option value="سنة رابعة">4</option><option value="سنة خامسة">5</option>
+            <option value="سنة أولى">1</option><option value="سنة ثانية">2</option>
+            <option value="سنة ثالثة">3</option><option value="سنة رابعة">4</option>
+            <option value="سنة خامسة">5</option>
         </select>
         <select id="f_type" class="m-select" onchange="runFilter()">
-            <option value="الكل">النوع</option><option value="نظري">نظري</option><option value="عملي">عملي</option><option value="ملخص">ملخص</option>
+            <option value="الكل">النوع</option>
+            <option value="نظري">نظري</option>
+            <option value="عملي">عملي</option>
+            <option value="ملخص">ملخص</option>
         </select>
     </div>
 
@@ -138,6 +154,7 @@
     <button class="fab-mode" onclick="document.getElementById('appBody').classList.toggle('light-mode')"><i class="fas fa-adjust"></i></button>
 
 <script>
+    // تكوين Firebase الخاص بكِ
     const firebaseConfig = {
         apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
         authDomain: "nabd-aust.firebaseapp.com",
@@ -150,28 +167,49 @@
 
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    
+    // نظام الكاش (التخزين المؤقت) للسرعة
     let libraryData = JSON.parse(localStorage.getItem('aust_cache')) || [];
 
     const admins = [
-        { id: "20241600060", key: "shjkshjk" },
-        { id: "20241600086", key: "shahed2006" }
+        { name: "shahed mamdoh alkhald", id: "20241600060", key: "shjkshjk" },
+        { name: "Deaa amar malaika", id: "20241600086", key: "shahed2006" }
     ];
 
     const currentID = (localStorage.getItem("universityID") || "").trim();
     const currentKey = (localStorage.getItem("securityKey") || "").trim();
 
-    function isAuthorized() { return admins.some(a => a.id === currentID && a.key === currentKey); }
+    function isAuthorized() {
+        return admins.some(a => a.id === currentID && a.key === currentKey);
+    }
 
     function startApp() {
-        if (isAuthorized()) { document.getElementById('adminPanel').style.display = 'flex'; watchRequests(); }
+        if (isAuthorized()) {
+            document.getElementById('adminPanel').style.display = 'flex';
+            watchRequests();
+        }
+        
+        // عرض الكاش فوراً قبل تحميل البيانات الحية
         if(libraryData.length > 0) runFilter();
 
+        document.getElementById('loading-line').style.display = 'block';
         db.ref('official_library/').on('value', (snap) => {
             document.getElementById('loading-line').style.display = 'none';
             const val = snap.val();
             libraryData = val ? Object.keys(val).map(k => ({...val[k], id: k})) : [];
-            localStorage.setItem('aust_cache', JSON.stringify(libraryData));
+            localStorage.setItem('aust_cache', JSON.stringify(libraryData)); // تحديث الكاش
             runFilter();
+        });
+    }
+
+    function watchRequests() {
+        db.ref('suggestions/').on('value', (snap) => {
+            const count = snap.numChildren();
+            const badge = document.getElementById('reqCount');
+            if (badge) {
+                badge.innerText = count;
+                badge.style.display = count > 0 ? 'block' : 'none';
+            }
         });
     }
 
@@ -190,8 +228,9 @@
         });
 
         let html = '';
-        list.reverse().forEach(item => {
+        list.slice().reverse().forEach(item => {
             let bClass = item.type === 'عملي' ? 'practical' : (item.type === 'ملخص' ? 'summary' : 'theory');
+            
             html += `
                 <div class="card">
                     <div class="badge ${bClass}">${item.type || 'نظري'}</div>
@@ -200,19 +239,22 @@
                         <i class="fas fa-trash del-icon" onclick="deleteItem('${item.id}')"></i>
                     </div>
                     <div>
-                        <h3 style="margin:25px 0 3px 0; font-size:0.85rem;">${item.title}</h3>
+                        <h3 style="margin:25px 0 3px 0; font-size:0.85rem; line-height:1.2;">${item.title}</h3>
                         <div class="doc-name">د. ${item.doctor || 'غير محدد'}</div>
                         <span class="info-tag"><i class="fas fa-university"></i> ${item.category}</span>
-                        <div class="stats-container">
-                            <span style="color:#a29bfe"><i class="fas fa-eye"></i> مشاهدة: ${item.views || 0}</span>
-                            <span style="color:var(--practical)"><i class="fas fa-download"></i> تحميل: ${item.downloads || 0}</span>
+                        <span class="info-tag"><i class="fas fa-calendar-alt"></i> ${item.year}</span>
+                        
+                        <div class="stats-row">
+                            <div class="stat-item" style="color:var(--purple)"><i class="fas fa-eye"></i> ${item.views || 0}</div>
+                            <div class="stat-item" style="color:var(--practical)"><i class="fas fa-download"></i> ${item.downloads || 0}</div>
                         </div>
                     </div>
-                    <div class="action-buttons">
-                        <button class="btn-card btn-view" onclick="actionFile('${item.id}', '${item.url}', 'view')">
+
+                    <div class="action-group">
+                        <button class="btn-action btn-view" onclick="handleFileAction('${item.id}', '${item.url}', '${item.title}', 'view')">
                             <i class="fas fa-eye"></i> عرض الملف
                         </button>
-                        <button class="btn-card btn-down" onclick="actionFile('${item.id}', '${item.url}', 'download')">
+                        <button class="btn-action btn-download" onclick="handleFileAction('${item.id}', '${item.url}', '${item.title}', 'download')">
                             <i class="fas fa-cloud-download-alt"></i> تحميل مباشر
                         </button>
                     </div>
@@ -221,76 +263,104 @@
         container.innerHTML = html;
     }
 
-    function actionFile(id, url, type) {
-        if (type === 'view') {
-            // زيادة عدد المشاهدات
+    // الدالة الموحدة للتعامل مع العرض والتحميل
+    function handleFileAction(id, url, title, mode) {
+        if (mode === 'view') {
+            // 1. زيادة عدد المشاهدات
             db.ref('official_library/' + id + '/views').transaction(c => (c || 0) + 1);
-            window.open(url, '_blank');
-        } else {
-            // زيادة عدد التحميلات
-            db.ref('official_library/' + id + '/downloads').transaction(c => (c || 0) + 1);
             
-            // معالجة رابط جوجل درايف للتحميل المباشر
-            let dUrl = url;
+            // 2. تجهيز الرابط للمعاينة
+            let viewUrl = url;
             if (url.includes('drive.google.com')) {
-                const fileId = url.split('/d/')[1]?.split('/')[0] || url.split('id=')[1]?.split('&')[0];
-                if (fileId) dUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+                viewUrl = url.replace('/view', '/preview');
             }
 
-            const a = document.createElement('a');
-            a.href = dUrl;
-            a.target = '_blank';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            
-            Swal.fire({ toast: true, position: 'top', icon: 'success', title: 'بدأ التحميل...', showConfirmButton: false, timer: 1500 });
+            // 3. فتح المعاينة في SweetAlert
+            Swal.fire({
+                title: title,
+                html: `<iframe src="${viewUrl}" style="width:100%; height:400px; border-radius:10px; border:none;"></iframe>`,
+                width: '95%',
+                background: '#0f172a',
+                color: '#fff',
+                showConfirmButton: false,
+                showCloseButton: true
+            });
+        } 
+        else if (mode === 'download') {
+            // 1. زيادة عدد التحميلات
+            db.ref('official_library/' + id + '/downloads').transaction(c => (c || 0) + 1);
+
+            // 2. تحويل رابط جوجل درايف لرابط تحميل مباشر
+            let directUrl = url;
+            if (url.includes('drive.google.com')) {
+                const fileId = url.split('/d/')[1]?.split('/')[0] || url.split('id=')[1]?.split('&')[0];
+                if (fileId) directUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+            }
+
+            // 3. تنفيذ التحميل
+            const link = document.createElement('a');
+            link.href = directUrl;
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            Swal.fire({ toast: true, position: 'top', icon: 'success', title: 'جاري التحميل...', showConfirmButton: false, timer: 1500 });
         }
     }
 
-    // دوال الإدارة
-    function watchRequests() { db.ref('suggestions/').on('value', s => { 
-        const c = s.numChildren(); const b = document.getElementById('reqCount');
-        if(b){ b.innerText = c; b.style.display = c > 0 ? 'block' : 'none'; }
-    });}
+    // دوال الإدارة (إضافة، تعديل، حذف)
+    function addNewItem() {
+        if (!isAuthorized()) return;
+        showItemForm('إضافة محاضرة جديدة', {}, (data) => db.ref('official_library/').push(data));
+    }
 
-    function addNewItem() { showItemForm('إضافة', {}, d => db.ref('official_library/').push(d)); }
-    function editItem(id) { const item = libraryData.find(i => i.id === id); showItemForm('تعديل', item, d => db.ref('official_library/'+id).update(d)); }
+    function editItem(id) {
+        const item = libraryData.find(i => i.id === id);
+        showItemForm('تعديل البيانات', item, (data) => db.ref('official_library/' + id).update(data));
+    }
 
     function showItemForm(title, item, callback) {
         Swal.fire({
             title: title, background: '#0f172a', color: '#fff',
-            html: `<input id="in-t" class="swal2-input" placeholder="المادة" value="${item.title || ''}">
-                   <input id="in-d" class="swal2-input" placeholder="الدكتور" value="${item.doctor || ''}">
-                   <input id="in-u" class="swal2-input" placeholder="الرابط" value="${item.url || ''}">
-                   <select id="in-c" class="swal2-input">
-                       <option value="كلية الهندسة المعلوماتية" ${item.category === 'كلية الهندسة المعلوماتية' ? 'selected' : ''}>المعلوماتية</option>
-                       <option value="كلية الهندسة المعمارية" ${item.category === 'كلية الهندسة المعمارية' ? 'selected' : ''}>المعمارية</option>
-                       <option value="كلية طب الأسنان" ${item.category === 'كلية طب الأسنان' ? 'selected' : ''}>أسنان</option>
-                       <option value="كلية الصيدلة" ${item.category === 'كلية الصيدلة' ? 'selected' : ''}>صيدلة</option>
-                   </select>
-                   <select id="in-y" class="swal2-input">
-                       <option value="سنة أولى">سنة 1</option><option value="سنة ثانية">سنة 2</option>
-                   </select>
-                   <select id="in-tp" class="swal2-input">
-                       <option value="نظري">نظري</option><option value="عملي">عملي</option><option value="ملخص">ملخص</option>
-                   </select>`,
+            html: `
+                <input id="in-t" class="swal2-input" placeholder="اسم المادة" value="${item.title || ''}">
+                <input id="in-d" class="swal2-input" placeholder="اسم الدكتور" value="${item.doctor || ''}">
+                <input id="in-u" class="swal2-input" placeholder="رابط الملف" value="${item.url || ''}">
+                <select id="in-c" class="swal2-input">
+                    <option value="كلية الهندسة المعلوماتية" ${item.category?.includes('المعلوماتية') ? 'selected' : ''}>المعلوماتية</option>
+                    <option value="كلية الهندسة المعمارية" ${item.category?.includes('المعمارية') ? 'selected' : ''}>المعمارية</option>
+                    <option value="كلية طب الأسنان" ${item.category?.includes('الأسنان') ? 'selected' : ''}>الأسنان</option>
+                    <option value="كلية الصيدلة" ${item.category?.includes('الصيدلة') ? 'selected' : ''}>الصيدلة</option>
+                    <option value="كلية الترجمة واللغات" ${item.category?.includes('اللغات') ? 'selected' : ''}>اللغات</option>
+                </select>
+                <select id="in-y" class="swal2-input">
+                    <option value="سنة أولى">سنة 1</option><option value="سنة ثانية">سنة 2</option><option value="سنة ثالثة">سنة 3</option>
+                </select>
+                <select id="in-tp" class="swal2-input">
+                    <option value="نظري">نظري</option><option value="عملي">عملي</option><option value="ملخص">ملخص</option>
+                </select>`,
             preConfirm: () => ({
-                title: document.getElementById('in-t').value, doctor: document.getElementById('in-d').value,
-                url: document.getElementById('in-u').value, category: document.getElementById('in-c').value,
-                year: document.getElementById('in-y').value, type: document.getElementById('in-tp').value,
-                views: item.views || 0, downloads: item.downloads || 0
+                title: document.getElementById('in-t').value,
+                doctor: document.getElementById('in-d').value,
+                url: document.getElementById('in-u').value,
+                category: document.getElementById('in-c').value,
+                year: document.getElementById('in-y').value,
+                type: document.getElementById('in-tp').value,
+                views: item.views || 0,
+                downloads: item.downloads || 0
             })
         }).then(r => { if(r.isConfirmed) callback(r.value); });
     }
 
     function studentShare() {
-        Swal.fire({ title: 'مساهمة', input: 'url', background: '#0f172a', color: '#fff' })
+        Swal.fire({ title: 'مساهمة', text: 'أدخل رابط الملف لمراجعته', input: 'url', background: '#0f172a', color: '#fff' })
         .then(r => { if(r.isConfirmed && r.value) db.ref('suggestions/').push({ url: r.value, date: new Date().toLocaleString() }); });
     }
 
-    function deleteItem(id) { 
-        Swal.fire({ title: 'حذف؟', icon: 'warning', showCancelButton: true }).then(r => { if(r.isConfirmed) db.ref('official_library/'+id).remove(); }); 
+    function deleteItem(id) {
+        Swal.fire({ title: 'حذف؟', icon: 'warning', showCancelButton: true, background: '#0f172a', color: '#fff' })
+        .then(r => { if(r.isConfirmed) db.ref('official_library/'+id).remove(); });
     }
 
     window.onload = startApp;
