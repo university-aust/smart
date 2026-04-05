@@ -61,13 +61,16 @@
             background: var(--card-bg); border-radius: 18px; padding: 15px;
             position: relative; border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            min-height: 260px; display: flex; flex-direction: column; justify-content: space-between;
+            min-height: 270px; display: flex; flex-direction: column; justify-content: space-between;
         }
 
         .badge { position: absolute; top: 8px; left: 8px; padding: 2px 8px; border-radius: 10px; font-size: 0.55rem; font-weight: bold; color: #fff; }
         .theory { background: var(--theory); }
         .practical { background: var(--practical); }
         .summary { background: var(--summary); }
+
+        .admin-tools { position: absolute; top: 8px; right: 8px; display: flex; gap: 8px; z-index: 5; }
+        .del-icon { color: #ff4d4d; cursor: pointer; }
 
         .doc-name { font-size: 0.75rem; color: var(--cyan); margin-top: 5px; font-weight: bold; }
         .info-tag { font-size: 0.65rem; color: #ccc; margin-top: 3px; display: block; }
@@ -79,7 +82,7 @@
 
         .btn-group { display: flex; gap: 8px; margin-top: 12px; }
         .btn-action { 
-            flex: 1; padding: 10px; border-radius: 10px; font-weight: bold; font-size: 0.75rem;
+            flex: 1; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 0.75rem;
             cursor: pointer; border: none; transition: 0.3s; display: flex; align-items: center; justify-content: center;
         }
         .btn-view { flex: 3; background: var(--cyan); color: #000; }
@@ -172,22 +175,22 @@
 
         list.reverse().forEach(item => {
             let bClass = item.type === 'عملي' ? 'practical' : (item.type === 'ملخص' ? 'summary' : 'theory');
-            
             container.innerHTML += `
                 <div class="card">
                     <div class="badge ${bClass}">${item.type || 'نظري'}</div>
+                    <div class="admin-tools" style="${isAuthorized() ? 'display:flex' : 'display:none'}">
+                        <i class="fas fa-trash del-icon" onclick="deleteItem('${item.id}')"></i>
+                    </div>
                     <div>
                         <h3 style="margin-top:20px; font-size:0.85rem; line-height:1.2;">${item.title}</h3>
                         <div class="doc-name">د. ${item.doctor}</div>
                         <span class="info-tag"><i class="fas fa-university"></i> ${item.category}</span>
                         <span class="info-tag"><i class="fas fa-calendar-alt"></i> ${item.year}</span>
                     </div>
-
                     <div class="stats-footer">
                         <span><i class="fas fa-eye"></i> ${item.views || 0}</span>
                         <span><i class="fas fa-download"></i> ${item.downloads || 0}</span>
                     </div>
-
                     <div class="btn-group">
                         <button class="btn-action btn-view" onclick="handleView('${item.id}', '${item.url}')">المعاينة</button>
                         <button class="btn-action btn-dl" onclick="handleDownload('${item.id}', '${item.url}')">
@@ -200,38 +203,47 @@
 
     function handleView(id, url) {
         db.ref('official_library/' + id + '/views').transaction(c => (c || 0) + 1);
-        let viewLink = url.includes('drive.google.com') ? url.replace('/view', '/preview') : url;
+        let viewLink = url;
+        if (url.includes('drive.google.com')) {
+            viewLink = url.replace('/view', '/preview');
+        } else if (url.includes('archive.org/details/')) {
+            // المعاينة في أرشيف نفتحها في صفحة جديدة لضمان عمل الـ Viewer الخاص بهم
+            viewLink = url;
+        }
         window.open(viewLink, '_blank');
     }
 
-    // دالة التحميل الذكية: تعالج درايف وأرشيف
+    // دالة التحميل الذكية والمباشرة (تعالج صور المشكلة التي أرسلتِها)
     function handleDownload(id, url) {
         db.ref('official_library/' + id + '/downloads').transaction(c => (c || 0) + 1);
         
+        let finalLink = url;
+
         if (url.includes('drive.google.com')) {
-            // تحميل مباشر من درايف
             const fId = url.split('/d/')[1]?.split('/')[0] || url.split('id=')[1]?.split('&')[0];
-            if (fId) {
-                window.location.href = `https://drive.google.com/uc?export=download&id=${fId}`;
-            } else {
-                window.open(url, '_blank');
-            }
-        } else if (url.includes('archive.org')) {
-            // توجيه لصفحة أرشيف للتحميل اليدوي (لأن أرشيف يمنع الروابط الخارجية المباشرة للملفات الكبيرة)
-            Swal.fire({
-                icon: 'info',
-                title: 'تنزيل من Archive',
-                text: 'سيتم فتح صفحة الأرشيف، يرجى الضغط على PDF أو DOWNLOAD لبدء التحميل.',
-                confirmButtonText: 'حسناً، انقلني هناك',
-                background: '#0f172a',
-                color: '#fff',
-                confirmButtonColor: 'var(--cyan)'
-            }).then(() => {
-                window.open(url, '_blank');
-            });
-        } else {
-            window.open(url, '_blank');
+            if (fId) finalLink = `https://drive.google.com/uc?export=download&id=${fId}`;
+        } 
+        else if (url.includes('archive.org/details/')) {
+            // هذا هو السطر السحري: يحول رابط الصفحة التي ظهرت في صورك إلى رابط تحميل مباشر للملف
+            finalLink = url.replace('/details/', '/download/') + ".pdf"; 
+            // ملاحظة: الأرشيف يتوقع أن الرابط ينتهي بصيغة الملف ليبدأ التحميل فوراً
         }
+
+        // تنفيذ التحميل بطريقة لا يحظرها الهاتف
+        const link = document.createElement('a');
+        link.href = finalLink;
+        link.target = '_blank';
+        link.download = ''; 
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'جاري بدء التحميل المباشر...', showConfirmButton: false, timer: 1500, background: '#0f172a', color: '#fff' });
+    }
+
+    function deleteItem(id) {
+        Swal.fire({ title: 'حذف؟', icon: 'warning', showCancelButton: true, background: '#0f172a', color: '#fff' })
+        .then(r => { if(r.isConfirmed) db.ref('official_library/'+id).remove(); });
     }
 
     function addNewItem() {
