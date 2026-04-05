@@ -28,7 +28,6 @@
             color: var(--text-color); font-family: 'Segoe UI', sans-serif; transition: 0.3s;
         }
 
-        /* شريط تجهيز نحيف جداً يختفي عند اكتمال جلب البيانات */
         #loading-line {
             height: 3px; width: 100%; position: fixed; top: 60px; z-index: 999;
             background: linear-gradient(90deg, transparent, var(--cyan), transparent);
@@ -50,7 +49,7 @@
 
         .filter-section {
             padding: 15px 4%; display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px;
-            background: rgba(0,0,0,0.2); backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.15); backdrop-filter: blur(10px);
         }
 
         .search-wrapper { position: relative; grid-column: 1 / -1; }
@@ -85,12 +84,11 @@
         .info-tag { font-size: 0.6rem; color: #ccc; margin-top: 2px; display: block; }
         .stats-bar { font-size: 0.65rem; margin-top: 8px; color: var(--practical); font-weight: bold; }
 
-        /* تعديل الزر ليصبح رابطاً مباشراً وسريعاً */
         .btn-card-direct { 
-            display: block; width: 100%; padding: 10px 0; border-radius: 10px; 
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            width: 100%; padding: 12px 0; border-radius: 10px; border: none;
             background: var(--cyan); color: #000; font-weight: bold; 
-            text-align: center; text-decoration: none; font-size: 0.8rem; margin-top: 10px;
-            box-sizing: border-box;
+            cursor: pointer; font-size: 0.8rem; margin-top: 10px;
         }
 
         .fab-mode { position: fixed; bottom: 20px; left: 20px; width: 45px; height: 45px; border-radius: 50%; background: var(--cyan); border: none; cursor: pointer; z-index: 1001; }
@@ -165,14 +163,15 @@
 
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    let libraryData = JSON.parse(localStorage.getItem('local_cache')) || [];
+    
+    // جلب الكاش المخزن سابقاً لتسريع التحميل الأولي
+    let libraryData = JSON.parse(localStorage.getItem('aust_cache')) || [];
 
     const admins = [
         { name: "shahed mamdoh alkhald", id: "20241600060", key: "shjkshjk" },
         { name: "Deaa amar malaika", id: "20241600086", key: "shahed2006" }
     ];
 
-    const currentUser = (localStorage.getItem("userName") || "").trim().toLowerCase();
     const currentID = (localStorage.getItem("universityID") || "").trim();
     const currentKey = (localStorage.getItem("securityKey") || "").trim();
 
@@ -186,14 +185,14 @@
             watchRequests();
         }
         
-        // عرض الكاش فوراً للسرعة
+        // عرض الكاش فوراً
         if(libraryData.length > 0) runFilter();
 
         db.ref('official_library/').on('value', (snap) => {
             document.getElementById('loading-line').style.display = 'none';
             const val = snap.val();
             libraryData = val ? Object.keys(val).map(k => ({...val[k], id: k})) : [];
-            localStorage.setItem('local_cache', JSON.stringify(libraryData));
+            localStorage.setItem('aust_cache', JSON.stringify(libraryData));
             runFilter();
         });
     }
@@ -217,15 +216,14 @@
         const container = document.getElementById('mainGrid');
         
         let list = libraryData.filter(i => {
-            const matchFac = (fac === 'الكل' || i.category === fac);
-            const matchYea = (yea === 'الكل' || i.year === yea);
-            const matchTyp = (typ === 'الكل' || i.type === typ);
-            const matchSearch = (!query || (i.title && i.title.toLowerCase().includes(query)) || (i.doctor && i.doctor.toLowerCase().includes(query)));
-            return matchFac && matchYea && matchTyp && matchSearch;
+            return (fac === 'الكل' || i.category === fac) &&
+                   (yea === 'الكل' || i.year === yea) &&
+                   (typ === 'الكل' || i.type === typ) &&
+                   (!query || (i.title && i.title.toLowerCase().includes(query)) || (i.doctor && i.doctor.toLowerCase().includes(query)));
         });
 
         let html = '';
-        list.reverse().forEach(item => {
+        list.slice().reverse().forEach(item => {
             let bClass = item.type === 'عملي' ? 'practical' : (item.type === 'ملخص' ? 'summary' : 'theory');
             
             html += `
@@ -242,25 +240,55 @@
                         <span class="info-tag"><i class="fas fa-calendar-alt"></i> ${item.year}</span>
                         <div class="stats-bar"><i class="fas fa-download"></i> التحميلات: ${item.downloads || 0}</div>
                     </div>
-                    <a href="${item.url}" target="_blank" class="btn-card-direct" 
-                       onclick="db.ref('official_library/${item.id}/downloads').transaction(c => (c || 0) + 1);">
-                       فتح وتحميل سريع
-                    </a>
+                    <button class="btn-card-direct" onclick="smartDownload('${item.id}', '${item.url}', '${item.title}')">
+                       <i class="fas fa-cloud-download-alt"></i> تحميل للهاتف
+                    </button>
                 </div>`;
         });
         container.innerHTML = html;
     }
 
+    // وظيفة التحميل الذكي: تحاول التنزيل وتفتح الرابط كخطة بديلة
+    async function smartDownload(id, url, title) {
+        // تحديث العداد في الخلفية
+        db.ref('official_library/' + id + '/downloads').transaction(c => (c || 0) + 1);
+
+        const toast = Swal.mixin({ toast: true, position: 'top', showConfirmButton: false, timer: 2000 });
+        toast.fire({ icon: 'info', title: 'جاري جلب الملف...' });
+
+        // محاولة التحميل القسري عبر Blob (تعمل مع الروابط المباشرة)
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000); // مهلة 5 ثواني
+
+            const response = await fetch(url, { signal: controller.signal });
+            const blob = await response.blob();
+            const bUrl = window.URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = bUrl;
+            a.download = title + ".pdf";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(bUrl);
+        } catch (e) {
+            // إذا فشل (بسبب قيود المتصفح أو جوجل درايف)، نفتح الرابط مباشرة
+            window.open(url, '_blank');
+        }
+    }
+
+    // دوال الإدارة
     function addNewItem() {
         if (!isAuthorized()) return;
-        showItemForm('إضافة ملف جديد', {}, (data) => db.ref('official_library/').push(data));
+        showItemForm('إضافة ملف جديد', {}, d => db.ref('official_library/').push(d));
     }
 
     function editItem(id) {
         if (!isAuthorized()) return;
         const item = libraryData.find(i => i.id === id);
-        showItemForm('تعديل البيانات', item, (data) => {
-            db.ref('official_library/' + id).update(data);
+        showItemForm('تعديل البيانات', item, d => {
+            db.ref('official_library/' + id).update(d);
             Swal.fire({ icon: 'success', title: 'تم التعديل', background: '#0f172a', color: '#fff' });
         });
     }
@@ -277,16 +305,16 @@
                     <option value="كلية الهندسة المعمارية" ${item.category === 'كلية الهندسة المعمارية' ? 'selected' : ''}>المعمارية</option>
                     <option value="كلية الهندسة الكيميائية" ${item.category === 'كلية الهندسة الكيميائية' ? 'selected' : ''}>الكيمياء</option>
                     <option value="كلية الهندسة البترولية" ${item.category === 'كلية الهندسة البترولية' ? 'selected' : ''}>البترول</option>
-                    <option value="كلية طب الأسنان" ${item.category === 'كلية طب الأسنان' ? 'selected' : ''}>طب الأسنان</option>
-                    <option value="كلية الصيدلة" ${item.category === 'كلية الصيدلة' ? 'selected' : ''}>الصيدلة</option>
-                    <option value="كلية الترجمة واللغات" ${item.category === 'كلية الترجمة واللغات' ? 'selected' : ''}>الترجمة واللغات</option>
+                    <option value="كلية طب الأسنان" ${item.category === 'كلية طب الأسنان' ? 'selected' : ''}>أسنان</option>
+                    <option value="كلية الصيدلة" ${item.category === 'كلية الصيدلة' ? 'selected' : ''}>صيدلة</option>
+                    <option value="كلية الترجمة واللغات" ${item.category === 'كلية الترجمة واللغات' ? 'selected' : ''}>لغات</option>
                 </select>
                 <select id="in-y" class="swal2-input">
-                    <option value="سنة أولى" ${item.year === 'سنة أولى' ? 'selected' : ''}>سنة أولى</option>
-                    <option value="سنة ثانية" ${item.year === 'سنة ثانية' ? 'selected' : ''}>سنة ثانية</option>
-                    <option value="سنة ثالثة" ${item.year === 'سنة ثالثة' ? 'selected' : ''}>سنة ثالثة</option>
-                    <option value="سنة رابعة" ${item.year === 'سنة رابعة' ? 'selected' : ''}>سنة رابعة</option>
-                    <option value="سنة خامسة" ${item.year === 'سنة خامسة' ? 'selected' : ''}>سنة خامسة</option>
+                    <option value="سنة أولى" ${item.year === 'سنة أولى' ? 'selected' : ''}>سنة 1</option>
+                    <option value="سنة ثانية" ${item.year === 'سنة ثانية' ? 'selected' : ''}>سنة 2</option>
+                    <option value="سنة ثالثة" ${item.year === 'سنة ثالثة' ? 'selected' : ''}>سنة 3</option>
+                    <option value="سنة رابعة" ${item.year === 'سنة رابعة' ? 'selected' : ''}>سنة 4</option>
+                    <option value="سنة خامسة" ${item.year === 'سنة خامسة' ? 'selected' : ''}>سنة 5</option>
                 </select>
                 <select id="in-tp" class="swal2-input">
                     <option value="نظري" ${item.type === 'نظري' ? 'selected' : ''}>نظري</option>
@@ -307,13 +335,11 @@
 
     function studentShare() {
         Swal.fire({
-            title: 'مساهمة الطلاب',
-            input: 'url', inputPlaceholder: 'رابط الملف هنا',
-            showCancelButton: true, confirmButtonText: 'إرسال',
-            background: '#0f172a', color: '#fff'
+            title: 'مساهمة الطلاب', text: 'ضع رابط الملف هنا مراجعة الإدارة',
+            input: 'url', showCancelButton: true, background: '#0f172a', color: '#fff'
         }).then(r => {
             if(r.isConfirmed && r.value) {
-                db.ref('suggestions/').push({ url: r.value, sender: currentUser || 'مجهول', date: new Date().toLocaleString() });
+                db.ref('suggestions/').push({ url: r.value, date: new Date().toLocaleString() });
                 Swal.fire('تم الإرسال', 'شكراً لمساهمتك!', 'success');
             }
         });
@@ -321,9 +347,8 @@
 
     function deleteItem(id) {
         if (!isAuthorized()) return;
-        Swal.fire({ 
-            title: 'حذف؟', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ff4d4d', background: '#0f172a', color: '#fff' 
-        }).then(r => { if(r.isConfirmed) db.ref('official_library/'+id).remove(); });
+        Swal.fire({ title: 'حذف؟', icon: 'warning', showCancelButton: true, background: '#0f172a', color: '#fff' })
+        .then(r => { if(r.isConfirmed) db.ref('official_library/'+id).remove(); });
     }
 
     window.onload = startApp;
