@@ -14,7 +14,7 @@
         :root {
             --cyan: #00d4ff; --bg-overlay: rgba(2, 6, 23, 0.7);
             --card-bg: rgba(255, 255, 255, 0.08); --text-color: #ffffff;
-            --nav-bg: rgba(2, 6, 23, 0.9); --theory: #ff9f43; --practical: #10ac84;
+            --nav-bg: rgba(2, 6, 23, 0.9); --theory: #ff9f43; --practical: #10ac84; --summary: #9b59b6;
         }
 
         body.light-mode {
@@ -38,7 +38,6 @@
         .nav-controls { display: flex; gap: 10px; align-items: center; }
         .btn-nav { padding: 8px 12px; border-radius: 10px; font-weight: bold; cursor: pointer; border: none; font-size: 0.8rem; }
         .btn-add { background: var(--cyan); color: #000; }
-        .btn-share { background: transparent; border: 1px solid var(--cyan); color: var(--cyan); }
 
         .filter-section {
             padding: 15px 4%; display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px;
@@ -75,6 +74,7 @@
         }
         .theory { background: var(--theory); }
         .practical { background: var(--practical); }
+        .summary { background: var(--summary); }
 
         .admin-tools { position: absolute; top: 8px; right: 8px; display: flex; gap: 8px; z-index: 5; }
         .del-icon { color: #ff4d4d; cursor: pointer; }
@@ -110,7 +110,7 @@
                 </a>
                 <button onclick="addNewItem()" class="btn-nav btn-add">إضافة</button>
             </div>
-            <button onclick="studentShare()" class="btn-nav btn-share">شارك</button>
+            <button onclick="studentShare()" class="btn-nav" style="background:transparent; border:1px solid var(--cyan); color:var(--cyan)">شارك</button>
         </div>
     </nav>
 
@@ -128,7 +128,6 @@
             <option value="كلية الهندسة البترولية">البترول</option>
             <option value="كلية طب الأسنان">الأسنان</option>
             <option value="كلية الصيدلة">الصيدلة</option>
-            <option value="كلية الترجمة واللغات">اللغات</option>
         </select>
         <select id="f_year" class="m-select" onchange="runFilter()">
             <option value="الكل">السنوات</option>
@@ -140,6 +139,7 @@
             <option value="الكل">النوع</option>
             <option value="نظري">نظري</option>
             <option value="عملي">عملي</option>
+            <option value="ملخص">ملخص</option>
         </select>
     </div>
 
@@ -148,6 +148,7 @@
     <button class="fab-mode" onclick="document.getElementById('appBody').classList.toggle('light-mode')"><i class="fas fa-adjust"></i></button>
 
 <script>
+    // تكوين فايربيس
     const firebaseConfig = {
         apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
         authDomain: "nabd-aust.firebaseapp.com",
@@ -177,24 +178,12 @@
     function startApp() {
         if (isAuthorized()) {
             document.getElementById('adminPanel').style.display = 'flex';
-            watchRequests();
         }
         
         db.ref('official_library/').on('value', (snap) => {
             const val = snap.val();
             libraryData = val ? Object.keys(val).map(k => ({...val[k], id: k})) : [];
             runFilter();
-        });
-    }
-
-    function watchRequests() {
-        db.ref('suggestions/').on('value', (snap) => {
-            const count = snap.numChildren();
-            const badge = document.getElementById('reqCount');
-            if (badge) {
-                badge.innerText = count;
-                badge.style.display = count > 0 ? 'block' : 'none';
-            }
         });
     }
 
@@ -214,7 +203,10 @@
         });
 
         list.reverse().forEach(item => {
-            const bClass = item.type === 'عملي' ? 'practical' : 'theory';
+            let bClass = 'theory';
+            if(item.type === 'عملي') bClass = 'practical';
+            if(item.type === 'ملخص') bClass = 'summary';
+
             container.innerHTML += `
                 <div class="card">
                     <div class="badge ${bClass}">${item.type || 'نظري'}</div>
@@ -227,13 +219,9 @@
                         <div class="doc-name">د. ${item.doctor || 'غير محدد'}</div>
                         <span class="info-tag"><i class="fas fa-university"></i> ${item.category}</span>
                         <span class="info-tag"><i class="fas fa-calendar-alt"></i> ${item.year}</span>
-                        <div class="stats-bar">
-                            <span><i class="fas fa-eye" style="color:var(--cyan)"></i> ${item.views || 0}</span>
-                            <span><i class="fas fa-download" style="color:#10ac84"></i> ${item.downloads || 0}</span>
-                        </div>
                     </div>
                     <div class="btn-group">
-                        <button class="btn-card-view" onclick="handleView('${item.id}', '${item.url}', '${item.title}')">عرض سريع</button>
+                        <button class="btn-card-view" onclick="handleView('${item.id}', '${item.url}')">عرض سريع</button>
                         <div class="btn-card-dl" onclick="handleDownload('${item.id}', '${item.url}')">
                             <i class="fas fa-cloud-download-alt"></i>
                         </div>
@@ -242,81 +230,73 @@
         });
     }
 
-    // إصلاح المعاينة لتكون متوافقة مع أرشيف ودرايف دون محركات وسيطة تسبب مشاكل
-    function handleView(id, url, title) {
+    // الحل النهائي للمعاينة: فتح في نافذة جديدة لضمان عملها على الهاتف 100%
+    function handleView(id, url) {
         db.ref('official_library/' + id + '/views').transaction(c => (c || 0) + 1);
         
         let finalUrl = url;
-        if(url.includes('archive.org/details/')) {
-            finalUrl = url.replace('/details/', '/embed/');
-        } else if(url.includes('drive.google.com')) {
+        if(url.includes('drive.google.com')) {
             finalUrl = url.replace('/view', '/preview');
+        } else if(url.includes('archive.org/details/')) {
+            finalUrl = url.replace('/details/', '/embed/');
         }
 
+        // إشعار سريع للمستخدم ثم فتح الملف
         Swal.fire({
-            title: title,
-            html: `<div style="width:100%; height:450px; border-radius:12px; overflow:hidden; background:#000;">
-                    <iframe src="${finalUrl}" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>
-                   </div>`,
-            width: '95%', background: '#0f172a', color: '#fff', showCloseButton: true, showConfirmButton: false
+            title: 'جاري فتح المعاينة',
+            text: 'سيتم فتح الملف في نافذة جديدة لضمان السرعة',
+            icon: 'info',
+            timer: 1500,
+            showConfirmButton: false,
+            background: '#0f172a',
+            color: '#fff'
         });
+
+        setTimeout(() => {
+            window.open(finalUrl, '_blank');
+        }, 1000);
     }
 
     function handleDownload(id, url) {
         db.ref('official_library/' + id + '/downloads').transaction(c => (c || 0) + 1);
-        
         let dLink = url;
         if (url.includes('drive.google.com')) {
             const fId = url.split('/d/')[1]?.split('/')[0] || url.split('id=')[1]?.split('&')[0];
             if (fId) dLink = `https://drive.google.com/uc?export=download&id=${fId}`;
         }
-
         window.open(dLink, '_blank');
-        Swal.fire({ toast: true, position: 'top', icon: 'success', title: 'جاري التحميل...', showConfirmButton: false, timer: 1500 });
     }
 
-    // دوال الإدارة
-    function addNewItem() {
-        showItemForm('إضافة محاضرة', {}, (data) => db.ref('official_library/').push(data));
-    }
-
-    function editItem(id) {
+    function addNewItem() { showItemForm('إضافة', {}, d => db.ref('official_library/').push(d)); }
+    function editItem(id) { 
         const item = libraryData.find(i => i.id === id);
-        showItemForm('تعديل البيانات', item, (data) => db.ref('official_library/' + id).update(data));
+        showItemForm('تعديل', item, d => db.ref('official_library/'+id).update(d)); 
     }
 
     function showItemForm(title, item, callback) {
         Swal.fire({
             title: title, background: '#0f172a', color: '#fff',
             html: `
-                <input id="in-t" class="swal2-input" placeholder="المادة" value="${item.title || ''}">
+                <input id="in-t" class="swal2-input" placeholder="اسم المادة" value="${item.title || ''}">
                 <input id="in-d" class="swal2-input" placeholder="الدكتور" value="${item.doctor || ''}">
                 <input id="in-u" class="swal2-input" placeholder="الرابط" value="${item.url || ''}">
                 <select id="in-c" class="swal2-input">
-                    <option value="كلية الهندسة المعلوماتية" ${item.category?.includes('المعلوماتية') ? 'selected' : ''}>المعلوماتية</option>
-                    <option value="كلية الهندسة المعمارية" ${item.category?.includes('المعمارية') ? 'selected' : ''}>المعمارية</option>
-                    <option value="كلية الهندسة الكيميائية" ${item.category?.includes('الكيمياء') ? 'selected' : ''}>الكيمياء</option>
-                    <option value="كلية الهندسة البترولية" ${item.category?.includes('البترول') ? 'selected' : ''}>البترول</option>
-                    <option value="كلية طب الأسنان" ${item.category?.includes('الأسنان') ? 'selected' : ''}>الأسنان</option>
-                    <option value="كلية الصيدلة" ${item.category?.includes('الصيدلة') ? 'selected' : ''}>الصيدلة</option>
-                    <option value="كلية الترجمة واللغات" ${item.category?.includes('اللغات') ? 'selected' : ''}>اللغات</option>
-                </select>
-                <select id="in-y" class="swal2-input">
-                    <option value="سنة أولى" ${item.year === 'سنة أولى' ? 'selected' : ''}>1</option>
-                    <option value="سنة ثانية" ${item.year === 'سنة ثانية' ? 'selected' : ''}>2</option>
-                    <option value="سنة ثالثة" ${item.year === 'سنة ثالثة' ? 'selected' : ''}>3</option>
-                    <option value="سنة رابعة" ${item.year === 'سنة رابعة' ? 'selected' : ''}>4</option>
-                    <option value="سنة خامسة" ${item.year === 'سنة خامسة' ? 'selected' : ''}>5</option>
+                    <option value="كلية الهندسة المعلوماتية" ${item.category === 'كلية الهندسة المعلوماتية' ? 'selected' : ''}>المعلوماتية</option>
+                    <option value="كلية الهندسة المعمارية" ${item.category === 'كلية الهندسة المعمارية' ? 'selected' : ''}>المعمارية</option>
+                    <option value="كلية طب الأسنان" ${item.category === 'كلية طب الأسنان' ? 'selected' : ''}>الأسنان</option>
                 </select>
                 <select id="in-tp" class="swal2-input">
                     <option value="نظري" ${item.type === 'نظري' ? 'selected' : ''}>نظري</option>
                     <option value="عملي" ${item.type === 'عملي' ? 'selected' : ''}>عملي</option>
+                    <option value="ملخص" ${item.type === 'ملخص' ? 'selected' : ''}>ملخص</option>
+                </select>
+                <select id="in-y" class="swal2-input">
+                    <option value="سنة أولى">1</option><option value="سنة ثانية">2</option><option value="سنة ثالثة">3</option>
                 </select>`,
             preConfirm: () => ({
                 title: document.getElementById('in-t').value, doctor: document.getElementById('in-d').value,
                 url: document.getElementById('in-u').value, category: document.getElementById('in-c').value,
-                year: document.getElementById('in-y').value, type: document.getElementById('in-tp').value,
-                views: item.views || 0, downloads: item.downloads || 0
+                type: document.getElementById('in-tp').value, year: document.getElementById('in-y').value
             })
         }).then(r => { if(r.isConfirmed) callback(r.value); });
     }
