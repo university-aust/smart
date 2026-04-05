@@ -79,32 +79,37 @@
         }
 
         .card {
-            background: var(--card-bg); border-radius: 18px; padding: 12px;
+            background: var(--card-bg); border-radius: 18px; padding: 15px;
             position: relative; border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            min-height: 220px; display: flex; flex-direction: column; justify-content: space-between;
+            min-height: 200px; display: flex; flex-direction: column; justify-content: space-between;
             transition: 0.3s;
         }
 
         .badge {
             position: absolute; top: 8px; left: 8px;
-            padding: 2px 8px; border-radius: 10px; font-size: 0.55rem; font-weight: bold; color: #fff; z-index: 2;
+            padding: 2px 8px; border-radius: 10px; font-size: 0.55rem; font-weight: bold; color: #fff;
         }
         .theory { background: var(--theory); }
         .practical { background: var(--practical); }
 
-        .admin-tools { position: absolute; top: 8px; right: 8px; display: flex; gap: 8px; z-index: 5; }
-        .del-icon { color: #ff4d4d; cursor: pointer; font-size: 0.9rem; }
-        .edit-icon { color: var(--cyan); cursor: pointer; font-size: 0.9rem; }
+        .admin-tools { position: absolute; top: 8px; right: 8px; display: flex; gap: 12px; z-index: 10; }
+        .del-icon { color: #ff4d4d; font-size: 1rem; cursor: pointer; }
+        .edit-icon { color: var(--cyan); font-size: 1rem; cursor: pointer; }
 
-        .doc-name { font-size: 0.7rem; color: var(--cyan); margin-top: 4px; font-weight: bold; }
-        .info-tag { font-size: 0.6rem; color: #ccc; margin-top: 2px; display: block; }
+        .doc-name { font-size: 0.75rem; color: var(--cyan); margin-top: 5px; font-weight: bold; }
+        .info-tag { font-size: 0.65rem; color: #ccc; margin-top: 3px; display: block; }
         
-        .stats-bar { display: flex; gap: 6px; font-size: 0.6rem; margin-top: 8px; opacity: 0.8; }
+        .stats-bar { display: flex; gap: 10px; font-size: 0.65rem; margin-top: 10px; opacity: 0.8; }
 
-        .btn-group { display: flex; gap: 5px; margin-top: 10px; }
-        .btn-card-main { flex: 2; padding: 8px; border-radius: 8px; border: none; background: var(--cyan); color: #000; font-weight: bold; cursor: pointer; font-size: 0.75rem; }
-        .btn-card-dl { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--cyan); color: var(--cyan); text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
+        .btn-download-full {
+            width: 100%; padding: 12px; border-radius: 10px; 
+            background: var(--cyan); color: #000; text-align: center; 
+            text-decoration: none; font-weight: bold; font-size: 0.85rem;
+            margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;
+            border: none; cursor: pointer; transition: 0.2s;
+        }
+        .btn-download-full:active { transform: scale(0.95); }
 
         .fab-mode {
             position: fixed; bottom: 20px; left: 20px; width: 45px; height: 45px;
@@ -179,10 +184,9 @@
     const db = firebase.database();
     let libraryData = [];
 
-    // بيانات المسؤولين للمطابقة مع localStorage
     const admins = [
-        { id: "20241600060", key: "shjkshjk" }, // شهد
-        { id: "20241600086", key: "shahed2006" } // ضياء
+        { id: "20241600060", key: "shjkshjk" }, 
+        { id: "20241600086", key: "shahed2006" }
     ];
 
     const currentID = (localStorage.getItem("universityID") || "").trim();
@@ -197,7 +201,6 @@
             document.getElementById('adminPanel').style.display = 'flex';
             watchRequests();
         }
-        
         db.ref('official_library/').on('value', (snap) => {
             const val = snap.val();
             libraryData = val ? Object.keys(val).map(k => ({...val[k], id: k})) : [];
@@ -243,12 +246,14 @@
             container.innerHTML += `
                 <div class="card">
                     <div class="badge ${badgeClass}">${item.type || 'نظري'}</div>
+                    
                     <div class="admin-tools" style="${hasAdminAccess ? 'display:flex' : 'display:none'}">
                         <i class="fas fa-edit edit-icon" onclick="editItem('${item.id}')"></i>
                         <i class="fas fa-trash del-icon" onclick="deleteItem('${item.id}')"></i>
                     </div>
-                    <div onclick="openFile('${item.id}', '${item.url}')" style="cursor:pointer;">
-                        <h3 style="margin:25px 0 3px 0; font-size:0.85rem; line-height:1.2;">${item.title}</h3>
+
+                    <div>
+                        <h3 style="margin:25px 0 5px 0; font-size:0.9rem; line-height:1.2;">${item.title}</h3>
                         <div class="doc-name">د. ${item.doctor || 'غير محدد'}</div>
                         <span class="info-tag"><i class="fas fa-university"></i> ${item.category}</span>
                         <span class="info-tag"><i class="fas fa-calendar-alt"></i> ${item.year}</span>
@@ -257,26 +262,23 @@
                             <span><i class="fas fa-download" style="color:#10ac84"></i> ${item.downloads || 0}</span>
                         </div>
                     </div>
-                    <div class="btn-group">
-                        <button class="btn-card-main" onclick="openFile('${item.id}', '${item.url}')">فتح</button>
-                        <a href="${item.url}" target="_blank" class="btn-card-dl" onclick="handleDownload('${item.id}')">
-                            <i class="fas fa-cloud-download-alt"></i>
-                        </a>
-                    </div>
+                    
+                    <button class="btn-download-full" onclick="handleDownload('${item.id}', '${item.url}')">
+                        تحميل المحاضرة <i class="fas fa-cloud-download-alt"></i>
+                    </button>
                 </div>`;
         });
     }
 
-    // دالة الفتح المباشر لحل مشكلة الهاتف
-    function openFile(id, url) {
+    function handleDownload(id, url) {
+        // تحديث العدادات في القاعدة
+        db.ref('official_library/' + id + '/downloads').transaction(c => (c || 0) + 1);
         db.ref('official_library/' + id + '/views').transaction(c => (c || 0) + 1);
+        // فتح الرابط فوراً
         window.open(url, '_blank');
     }
 
-    function handleDownload(id) {
-        db.ref('official_library/' + id + '/downloads').transaction(c => (c || 0) + 1);
-    }
-
+    // باقي الدوال (Add, Edit, Delete, Share) بقيت كما هي لضمان عملها للأدمن
     function addNewItem() {
         showItemForm('إضافة محاضرة جديدة', {}, (data) => {
             db.ref('official_library/').push(data);
