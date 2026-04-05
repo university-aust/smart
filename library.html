@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة نبض AUST | Shahd Al-Khaled</title>
+    <title>منصة نبض AUST | المكتبه</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" href="data:,">
@@ -186,18 +186,17 @@
     const db = firebase.database();
     let libraryData = [];
 
+    // معلومات الإشراف: تم تأكيد بياناتك وبيانات ضياء (الرقم والرمز فقط)
     const admins = [
-        { name: "shahed mamdoh alkhald", id: "20241600060", key: "shjkshjk" },
-        { name: "Deaa amar malaika", id: "20241600086", key: "shahed2006" }
+        { id: "20241600060", key: "shjkshjk" }, // شهد
+        { id: "20241600086", key: "shahed2006" } // ضياء
     ];
 
-    const currentUser = (localStorage.getItem("userName") || "").trim().toLowerCase();
     const currentID = (localStorage.getItem("universityID") || "").trim();
     const currentKey = (localStorage.getItem("securityKey") || "").trim();
 
     function isAuthorized() {
         return admins.some(admin => 
-            admin.name.toLowerCase() === currentUser && 
             admin.id === currentID && 
             admin.key === currentKey
         );
@@ -238,7 +237,7 @@
             return (fac === 'الكل' || i.category === fac) &&
                    (yea === 'الكل' || i.year === yea) &&
                    (typ === 'الكل' || i.type === typ) &&
-                   (!query || i.title.toLowerCase().includes(query) || i.doctor.toLowerCase().includes(query));
+                   (!query || (i.title && i.title.toLowerCase().includes(query)) || (i.doctor && i.doctor.toLowerCase().includes(query)));
         });
 
         const hasAdminAccess = isAuthorized();
@@ -278,47 +277,46 @@
     function handleView(id, url, title) {
         db.ref('official_library/' + id + '/views').transaction(c => (c || 0) + 1);
         
-        let finalUrl = url;
-        if(url.includes('archive.org/details/')) {
-            finalUrl = url.replace('/details/', '/embed/');
-        } else if(url.includes('drive.google.com')) {
-            finalUrl = url.replace('/view?usp=sharing', '/preview').replace('/view', '/preview');
+        let previewUrl = url;
+        // تحويل رابط الدرايف للعرض
+        if(url.includes('drive.google.com')) {
+            previewUrl = url.replace('/view?usp=sharing', '/preview').replace('/view', '/preview');
         }
 
         Swal.fire({
             title: title,
             html: `<div style="width:100%; height:450px; border-radius:12px; overflow:hidden; background:#000;">
-                    <iframe src="${finalUrl}" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>
+                    <iframe src="${previewUrl}" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>
                    </div>`,
             width: '95%', background: '#0f172a', color: '#fff',
             showCloseButton: true, showConfirmButton: false
         });
     }
 
+    // دالة التحميل المباشر من Google Drive فقط
     function handleDownload(id, url) {
         db.ref('official_library/' + id + '/downloads').transaction(c => (c || 0) + 1);
         
-        let finalLink = url;
-        // معالجة درايف
+        let downloadLink = url;
         if (url.includes('drive.google.com')) {
-            const fId = url.split('/d/')[1]?.split('/')[0] || url.split('id=')[1]?.split('&')[0];
-            if (fId) finalLink = `https://drive.google.com/uc?export=download&id=${fId}`;
-        } 
-        // معالجة أرشيف (التحويل التلقائي للرابط المباشر)
-        else if (url.includes('archive.org/details/')) {
-            finalLink = url.replace('/details/', '/download/');
-            // ملاحظة: لتحميل ملف PDF مباشرة، يفضل أن ينتهي الرابط بـ .pdf
-            if(!finalLink.toLowerCase().endsWith('.pdf')) {
-                // نحاول استنتاج اسم الملف أو تركه يفتح صفحة التحميل المباشرة
+            const fileId = url.split('/d/')[1]?.split('/')[0] || url.split('id=')[1]?.split('&')[0];
+            if (fileId) {
+                downloadLink = `https://drive.google.com/uc?export=download&id=${fileId}`;
             }
         }
 
-        // تنفيذ التحميل بفتح الرابط
-        window.open(finalLink, '_blank');
+        // تنفيذ التحميل المباشر
+        const a = document.createElement('a');
+        a.href = downloadLink;
+        a.setAttribute('download', '');
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
         
         Swal.fire({
             toast: true, position: 'top-end', icon: 'success',
-            title: 'بدأ التحميل...', showConfirmButton: false,
+            title: 'بدأ التحميل من درايف...', showConfirmButton: false,
             timer: 2000, background: '#0f172a', color: '#fff'
         });
     }
@@ -346,7 +344,7 @@
             html: `
                 <input id="in-t" class="swal2-input" placeholder="اسم المادة" value="${item.title || ''}">
                 <input id="in-d" class="swal2-input" placeholder="اسم الدكتور" value="${item.doctor || ''}">
-                <input id="in-u" class="swal2-input" placeholder="رابط الملف" value="${item.url || ''}">
+                <input id="in-u" class="swal2-input" placeholder="رابط Google Drive" value="${item.url || ''}">
                 <select id="in-c" class="swal2-input">
                     <option value="كلية الهندسة المعلوماتية" ${item.category === 'كلية الهندسة المعلوماتية' ? 'selected' : ''}>الهندسة المعلوماتية</option>
                     <option value="كلية الهندسة المعمارية" ${item.category === 'كلية الهندسة المعمارية' ? 'selected' : ''}>الهندسة المعمارية</option>
@@ -384,19 +382,23 @@
     function studentShare() {
         Swal.fire({
             title: 'مساهمة الطلاب',
-            text: 'أدخل رابط الملف لمراجعته من قبل الإدارة',
+            text: 'أدخل رابط ملف Google Drive لمراجعته',
             input: 'url', inputPlaceholder: 'رابط الملف هنا',
             showCancelButton: true, confirmButtonText: 'إرسال',
             background: '#0f172a', color: '#fff'
         }).then(r => {
             if(r.isConfirmed && r.value) {
-                db.ref('suggestions/').push({ url: r.value, sender: currentUser || 'مجهول', date: new Date().toLocaleString() });
+                db.ref('suggestions/').push({ 
+                    url: r.value, 
+                    sender: currentID || 'طالب مجهول', 
+                    date: new Date().toLocaleString() 
+                });
                 Swal.fire('تم الإرسال', 'شكراً لمساهمتك! سيتم مراجعة الملف ونشره.', 'success');
             }
         });
     }
 
-    function deleteItem(id) {
+  function deleteItem(id) {
         if (!isAuthorized()) return;
         Swal.fire({ 
             title: 'حذف المحاضرة؟', 
