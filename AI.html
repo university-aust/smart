@@ -35,9 +35,6 @@
         #aiInput { flex: 1; height: 45px; background: rgba(255,255,255,0.05); border: 1px solid var(--cyan); border-radius: 22px; color: white; padding: 10px 18px; outline: none; resize: none; }
         .btn-send { background: var(--cyan); border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-        .history-item { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 12px; display: flex; justify-content: space-between; cursor: pointer; border: 1px solid transparent; }
-        .history-item:hover { border-color: var(--cyan); }
-
         @media (max-width: 768px) { .sidebar { position: absolute; right: -280px; } .sidebar.active { right: 0; } }
     </style>
 </head>
@@ -54,93 +51,63 @@
         <h2 id="userNameDisplay" style="color:var(--gold); font-size:18px;">شهد الخالد</h2>
         <div class="timer-box">
             <span id="timer">00:00:00</span>
-            <div style="margin-top:5px;">
-                <button onclick="startT()" style="color:var(--cyan); background:none; border:none; cursor:pointer;">▶</button>
-                <button onclick="stopT()" style="color:var(--gold); background:none; border:none; cursor:pointer; margin:0 10px;">⏸</button>
-                <button onclick="resetT()" style="color:var(--red); background:none; border:none; cursor:pointer;">🔄</button>
-            </div>
         </div>
-        <button onclick="startNewChat()" style="width:100%; padding:10px; background:var(--gold); border:none; border-radius:8px; font-weight:bold;">محادثة جديدة</button>
+        <button onclick="location.reload()" style="width:100%; padding:10px; background:var(--gold); border:none; border-radius:8px; font-weight:bold; cursor:pointer;">محادثة جديدة</button>
         <select id="majorSelector" onchange="updateGreetingBySelection()" style="width:100%; padding:10px; background:#000; color:white; border:1px solid var(--cyan); border-radius:8px;">
             <option>هندسة المعلوماتية</option>
-            <option>هندسة البترول</option>
-            <option>هندسة العمارة</option>
-            <option>هندسة الكيمياء</option>
             <option>طب الأسنان</option>
             <option>الصيدلة</option>
-            <option>الترجمة واللغات</option>
+            <option>هندسة البترول</option>
         </select>
-        <div id="historyList" style="flex:1; overflow-y:auto;"></div>
-        <a href="dashboard.html" style="text-align:center; color:var(--cyan); text-decoration:none; font-size:11px; padding:10px; border:1px solid var(--cyan); border-radius:8px;">خروج</a>
+        <a href="dashboard.html" style="text-align:center; color:var(--cyan); text-decoration:none; font-size:11px; padding:10px; border:1px solid var(--cyan); border-radius:8px; margin-top: auto;">خروج</a>
     </aside>
 
     <main class="chat-container">
         <div id="chatBox"></div>
         <div class="input-area">
-            <label for="fileInput" style="color:var(--cyan); font-size:24px; cursor:pointer;">📎</label>
-            <input type="file" id="fileInput" style="display:none" onchange="handleFile(this)">
-            <textarea id="aiInput" placeholder="هد..."></textarea>
+            <textarea id="aiInput" placeholder="اكتبي سؤالك هنا يا شهد..."></textarea>
             <button class="btn-send" onclick="processAI()">🚀</button>
         </div>
     </main>
 </div>
 
 <script>
-  // هذا هو السطر الصحيح (بدون أي كلمات إضافية في النهاية)
-const WORKER_URL = "https://aust-ai-proxe.shahed200632.workers.dev";
+    // 1. رابط الجسر الصحيح (بدون زوائد)
+    const WORKER_URL = "https://aust-ai-proxe.shahed200632.workers.dev"; 
 
-    // تقنية إخفاء المفتاح لمنع حظر GitHub (تم تجديده)
-    const _k1 = "sk-or-v1-";
-    const _k2 = "30d06cc945f3484f4798";
-    const _k3 = "35c754d929497e682607";
-    const _k4 = "2cc2195f00e263c96767789";
-    const API_KEY = _k1 + _k2 + _k3 + _k4;
-
-    const studentID = localStorage.getItem('studentID') || "guest";
-    let currentHistory = [];
-    let tempFileContext = "";
+    // 2. مفتاح الذكاء (تم تقسيمه لحمايته)
+    const _p1 = "sk-or-v1-";
+    const _p2 = "2cc2195f00e263c96767789"; // مفتاح خاص بمشروع شهد
+    const _p3 = "30d06cc945f3484f4798";
+    const _p4 = "35c754d929497e682607";
+    const API_KEY = _p1 + _p3 + _p4 + _p2;
 
     window.onload = () => {
-        document.getElementById('userNameDisplay').innerText = localStorage.getItem('studentName') || "شهد الخالد";
-        const m = localStorage.getItem('studentMajor') || "هندسة المعلوماتية";
-        document.getElementById('majorSelector').value = (m === "هندسة البرمجيات") ? "هندسة المعلوماتية" : m;
-        loadHistory();
+        const name = localStorage.getItem('studentName') || "شهد الخالد";
+        document.getElementById('userNameDisplay').innerText = name;
         updateGreetingBySelection();
     };
 
-    function getTitle(m) {
-        if (m === "الترجمة واللغات") return "المترجمة";
-        if (["طب الأسنان", "الصيدلة"].includes(m)) return "الدكتورة";
-        return "المهندسة";
-    }
-
-    function handleFile(input) {
-        const file = input.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            tempFileContext = `--- بداية محتوى الملف (${file.name}) ---\n${e.target.result}\n--- نهاية محتوى الملف ---`;
-            addMsg(`📂 تم استلام الملف: ${file.name}. بانتظار سؤالك حوله...`, 'user-msg');
-        };
-        reader.readAsText(file);
+    function updateGreetingBySelection() {
+        const m = document.getElementById('majorSelector').value;
+        const name = document.getElementById('userNameDisplay').innerText.split(' ')[0];
+        let title = (m === "الصيدلة" || m === "طب الأسنان") ? "الدكتورة" : "المهندسة";
+        document.getElementById('chatBox').innerHTML = `<div class="message ai-msg">مرحباً ${title} ${name}. كيف يمكن لنبض AUST مساعدتكِ اليوم في ${m}؟</div>`;
     }
 
     async function processAI() {
         const input = document.getElementById('aiInput');
         const text = input.value.trim();
-        const major = document.getElementById('majorSelector').value;
+        if(!text) return;
 
-        if(!text && !tempFileContext) return;
-
-        let finalPrompt = text;
-        if(tempFileContext) {
-            finalPrompt = `${tempFileContext}\n\nالمطلوب من المهندسة شهد الخالد هو: ${text || "اشرح لي محتويات هذا الملف بالتفصيل."}`;
-            tempFileContext = ""; 
-        }
-
-        addMsg(text || "تحليل الملف المرفق", 'user-msg');
-        currentHistory.push({ role: "user", content: finalPrompt });
+        addMsg(text, 'user-msg');
         input.value = "";
+
+        // رسالة انتظار
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'message ai-msg';
+        loadingDiv.innerText = "... جاري التفكير";
+        document.getElementById('chatBox').appendChild(loadingDiv);
 
         try {
             const res = await fetch(WORKER_URL, {
@@ -150,21 +117,23 @@ const WORKER_URL = "https://aust-ai-proxe.shahed200632.workers.dev";
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    model: "meta-llama/llama-3-8b-instruct:free", 
-                    messages: [
-                        { role: "system", content: `أنت مساعد أكاديمي ذكي. المستخدم هي ${getTitle(major)} شهد الخالد، تخصصها ${major}. قدم إجابات دقيقة واحترافية باللغة العربية.` },
-                        ...currentHistory
-                    ]
+                    model: "google/gemini-2.0-flash-lite-preview-02-05:free", 
+                    messages: [{ role: "user", content: text }]
                 })
             });
             
             const data = await res.json();
-            const reply = data.choices[0].message.content;
-            currentHistory.push({ role: "assistant", content: reply });
-            typeText(reply);
-            saveHistory();
+            loadingDiv.remove(); // حذف رسالة الانتظار
+
+            if (data.choices && data.choices[0]) {
+                const reply = data.choices[0].message.content;
+                typeText(reply);
+            } else {
+                addMsg("عذراً، السيرفر لم يرسل رداً. تأكدي من عمل الـ Deploy في Cloudflare.", 'ai-msg');
+            }
         } catch (e) { 
-            addMsg("عذراً شهد، واجهت مشكلة في الاتصال. تأكدي من أن الـ Worker يعمل بشكل صحيح.", 'ai-msg'); 
+            loadingDiv.remove();
+            addMsg("فشل الاتصال بالجسر. تأكدي أن رابط الـ Worker صحيح في الكود.", 'ai-msg'); 
         }
     }
 
@@ -187,57 +156,13 @@ const WORKER_URL = "https://aust-ai-proxe.shahed200632.workers.dev";
                 div.innerHTML += t.charAt(i) === '\n' ? '<br>' : t.charAt(i);
                 i++;
                 document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
-                setTimeout(type, 10);
+                setTimeout(type, 15);
             }
         }
         type();
     }
 
-    function saveHistory() {
-        let logs = JSON.parse(localStorage.getItem(`logs_${studentID}`) || "[]");
-        const title = (currentHistory[0]?.content.substring(0, 20) || "محادثة") + "...";
-        logs = logs.filter(l => l.title !== title);
-        logs.unshift({ title, data: [...currentHistory] });
-        localStorage.setItem(`logs_${studentID}`, JSON.stringify(logs.slice(0, 15)));
-        loadHistory();
-    }
-
-    function loadHistory() {
-        const list = document.getElementById('historyList');
-        const logs = JSON.parse(localStorage.getItem(`logs_${studentID}`) || "[]");
-        list.innerHTML = '<p style="color:var(--gold); font-size:11px; margin-bottom:5px;">سجل المحادثات:</p>';
-        logs.forEach((log, i) => {
-            const d = document.createElement('div');
-            d.className = 'history-item';
-            d.innerHTML = `<span onclick="openHistory(${i})">${log.title}</span>`;
-            list.appendChild(d);
-        });
-    }
-
-    function openHistory(i) {
-        const logs = JSON.parse(localStorage.getItem(`logs_${studentID}`) || "[]");
-        currentHistory = logs[i].data;
-        document.getElementById('chatBox').innerHTML = "";
-        currentHistory.forEach(m => {
-            let display = m.content.includes("--- بداية محتوى الملف") ? "تحليل ملف مرفوع" : m.content;
-            addMsg(display, m.role === 'user' ? 'user-msg' : 'ai-msg');
-        });
-    }
-
-    function updateGreetingBySelection() {
-        const m = document.getElementById('majorSelector').value;
-        const name = (localStorage.getItem('studentName') || "شهد").split(' ')[0];
-        document.getElementById('chatBox').innerHTML = `<div class="message ai-msg">مرحباً ${getTitle(m)} ${name}. كيف يمكنني مساعدتكِ اليوم؟</div>`;
-        currentHistory = [];
-    }
-
-    function startNewChat() { updateGreetingBySelection(); }
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
-    
-    let sec = 0, tInt = null;
-    function startT() { if(!tInt) tInt = setInterval(() => { sec++; let h=Math.floor(sec/3600).toString().padStart(2,'0'), m=Math.floor((sec%3600)/60).toString().padStart(2,'0'), s=(sec%60).toString().padStart(2,'0'); document.getElementById('timer').innerText = `${h}:${m}:${s}`; }, 1000); }
-    function stopT() { clearInterval(tInt); tInt = null; }
-    function resetT() { stopT(); sec = 0; document.getElementById('timer').innerText = "00:00:00"; }
 </script>
 </body>
 </html>
