@@ -149,6 +149,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
 <script>
+    // 1. تهيئة الخدمات
     (function() { emailjs.init("m905j3dqOVj_wLxf-"); })();
 
     const firebaseConfig = {
@@ -165,14 +166,16 @@
     const database = firebase.database();
     const auth = firebase.auth(); 
 
-    // إجبار السيرفر على البقاء متصلاً
+    // إجبار السيرفر على البقاء متصلاً لحل مشكلة الـ Offline
     database.goOnline();
 
     let mode = 'login';
     let savedRecoveryCode = null;
 
     // دالة التشفير البسيط لحماية البيانات في LocalStorage
-    const secureStore = (key, value) => localStorage.setItem(key, btoa(encodeURIComponent(value)));
+    const secureStore = (key, value) => {
+        if (value) localStorage.setItem(key, btoa(encodeURIComponent(value)));
+    };
 
     function notify(msg) {
         const container = document.getElementById('toast-container');
@@ -184,10 +187,39 @@
         setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
     }
 
-    // [دوال showAuth, togglePass, toggleMode, showForgot تظل كما هي في كودك الأصلي]
-    function showAuth() { document.getElementById('welcomeSection').style.display = 'none'; document.getElementById('authSection').style.display = 'block'; }
-    function togglePass(icon) { const input = document.getElementById('passInput'); input.type = (input.type === 'password') ? 'text' : 'password'; icon.classList.toggle('fa-eye-slash'); }
+    // --- الدوال الأساسية للواجهة (UI Functions) ---
+    function showAuth() { 
+        document.getElementById('welcomeSection').style.display = 'none'; 
+        document.getElementById('authSection').style.display = 'block'; 
+    }
+
+    function togglePass(icon) { 
+        const input = document.getElementById('passInput'); 
+        input.type = (input.type === 'password') ? 'text' : 'password'; 
+        icon.classList.toggle('fa-eye-slash'); 
+    }
     
+    function toggleMode() {
+        document.getElementById('verifyCodeGroup').style.display = 'none';
+        document.getElementById('passGroup').style.display = 'block';
+
+        if (mode === 'login' || mode === 'forgot' || mode === 'verify') {
+            mode = 'register';
+            updateUI("إنشاء حساب", "تأكيد الحساب", "block", "block", "block", "لديك حساب؟ <b>سجل دخولك</b>");
+            document.getElementById('forgotLink').style.display = 'none';
+        } else {
+            mode = 'login';
+            updateUI("تسجيل الدخول", "دخول المنصة", "none", "none", "block", "إنشاء حساب جديد");
+            document.getElementById('forgotLink').style.display = 'block';
+        }
+    }
+
+    function showForgot() {
+        mode = 'forgot';
+        updateUI("استعادة الرمز", "إرسال كود التحقق", "none", "block", "none", "العودة للدخول");
+        document.getElementById('verifyCodeGroup').style.display = 'none';
+    }
+
     function updateUI(t, b, n, e, p, sw) {
         document.getElementById('mainTitle').innerText = t;
         document.getElementById('btnText').innerText = b;
@@ -197,6 +229,7 @@
         document.getElementById('toggleTxt').innerHTML = sw;
     }
 
+    // --- الدالة الرئيسية للتعامل مع البيانات (The Engine) ---
     async function handleAction() {
         const id = document.getElementById('idInput').value.trim();
         const pass = document.getElementById('passInput').value;
@@ -207,13 +240,13 @@
         if (!id) return notify("يرجى إدخال الرقم");
 
         try {
+            // 1. حالة إنشاء حساب جديد
             if (mode === 'register') {
-                if (pass.length < 8) return notify("الرمز ضعيف!");
+                if (pass.length < 8) return notify("الرمز 8 محارف على الأقل");
                 notify("جاري إنشاء الحساب...");
                 
-                // التأكد من عدم تكرار الرقم (أمان)
                 const check = await database.ref('users/' + id).get();
-                if (check.exists()) return notify("هذا الرقم مسجل مسبقاً!");
+                if (check.exists()) return notify("رقم الطالب مسجل مسبقاً!");
 
                 const userCred = await auth.createUserWithEmailAndPassword(email, pass);
                 await userCred.user.sendEmailVerification();
@@ -224,8 +257,9 @@
                 });
 
                 notify("تم! فعل حسابك من الإيميل ✅");
-                setTimeout(() => location.reload(), 2000);
+                setTimeout(toggleMode, 2000);
 
+            // 2. حالة تسجيل الدخول
             } else if (mode === 'login') {
                 notify("جاري التحقق...");
                 const snapshot = await database.ref('users/' + id).get();
@@ -234,28 +268,62 @@
                 if (data && data.pass === pass) {
                     const userCred = await auth.signInWithEmailAndPassword(data.email, pass);
                     if (userCred.user.emailVerified) {
-                        // تخزين آمن للبيانات
+                        // تخزين البيانات للربط مع الداشبورد والمكتبة
                         secureStore("userName", data.name);
                         secureStore("userID", data.id);
-                        localStorage.setItem("userName", data.name); // للربط مع باقي الصفحات
-                        localStorage.setItem("userID", data.id);
-
+                        localStorage.setItem("userName", data.name.trim());
+                        localStorage.setItem("userID", data.id.trim());
+                        localStorage.setItem("userMajor", data.major || "هندسة البرمجيات");
+                        
                         notify("مرحباً بك يا " + data.name.split(' ')[0]);
                         setTimeout(() => window.location.href = "dashboard.html", 1000);
                     } else {
-                        notify("يرجى تفعيل الإيميل أولاً!");
+                        notify("⚠️ يرجى تفعيل الحساب من بريدك!");
                         await auth.signOut();
                     }
                 } else {
-                    notify("البيانات غير صحيحة");
+                    notify("الرقم أو الرمز غير صحيح ❌");
+                }
+
+            // 3. حالة نسيان كلمة المرور (إرسال الكود)
+            } else if (mode === 'forgot') {
+                if (!email) return notify("أدخل بريدك الإلكتروني");
+                notify("جاري جلب بياناتك...");
+                const snapshot = await database.ref('users/' + id).get();
+                const data = snapshot.val();
+
+                if (data && data.email.toLowerCase() === email.toLowerCase()) {
+                    savedRecoveryCode = Math.floor(100000 + Math.random() * 900000);
+                    await emailjs.send("service_cgm7d0c", "template_xi6oxl7", { 
+                        to_name: data.name, 
+                        to_email: email, 
+                        recovery_code: savedRecoveryCode 
+                    });
+                    notify("تم إرسال كود الاستعادة ✅");
+                    mode = 'verify';
+                    updateUI("تأكيد الرمز", "تحديث كلمة المرور", "none", "none", "block", "العودة");
+                    document.getElementById('verifyCodeGroup').style.display = 'block';
+                } else {
+                    notify("البيانات غير متطابقة ❌");
+                }
+
+            // 4. حالة تأكيد الكود وتغيير الرمز
+            } else if (mode === 'verify') {
+                if (userEnteredCode == savedRecoveryCode) {
+                    if (pass.length < 8) return notify("الرمز الجديد قصير جداً");
+                    await database.ref('users/' + id).update({ pass: pass });
+                    notify("تم التحديث بنجاح! سجل دخولك الآن ✅");
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    notify("كود التحقق خاطئ ❌");
                 }
             }
-            // [باقي حالات forgot و verify تظل كما هي مع استخدام await لضمان السرعة]
         } catch (error) {
             notify("حدث خطأ: " + error.message);
         }
     }
 
+    // منع الحروف في حقل الرقم
     document.getElementById('idInput').addEventListener('input', function() {
         this.value = this.value.replace(/[^0-9]/g, '');
     });
