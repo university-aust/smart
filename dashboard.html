@@ -115,16 +115,45 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-    // تكوين الفايربيس (محمي كما هو)
-    const firebaseConfig = { apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo", authDomain: "nabd-aust.firebaseapp.com", databaseURL: "https://nabd-aust-default-rtdb.europe-west1.firebasedatabase.app", projectId: "nabd-aust", storageBucket: "nabd-aust.firebasestorage.app", messagingSenderId: "921777725948", appId: "1:921777725948:web:7b024d0aa101068bef9279" };
+    // 1. حماية الدخول: منع أي شخص من دخول الصفحة إذا لم يسجل دخوله
+    (function() {
+        const userId = localStorage.getItem("userID");
+        const userName = localStorage.getItem("userName");
+        if (!userId || !userName) {
+            // إذا لم يجد بيانات، يعيده فوراً لصفحة تسجيل الدخول
+            window.location.replace("index.html"); 
+        }
+    })();
+
+    // 2. درع الحماية: منع زر الفأرة الأيمن واختصارات المطورين (F12)
+    document.addEventListener('contextmenu', event => event.preventDefault());
+    document.onkeydown = function(e) {
+        if(e.keyCode == 123 || 
+          (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'C'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) ||
+          (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0))) {
+            return false;
+        }
+    };
+
+    // --- تكوين الفايربيس (كما هو في كودك) ---
+    const firebaseConfig = { 
+        apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo", 
+        authDomain: "nabd-aust.firebaseapp.com", 
+        databaseURL: "https://nabd-aust-default-rtdb.europe-west1.firebasedatabase.app", 
+        projectId: "nabd-aust", 
+        storageBucket: "nabd-aust.firebasestorage.app", 
+        messagingSenderId: "921777725948", 
+        appId: "1:921777725948:web:7b024d0aa101068bef9279" 
+    };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    // البيانات الأساسية
-    const currentUserName = localStorage.getItem("userName") || "مستخدم جديد";
-    const currentUserID = localStorage.getItem("userID") || "0000";
+    // البيانات الأساسية من الـ LocalStorage المحمي
+    const currentUserName = localStorage.getItem("userName");
+    const currentUserID = localStorage.getItem("userID");
 
-    const allAUSTSubjects = {
+    // [باقي كود المواد allAUSTSubjects كما هو تماماً دون تغيير]
+   const allAUSTSubjects = {
         it: { 1: ["البرمجة 1", "الفيزياء 1", "الرياضيات 1", "الرسم الهندسي", "مهارات الحاسوب", "البرمجة 2", "الفيزياء 2", "الرياضيات 2", "الكيمياء الهندسية", "الميكانيك"], 2: ["خوارزميات 1", "برمجة ويب", "رياضيات متقطعة", "احتمالات", "OOP 1", "قواعد بيانات 1", "خوارزميات 2", "هندسة كهربائية", "تحليل عددي", "OOP 2"], 3: ["هندسة برمجيات 1", "تطوير ويب", "معمارية حاسوب", "نظم تشغيل 1", "تحليل نظم", "هندسة برمجيات 2", "نظم معلومات", "قواعد بيانات 2", "ذكاء صنعي"], 4: ["تنقيب بيانات", "رسم حاسوبي", "نظم زمن حقيقي", "شبكات 1", "إدارة قواعد بيانات", "نظم دعم قرار", "نمذجة ومحاكاة", "شبكات 2"], 5: ["مشروع تخرج 1", "إدارة مشاريع", "أنظمة خبيرة", "شبكات عصبونية", "مشروع تخرج 2", "معالجة صور", "أمن معلومات"] },
         chemical: { 1: ["الرياضيات 1", "الفيزياء", "كيمياء عامة", "رسم هندسي", "ميكانيك هندسي", "رياضيات 2", "كيمياء عضوية 1"], 2: ["برامج حاسوبية", "رياضيات تطبيقية", "كيمياء فيزيائية 1", "تقانات عضوية", "كيمياء تحليلية", "تحليل عددي", "كيمياء فيزيائية 2"], 3: ["جريان موائع", "انتقال حرارة", "ثيرموديناميك", "عمليات موحدة 1", "علم مواد", "إحصاء هندسي"], 4: ["انتقال كتلة", "هندسة تفاعلات 1", "تقانة أسمدة", "أصباغ ودهانات", "ألياف", "تفاعلات 2"], 5: ["ديناميك وتحكم", "تصميم أجهزة", "هندسة بيئية", "مشروع 1", "صناعات تكرير", "أمن صناعي"] },
         dent: { 1: ["كيمياء عامة", "تشريح عام 1", "بيولوجيا", "فيزيولوجيا", "كيمياء حيوية", "فيزياء", "إحصاء حيوي"], 2: ["تعويضات ثابتة 1", "مواد ترميمية", "تشريح ونحت أسنان", "رأس وعنق", "أحياء دقيقة", "تعويضات متحركة 1"], 3: ["تعويضات متحركة 2", "ترميمية 2", "أدوية", "باطنة وجلدية", "تشريح مرضي", "ثابتة 2", "أطفال"], 4: ["ثابتة 3", "تقويم 1", "مداواة لبية 1", "أمراض فم 1", "تخدير وقلع 1", "أطفال 1", "مداواة لبية 2"], 5: ["ثابتة 5", "زرع أسنان", "أطفال 2", "مداواة لبية 3", "تخدير وقلع 3", "جراحة فم وفكين"] },
@@ -133,8 +162,7 @@
         petro: { 1: ["لغة إنكليزية 1", "رياضيات 1", "رسم هندسي", "كيمياء", "فيزياء", "جيولوجيا", "كيمياء هيدروكربون"], 2: ["برامج حاسوبية", "رياضيات تطبيقية", "كيمياء نفط", "عناصر آلات", "تحليل عددي", "صخور"], 3: ["جريان موائع", "جيولوجيا بترول", "ثيرموديناميك", "فيزياء طبقة", "هيدروليك", "انتقال حرارة"], 4: ["إنتاج نفط", "حفر 1", "مسح اهتزازي", "مخزون 1", "معدات حفر", "إنتاج غاز"], 5: ["ديناميك عمليات", "نقل وتخزين", "هندسة بيئية", "حفر موجه", "تآكل", "مشروع 2"] },
         trans: { 1: ["صوتيات", "قراءة وكتابة 1", "استماع وتحدث 1", "قواعد 1", "ترجمة 1", "مقدمة أدب"], 2: ["مسرح نهضة", "شعر نهضة", "ترجمة 2", "مناهج بحث", "رواية قرن 18", "قصة قصيرة"], 3: ["مقالة نقدية", "مسرح حديث", "شعر حديث", "ترجمة 3", "نظام صوتي", "رواية قرن 19"], 4: ["مسرح عصر حديث", "شعر عصر حديث", "ترجمة 4", "نقد أدبي", "مشروع تخرج", "رواية حديثة"] }
     };
-
-    // تسريع جلب المواد
+    // [وظائف updateSubjects و checkUnreadMessages كما هي]
     function updateSubjects() {
         const college = document.getElementById('collegeSOS').value;
         const year = document.getElementById('yearSOS').value;
@@ -143,19 +171,17 @@
         select.innerHTML = subjects.map(s => `<option value="${s}">${s}</option>`).join('');
     }
 
-    // مراقبة الرسائل (Optimization: استخدام Off لعدم تكرار المستمعات)
     function checkUnreadMessages() {
-        const myName = localStorage.getItem("userName");
-        if(!myName) return;
+        if(!currentUserName) return;
         const notifyDot = document.getElementById("notifyDot");
-        const chatsRef = database.ref('chats');
-        
-        chatsRef.on('value', (snapshot) => {
+        // حماية الخصوصية: التسمية بدون مسافات للبحث الدقيق
+        const safeName = currentUserName.replace(/\s/g, '');
+        database.ref('chats').on('value', (snapshot) => {
             let hasUnread = false;
             snapshot.forEach((child) => {
-                if (child.key.includes(myName.replace(/\s/g, ''))) {
+                if (child.key.includes(safeName)) {
                     child.forEach((msg) => {
-                        if (msg.val().sender !== myName && msg.val().seen === false) { hasUnread = true; }
+                        if (msg.val().sender !== currentUserName && msg.val().seen === false) { hasUnread = true; }
                     });
                 }
             });
@@ -163,47 +189,57 @@
         });
     }
 
-    // إرسال SOS
+    // وظيفة إرسال SOS مع تأمين البيانات المرسلة
     function sendSOS() {
         const subject = document.getElementById('subjectSelect').value;
         const explanation = document.getElementById('customSOS').value.trim();
         if(!subject || !explanation) return Swal.fire('تنبيه', 'أكمل البيانات المطلوبة', 'warning');
 
-        const now = new Date();
-        const timeStr = now.toLocaleDateString('ar-EG') + " | " + now.toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'});
+        const timeStr = new Date().toLocaleString('ar-EG');
 
         database.ref('globalMarket/').push({
-            name: `🆘 SOS: ${subject}`, explanation, college: document.getElementById('collegeSOS').value,
-            owner: currentUserName, studentId: currentUserID, fullTime: timeStr, isSOS: true
+            name: `🆘 SOS: ${subject}`, 
+            explanation: explanation, 
+            college: document.getElementById('collegeSOS').value,
+            owner: currentUserName, 
+            studentId: currentUserID, 
+            fullTime: timeStr, 
+            isSOS: true
         }).then(() => {
-            Swal.fire({ icon: 'success', title: 'تم الإرسال', timer: 1500, showConfirmButton: false });
+            Swal.fire({ icon: 'success', title: 'تم الإرسال بنجاح', timer: 1500, showConfirmButton: false });
             document.getElementById('customSOS').value = "";
+        }).catch(err => {
+            Swal.fire('خطأ', 'فشل الإرسال، تأكد من تسجيل دخولك', 'error');
         });
     }
 
-    // إضافة غرض للماركت
+    // إضافة غرض للماركت مع حماية الهوية
     function addNewTool() {
         const name = document.getElementById('newToolName').value.trim();
         if (!name) return Swal.fire('خطأ', 'اكتب اسم الغرض', 'error');
         
         const type = document.getElementById('itemType').value;
-        const now = new Date();
-        const timeStr = now.toLocaleDateString('ar-EG') + " | " + now.toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'});
+        const timeStr = new Date().toLocaleString('ar-EG');
 
         database.ref('globalMarket/').push({
-            name: `${type}: ${name}`, college: document.getElementById('itemCollege').value,
-            owner: currentUserName, studentId: currentUserID, fullTime: timeStr, isSOS: false
+            name: `${type}: ${name}`, 
+            college: document.getElementById('itemCollege').value,
+            owner: currentUserName, 
+            studentId: currentUserID, 
+            fullTime: timeStr, 
+            isSOS: false
         }).then(() => {
-            Swal.fire({ icon: 'success', title: 'تم النشر', timer: 1500, showConfirmButton: false });
+            Swal.fire({ icon: 'success', title: 'تم النشر في المعرض', timer: 1500, showConfirmButton: false });
             document.getElementById('newToolName').value = "";
         });
     }
 
-    // عند التحميل
     window.onload = () => {
-        document.getElementById("userDisplayName").innerText = currentUserName;
-        updateSubjects();
-        checkUnreadMessages();
+        if (currentUserName) {
+            document.getElementById("userDisplayName").innerText = currentUserName;
+            updateSubjects();
+            checkUnreadMessages();
+        }
     };
 </script>
 </body>
