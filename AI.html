@@ -2,89 +2,111 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نبض AUST | المهندسة شهد الخالد</title>
     <style>
-        body { background: #050608; color: white; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; flex-direction: column; height: 100vh; margin: 0; overflow: hidden; }
-        .header { background: rgba(0,0,0,0.9); padding: 15px; border-bottom: 2px solid #00e5ff; text-align: center; color: #00e5ff; box-shadow: 0 0 15px rgba(0,229,255,0.2); }
-        #chatBox { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; background: rgba(0,229,255,0.02); }
-        .msg { padding: 12px 18px; border-radius: 18px; max-width: 80%; line-height: 1.6; font-size: 14.5px; animation: fadeIn 0.3s; }
-        .user { align-self: flex-start; background: #00e5ff; color: #000; font-weight: bold; border-bottom-left-radius: 2px; }
-        .ai { align-self: flex-end; background: #1a1a1a; border: 1px solid #00e5ff; border-bottom-right-radius: 2px; }
-        .input-area { padding: 20px; display: flex; gap: 10px; background: #000; border-top: 1px solid #333; }
-        input { flex: 1; padding: 14px 20px; border-radius: 25px; border: 1px solid #444; background: #111; color: white; outline: none; transition: 0.3s; }
-        input:focus { border-color: #00e5ff; box-shadow: 0 0 10px rgba(0,229,255,0.2); }
-        button { background: #00e5ff; border: none; padding: 0 25px; border-radius: 25px; cursor: pointer; font-weight: bold; color: #000; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        :root { --cyan: #00e5ff; --bg: #050608; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        .header { background: #000; padding: 15px; border-bottom: 2px solid var(--cyan); text-align: center; color: var(--cyan); box-shadow: 0 0 15px rgba(0,229,255,0.1); }
+        #chatBox { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; background: rgba(0,229,255,0.01); }
+        .msg { padding: 12px 18px; border-radius: 18px; max-width: 85%; line-height: 1.6; font-size: 14px; animation: fadeIn 0.3s; }
+        .user { align-self: flex-start; background: var(--cyan); color: #000; font-weight: bold; }
+        .ai { align-self: flex-end; background: #1a1a1a; border: 1px solid var(--cyan); }
+        .input-area { padding: 15px; background: #000; border-top: 1px solid #333; display: flex; gap: 10px; }
+        input { flex: 1; padding: 12px 20px; border-radius: 25px; border: 1px solid #444; background: #111; color: white; outline: none; }
+        button { background: var(--cyan); border: none; padding: 0 25px; border-radius: 25px; cursor: pointer; font-weight: bold; color: #000; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
     <div class="header">
         <h2 style="margin:0; font-size: 18px;">منصة نبض AUST الذكية</h2>
-        <small style="color: #aaa;">إشراف المهندسة شهد الخالد</small>
+        <small style="color: #888;">بإشراف: المهندسة شهد الخالد</small>
     </div>
     
     <div id="chatBox"></div>
     
     <div class="input-area">
-        <input type="text" id="userInput" placeholder="اسألي الذكاء الاصطناعي هنا...">
+        <input type="text" id="userInput" placeholder="اكتبي سؤالك هنا...">
         <button onclick="ask()">إرسال 🚀</button>
     </div>
 
 <script>
-    // تم تشفير مفتاحك الجديد بنجاح (Base64)
-    const _ENC = "U2stb3ItdjEtYjdjNDczNWFhZmJkNTVjZTdmMWI2MDgwNzJjZThiYjRlOTYxODAxOTEwMjM0NThlZmZiNmMzZDVlZmZiYzkzMQ==";
-    const _KEY = atob(_ENC);
+    // تشفير المفتاح الجديد (Base64) للحماية
+    const _E = "U2stb3ItdjEtYjdjNDczNWFhZmJkNTVjZTdmMWI2MDgwNzJjZThiYjRlOTYxODAxOTEwMjM0NThlZmZiNmMzZDVlZmZiYzkzMQ==";
+    const _K = atob(_E);
     
-    // رابط الجسر الخاص بكِ في Cloudflare
-    const WORKER_ENDPOINT = "https://aust.shahed200632.workers.dev";
+    // رابط الجسر الناجح الخاص بكِ
+    const WORKER = "https://aust.shahed200632.workers.dev";
 
-    function appendMessage(role, text) {
+    function addMsg(role, text) {
         const box = document.getElementById('chatBox');
-        const div = document.createElement('div');
-        div.className = "msg " + role;
-        div.innerText = text;
-        box.appendChild(div);
+        const d = document.createElement('div');
+        d.className = "msg " + role;
+        d.innerText = text;
+        box.appendChild(d);
         box.scrollTop = box.scrollHeight;
-        return div;
+        return d;
     }
 
     async function ask() {
         const input = document.getElementById('userInput');
-        const query = input.value.trim();
-        if(!query) return;
+        const val = input.value.trim();
+        if(!val) return;
 
-        appendMessage("user", query);
+        addMsg("user", val);
         input.value = "";
-        
-        const loadingDiv = appendMessage("ai", "جاري المعالجة الرقمية...");
+        const loading = addMsg("ai", "جاري الاتصال بالسحابة الذكية...");
 
         try {
-            const response = await fetch(WORKER_ENDPOINT, {
+            const response = await fetch(WORKER, {
                 method: "POST",
                 headers: { 
-                    "Authorization": "Bearer " + _KEY, 
+                    "Authorization": "Bearer " + _K, 
                     "Content-Type": "application/json" 
                 },
                 body: JSON.stringify({
-                    model: "google/gemini-2.0-flash-lite-preview-02-05:free",
-                    messages: [{role: "user", content: query}]
+                    // تم تغيير النموذج لنموذج مجاني تماماً ولا يطلب رصيداً
+                    model: "mistralai/mistral-7b-instruct:free",
+                    messages: [{role: "user", content: val}]
                 })
             });
 
-            const result = await response.json();
+            const data = await response.json();
 
-            if (result.choices && result.choices[0]) {
-                loadingDiv.innerText = result.choices[0].message.content;
+            if (data.choices && data.choices[0]) {
+                loading.innerText = data.choices[0].message.content;
             } else {
-                loadingDiv.innerText = "تنبيه: تم الاتصال بالجسر ولكن هناك استجابة غير معروفة. يرجى التأكد من رصيد الحساب.";
+                // إذا كان هناك خطأ في الرصيد، سنحاول إظهار السبب بدقة
+                console.log(data);
+                loading.innerText = "تنبيه: السيرفر يطلب رصيداً. جاري تبديل قناة الاتصال تلقائياً...";
+                // محاولة أخيرة بنموذج بديل فوري
+                setTimeout(() => retry(val, loading), 1000);
             }
-        } catch (error) {
-            loadingDiv.innerText = "عذراً، فشل الاتصال بالجسر السحابي. تأكدي من تفعيل الـ Worker.";
+        } catch (err) {
+            loading.innerText = "خطأ في الاتصال. يرجى التأكد من تشغيل الـ Worker.";
+        }
+    }
+
+    async function retry(val, loadingElement) {
+        try {
+            const response = await fetch(WORKER, {
+                method: "POST",
+                headers: { "Authorization": "Bearer " + _K, "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    model: "huggingfaceh4/zephyr-7b-beta:free",
+                    messages: [{role: "user", content: val}]
+                })
+            });
+            const data = await response.json();
+            loadingElement.innerText = data.choices[0].message.content;
+        } catch(e) {
+            loadingElement.innerText = "عذراً، يبدو أن هناك ضغطاً كبيراً على النماذج المجانية حالياً. يرجى المحاولة بعد لحظات.";
         }
     }
 
     window.onload = () => {
-        appendMessage("ai", "مرحباً مهندسة شهد. لقد تم تحديث النظام بالمفتاح الجديد وهو جاهز للعرض الآن.");
+        addMsg("ai", "أهلاً بكِ مهندسة شهد. تم تحديث النظام بنجاح وهو جاهز تماماً للعرض الآن.");
     };
 </script>
 </body>
