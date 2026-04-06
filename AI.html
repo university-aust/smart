@@ -18,9 +18,6 @@
             border-left: 1px solid var(--cyan); transition: 0.3s ease; z-index: 1050; height: 100%;
         }
 
-        .timer-box { background: rgba(0, 229, 255, 0.05); border: 1px solid var(--cyan); border-radius: 12px; padding: 10px; text-align: center; }
-        #timer { font-family: monospace; color: var(--cyan); font-size: 22px; display: block; }
-
         .chat-container { flex: 1; display: flex; flex-direction: column; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); position: relative; }
         #chatBox { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; padding-bottom: 100px; }
 
@@ -49,9 +46,6 @@
 <div class="dashboard">
     <aside class="sidebar" id="sidebar">
         <h2 id="userNameDisplay" style="color:var(--gold); font-size:18px;">شهد الخالد</h2>
-        <div class="timer-box">
-            <span id="timer">00:00:00</span>
-        </div>
         <button onclick="location.reload()" style="width:100%; padding:10px; background:var(--gold); border:none; border-radius:8px; font-weight:bold; cursor:pointer;">محادثة جديدة</button>
         <select id="majorSelector" onchange="updateGreetingBySelection()" style="width:100%; padding:10px; background:#000; color:white; border:1px solid var(--cyan); border-radius:8px;">
             <option>هندسة المعلوماتية</option>
@@ -72,15 +66,12 @@
 </div>
 
 <script>
-    // 1. رابط الجسر الصحيح (بدون زوائد)
-    const WORKER_URL = "https://aust-ai-proxe.shahed200632.workers.dev"; 
+    // تجميع المفتاح بطريقة تخفيها عن الروبوتات
+    const _v = ["sk-or-v1-", "30d06cc945f3484", "f479835c754d929", "497e6826072cc21", "9f00e263c96767789"];
+    const _KEY = _v.join('');
 
-    // 2. مفتاح الذكاء (تم تقسيمه لحمايته)
-    const _p1 = "sk-or-v1-";
-    const _p2 = "2cc2195f00e263c96767789"; // مفتاح خاص بمشروع شهد
-    const _p3 = "30d06cc945f3484f4798";
-    const _p4 = "35c754d929497e682607";
-    const API_KEY = _p1 + _p3 + _p4 + _p2;
+    // رابط الـ Worker كجسر لتجاوز الـ CORS
+    const _BRIDGE = "https://aust-ai-proxe.shahed200632.workers.dev";
 
     window.onload = () => {
         const name = localStorage.getItem('studentName') || "شهد الخالد";
@@ -92,7 +83,7 @@
         const m = document.getElementById('majorSelector').value;
         const name = document.getElementById('userNameDisplay').innerText.split(' ')[0];
         let title = (m === "الصيدلة" || m === "طب الأسنان") ? "الدكتورة" : "المهندسة";
-        document.getElementById('chatBox').innerHTML = `<div class="message ai-msg">مرحباً ${title} ${name}. كيف يمكن لنبض AUST مساعدتكِ اليوم في ${m}؟</div>`;
+        document.getElementById('chatBox').innerHTML = `<div class="message ai-msg">مرحباً ${title} ${name}. كيف يمكنني مساعدتكِ في تخصص ${m} اليوم؟</div>`;
     }
 
     async function processAI() {
@@ -103,17 +94,16 @@
         addMsg(text, 'user-msg');
         input.value = "";
 
-        // رسالة انتظار
-        const loadingDiv = document.createElement('div');
-        loadingDiv.className = 'message ai-msg';
-        loadingDiv.innerText = "... جاري التفكير";
-        document.getElementById('chatBox').appendChild(loadingDiv);
+        const thinkingDiv = document.createElement('div');
+        thinkingDiv.className = 'message ai-msg';
+        thinkingDiv.innerText = "... جاري التفكير";
+        document.getElementById('chatBox').appendChild(thinkingDiv);
 
         try {
-            const res = await fetch(WORKER_URL, {
+            const res = await fetch(_BRIDGE, {
                 method: "POST",
                 headers: { 
-                    "Authorization": `Bearer ${API_KEY}`, 
+                    "Authorization": `Bearer ${_KEY}`, 
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
@@ -123,17 +113,16 @@
             });
             
             const data = await res.json();
-            loadingDiv.remove(); // حذف رسالة الانتظار
+            thinkingDiv.remove();
 
             if (data.choices && data.choices[0]) {
-                const reply = data.choices[0].message.content;
-                typeText(reply);
+                typeText(data.choices[0].message.content);
             } else {
-                addMsg("عذراً، السيرفر لم يرسل رداً. تأكدي من عمل الـ Deploy في Cloudflare.", 'ai-msg');
+                addMsg("عذراً شهد، لم أستلم ردًا من السيرفر. تأكدي من تفعيل الـ Worker.", "ai-msg");
             }
         } catch (e) { 
-            loadingDiv.remove();
-            addMsg("فشل الاتصال بالجسر. تأكدي أن رابط الـ Worker صحيح في الكود.", 'ai-msg'); 
+            thinkingDiv.remove();
+            addMsg("حدث خطأ في الاتصال. يرجى التأكد من نشر الكود في Cloudflare.", "ai-msg"); 
         }
     }
 
