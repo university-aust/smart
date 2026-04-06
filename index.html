@@ -3,111 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AUST Smart Pulse | تسجيل الدخول </title>
+    <title>AUST Smart Pulse | دخول آمن</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-    :root {
-        --gold: #00d4ff; 
-        --gold-glow: rgba(0, 212, 255, 0.6);
-        --glass: rgba(10, 15, 30, 0.75);
-    }
-    
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
-
-    body {
-        height: 100vh; display: flex; justify-content: center; align-items: center;
-        background-color: #030712;
-        background-image: url('67260.jpg');
-        background-size: cover; background-position: center; background-attachment: fixed;
-        overflow: hidden; position: relative;
-    }
-
-    body::before { 
-        content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-        background: rgba(0, 0, 0, 0.3);
-        z-index: 0; 
-    }
-
-    .glass-container {
-        position: relative; z-index: 1; width: 420px; padding: 35px;
-        background: var(--glass); 
-        backdrop-filter: blur(15px) saturate(160%); 
-        -webkit-backdrop-filter: blur(15px) saturate(160%);
-        border: 1px solid rgba(0, 212, 255, 0.3); 
-        border-radius: 45px;
-        text-align: center; 
-        box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-        transition: all 0.5s ease-in-out;
-    }
-
-    .glass-container:hover {
-        transform: translateY(-10px); 
-        box-shadow: 0 30px 60px rgba(0,0,0,0.4), 0 0 40px var(--gold-glow);
-        border-color: var(--gold);
-    }
-
-    .top-line { width: 60px; height: 4px; background: var(--gold); margin: 0 auto 15px; border-radius: 10px; box-shadow: 0 0 15px var(--gold); }
-    
-    .brand-h1 { 
-        font-size: 2.8rem; margin: 0; 
-        background: linear-gradient(to bottom, #fff 40%, var(--gold)); 
-        -webkit-background-clip: text; background-clip: text;
-        -webkit-text-fill-color: transparent; 
-        font-weight: 900; filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5)); 
-    }
-
-    .wisdom-container { margin: 20px 0; padding: 25px; background: rgba(0, 0, 0, 0.4); border-radius: 25px; border-right: 4px solid var(--gold); }
-    .wisdom-text { font-size: 1.1rem; line-height: 1.6; color: #fff; font-style: italic; text-shadow: 1px 1px 5px rgba(0,0,0,0.5); }
-
-    .main-btn, .submit-btn {
-        display: block; width: 100%; padding: 16px; margin-top: 20px;
-        background: linear-gradient(45deg, var(--gold), #1e293b);
-        color: #fff; border: none; border-radius: 15px; font-weight: 800;
-        font-size: 1.1rem; cursor: pointer; transition: 0.3s;
-        box-shadow: 0 4px 15px var(--gold-glow);
-    }
-
-    .form-group { margin-top: 15px; text-align: right; position: relative; }
-    label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: var(--gold); font-weight: bold; }
-    
-    input { 
-        width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); 
-        background: rgba(255, 255, 255, 0.95); color: #222; font-size: 1rem; outline: none; transition: 0.3s; 
-    }
-    input:focus { transform: translateY(-2px); box-shadow: 0 5px 15px var(--gold-glow); }
-
-    .pass-toggle { position: absolute; left: 12px; bottom: 12px; color: #666; cursor: pointer; }
-    .footer { margin-top: 25px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.75rem; color: #fff; text-shadow: 1px 1px 2px #000; }
-    
-    #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; }
-    .toast { 
-        background: rgba(10, 15, 30, 0.9); backdrop-filter: blur(10px); 
-        color: white; padding: 12px 25px; border-radius: 15px; 
-        border: 1px solid var(--gold); margin-bottom: 10px; 
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        animation: slideDown 0.4s ease-out;
-    }
-    @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        :root {
+            --gold: #00d4ff; 
+            --gold-glow: rgba(0, 212, 255, 0.6);
+            --glass: rgba(10, 15, 30, 0.85);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body {
+            height: 100vh; display: flex; justify-content: center; align-items: center;
+            background: #030712 url('67260.jpg') no-repeat center center fixed;
+            background-size: cover; overflow: hidden; position: relative;
+        }
+        body::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); z-index: 0; }
+        .glass-container {
+            position: relative; z-index: 1; width: 420px; padding: 35px;
+            background: var(--glass); backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 40px;
+            text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            transition: 0.4s;
+        }
+        .brand-h1 { font-size: 2.5rem; background: linear-gradient(to bottom, #fff, var(--gold)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
+        .form-group { margin-top: 15px; text-align: right; position: relative; }
+        label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: var(--gold); font-weight: bold; }
+        input { width: 100%; padding: 12px; border-radius: 12px; border: none; background: rgba(255, 255, 255, 0.95); color: #222; outline: none; }
+        .submit-btn { width: 100%; padding: 16px; margin-top: 20px; background: linear-gradient(45deg, var(--gold), #1e293b); color: #fff; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; }
+        .pass-toggle { position: absolute; left: 12px; bottom: 12px; color: #666; cursor: pointer; }
+        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; }
+        .toast { background: rgba(10, 15, 30, 0.9); color: white; padding: 12px 25px; border-radius: 15px; border: 1px solid var(--gold); margin-bottom: 10px; animation: slideDown 0.4s; }
+        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body>
 
     <div id="toast-container"></div>
 
-    <div class="glass-container" id="welcomeSection">
-        <div class="top-line"></div>
-        <p style="color: var(--gold); font-weight: 600;">اهلا وسهلا بك في</p>
+    <div class="glass-container" id="authSection">
         <h1 class="brand-h1">Smart Pulse</h1>
-        <div class="wisdom-container">
-            <p class="wisdom-text">"الطريق طويل، لكن كل خطوة تخطوها اليوم تجعل القمة أقرب."</p>
-        </div>
-        <button class="main-btn" onclick="showAuth()">انطلق نحو مستقبلك</button>
-        <div class="footer">تطوير المهندسة <b>شهد الخالد</b> & المهندسة<b> ضياء ملائكه</b></div>
-    </div>
-
-    <div class="glass-container" id="authSection" style="display:none;">
-        <div class="top-line"></div>
-        <h2 id="mainTitle" style="color:var(--gold); margin-bottom:15px;">تسجيل الدخول</h2>
+        <h2 id="mainTitle" style="color:white; margin: 10px 0;">تسجيل الدخول</h2>
         
         <form id="authForm" onsubmit="event.preventDefault(); handleAction();">
             <div class="form-group" id="nameGroup" style="display:none;">
@@ -125,14 +60,9 @@
                 <input type="email" id="emailInput" placeholder="name@gmail.com">
             </div>
 
-            <div class="form-group" id="verifyCodeGroup" style="display:none;">
-                <label>كود التحقق المرسل للإيميل</label>
-                <input type="text" id="verifyCodeInput" placeholder="أدخل الـ 6 أرقام">
-            </div>
-
             <div class="form-group" id="passGroup">
-                <label id="passLabel">الرمز السري (8 محارف على الأقل)</label>
-                <input type="password" id="passInput" placeholder="أحرف، أرقام، رموز">
+                <label id="passLabel">الرمز السري</label>
+                <input type="password" id="passInput" placeholder="********">
                 <i class="fas fa-eye pass-toggle" onclick="togglePass(this)"></i>
             </div>
 
@@ -140,193 +70,130 @@
         </form>
 
         <div style="margin-top:20px; font-size:0.85rem; cursor:pointer; color: #fff;" onclick="toggleMode()" id="toggleTxt">ليس لديك حساب؟ <b>إنشاء حساب جديد</b></div>
-        <div style="margin-top:10px; font-size:0.8rem; color:var(--gold); cursor:pointer; text-decoration:underline;" id="forgotLink" onclick="showForgot()">نسيت كلمة المرور؟</div>
+        <div style="margin-top:10px; font-size:0.8rem; color:var(--gold); cursor:pointer; text-decoration:underline;" id="forgotLink" onclick="forgotPassword()">نسيت كلمة المرور؟</div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
-<script>
-    // 1. تهيئة الخدمات
-    (function() { emailjs.init("m905j3dqOVj_wLxf-"); })();
+    <script>
+        // إعدادات Firebase الخاصة بك
+        const firebaseConfig = {
+            apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
+            authDomain: "nabd-aust.firebaseapp.com",
+            databaseURL: "https://nabd-aust-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "nabd-aust",
+            storageBucket: "nabd-aust.firebasestorage.app",
+            messagingSenderId: "921777725948",
+            appId: "1:921777725948:web:7b024d0aa101068bef9279"
+        };
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
-        authDomain: "nabd-aust.firebaseapp.com",
-        databaseURL: "https://nabd-aust-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "nabd-aust",
-        storageBucket: "nabd-aust.firebasestorage.app",
-        messagingSenderId: "921777725948",
-        appId: "1:921777725948:web:7b024d0aa101068bef9279"
-    };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
 
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-    const auth = firebase.auth(); 
+        let mode = 'login';
 
-    // إجبار السيرفر على البقاء متصلاً لحل مشكلة الـ Offline
-    database.goOnline();
-
-    let mode = 'login';
-    let savedRecoveryCode = null;
-
-    // دالة التشفير البسيط لحماية البيانات في LocalStorage
-    const secureStore = (key, value) => {
-        if (value) localStorage.setItem(key, btoa(encodeURIComponent(value)));
-    };
-
-    function notify(msg) {
-        const container = document.getElementById('toast-container');
-        if(!container) return; 
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.innerText = msg;
-        container.appendChild(toast);
-        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
-    }
-
-    // --- الدوال الأساسية للواجهة (UI Functions) ---
-    function showAuth() { 
-        document.getElementById('welcomeSection').style.display = 'none'; 
-        document.getElementById('authSection').style.display = 'block'; 
-    }
-
-    function togglePass(icon) { 
-        const input = document.getElementById('passInput'); 
-        input.type = (input.type === 'password') ? 'text' : 'password'; 
-        icon.classList.toggle('fa-eye-slash'); 
-    }
-    
-    function toggleMode() {
-        document.getElementById('verifyCodeGroup').style.display = 'none';
-        document.getElementById('passGroup').style.display = 'block';
-
-        if (mode === 'login' || mode === 'forgot' || mode === 'verify') {
-            mode = 'register';
-            updateUI("إنشاء حساب", "تأكيد الحساب", "block", "block", "block", "لديك حساب؟ <b>سجل دخولك</b>");
-            document.getElementById('forgotLink').style.display = 'none';
-        } else {
-            mode = 'login';
-            updateUI("تسجيل الدخول", "دخول المنصة", "none", "none", "block", "إنشاء حساب جديد");
-            document.getElementById('forgotLink').style.display = 'block';
+        function notify(msg) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerText = msg;
+            container.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 3500);
         }
-    }
 
-    function showForgot() {
-        mode = 'forgot';
-        updateUI("استعادة الرمز", "إرسال كود التحقق", "none", "block", "none", "العودة للدخول");
-        document.getElementById('verifyCodeGroup').style.display = 'none';
-    }
+        function togglePass(icon) {
+            const input = document.getElementById('passInput');
+            input.type = (input.type === 'password') ? 'text' : 'password';
+            icon.classList.toggle('fa-eye-slash');
+        }
 
-    function updateUI(t, b, n, e, p, sw) {
-        document.getElementById('mainTitle').innerText = t;
-        document.getElementById('btnText').innerText = b;
-        document.getElementById('nameGroup').style.display = n;
-        document.getElementById('emailGroup').style.display = e;
-        document.getElementById('passGroup').style.display = p;
-        document.getElementById('toggleTxt').innerHTML = sw;
-    }
-
-    // --- الدالة الرئيسية للتعامل مع البيانات (The Engine) ---
-    async function handleAction() {
-        const id = document.getElementById('idInput').value.trim();
-        const pass = document.getElementById('passInput').value;
-        const name = document.getElementById('nameInput').value.trim();
-        const email = document.getElementById('emailInput').value.trim();
-        const userEnteredCode = document.getElementById('verifyCodeInput').value.trim();
-
-        if (!id) return notify("يرجى إدخال الرقم");
-
-        try {
-            // 1. حالة إنشاء حساب جديد
-            if (mode === 'register') {
-                if (pass.length < 8) return notify("الرمز 8 محارف على الأقل");
-                notify("جاري إنشاء الحساب...");
-                
-                const check = await database.ref('users/' + id).get();
-                if (check.exists()) return notify("رقم الطالب مسجل مسبقاً!");
-
-                const userCred = await auth.createUserWithEmailAndPassword(email, pass);
-                await userCred.user.sendEmailVerification();
-
-                await database.ref('users/' + id).set({ 
-                    id, pass, name, email, major: "هندسة البرمجيات", 
-                    createdAt: firebase.database.ServerValue.TIMESTAMP 
-                });
-
-                notify("تم! فعل حسابك من الإيميل ✅");
-                setTimeout(toggleMode, 2000);
-
-            // 2. حالة تسجيل الدخول
-            } else if (mode === 'login') {
-                notify("جاري التحقق...");
-                const snapshot = await database.ref('users/' + id).get();
-                const data = snapshot.val();
-
-                if (data && data.pass === pass) {
-                    const userCred = await auth.signInWithEmailAndPassword(data.email, pass);
-                    if (userCred.user.emailVerified) {
-                        // تخزين البيانات للربط مع الداشبورد والمكتبة
-                        secureStore("userName", data.name);
-                        secureStore("userID", data.id);
-                        localStorage.setItem("userName", data.name.trim());
-                        localStorage.setItem("userID", data.id.trim());
-                        localStorage.setItem("userMajor", data.major || "هندسة البرمجيات");
-                        
-                        notify("مرحباً بك يا " + data.name.split(' ')[0]);
-                        setTimeout(() => window.location.href = "dashboard.html", 1000);
-                    } else {
-                        notify("⚠️ يرجى تفعيل الحساب من بريدك!");
-                        await auth.signOut();
-                    }
-                } else {
-                    notify("الرقم أو الرمز غير صحيح ❌");
-                }
-
-            // 3. حالة نسيان كلمة المرور (إرسال الكود)
-            } else if (mode === 'forgot') {
-                if (!email) return notify("أدخل بريدك الإلكتروني");
-                notify("جاري جلب بياناتك...");
-                const snapshot = await database.ref('users/' + id).get();
-                const data = snapshot.val();
-
-                if (data && data.email.toLowerCase() === email.toLowerCase()) {
-                    savedRecoveryCode = Math.floor(100000 + Math.random() * 900000);
-                    await emailjs.send("service_cgm7d0c", "template_xi6oxl7", { 
-                        to_name: data.name, 
-                        to_email: email, 
-                        recovery_code: savedRecoveryCode 
-                    });
-                    notify("تم إرسال كود الاستعادة ✅");
-                    mode = 'verify';
-                    updateUI("تأكيد الرمز", "تحديث كلمة المرور", "none", "none", "block", "العودة");
-                    document.getElementById('verifyCodeGroup').style.display = 'block';
-                } else {
-                    notify("البيانات غير متطابقة ❌");
-                }
-
-            // 4. حالة تأكيد الكود وتغيير الرمز
-            } else if (mode === 'verify') {
-                if (userEnteredCode == savedRecoveryCode) {
-                    if (pass.length < 8) return notify("الرمز الجديد قصير جداً");
-                    await database.ref('users/' + id).update({ pass: pass });
-                    notify("تم التحديث بنجاح! سجل دخولك الآن ✅");
-                    setTimeout(() => location.reload(), 1500);
-                } else {
-                    notify("كود التحقق خاطئ ❌");
-                }
+        function toggleMode() {
+            if (mode === 'login') {
+                mode = 'register';
+                updateUI("إنشاء حساب", "تأكيد الحساب", "block", "block", "إنشاء حساب جديد؟ <b>سجل دخولك</b>");
+                document.getElementById('forgotLink').style.display = 'none';
+            } else {
+                mode = 'login';
+                updateUI("تسجيل الدخول", "دخول المنصة", "none", "none", "ليس لديك حساب؟ <b>إنشاء حساب جديد</b>");
+                document.getElementById('forgotLink').style.display = 'block';
             }
-        } catch (error) {
-            notify("حدث خطأ: " + error.message);
         }
-    }
 
-    // منع الحروف في حقل الرقم
-    document.getElementById('idInput').addEventListener('input', function() {
-        this.value = this.value.replace(/[^0-9]/g, '');
-    });
-</script>
+        function updateUI(t, b, n, e, sw) {
+            document.getElementById('mainTitle').innerText = t;
+            document.getElementById('btnText').innerText = b;
+            document.getElementById('nameGroup').style.display = n;
+            document.getElementById('emailGroup').style.display = e;
+            document.getElementById('toggleTxt').innerHTML = sw;
+        }
+
+        async function handleAction() {
+            const id = document.getElementById('idInput').value.trim();
+            const pass = document.getElementById('passInput').value;
+            const email = document.getElementById('emailInput').value.trim();
+            const name = document.getElementById('nameInput').value.trim();
+
+            if (!id) { notify("يرجى إدخال رقم الطالب"); return; }
+
+            if (mode === 'register') {
+                if (!email || !pass || !name) { notify("يرجى إكمال كافة الحقول"); return; }
+                if (pass.length < 8) { notify("كلمة المرور يجب أن تكون 8 رموز على الأقل"); return; }
+                
+                try {
+                    // التحقق من عدم تكرار رقم الطالب في الداتابيز
+                    const snap = await database.ref('users/' + id).once('value');
+                    if (snap.exists()) { notify("رقم الطالب مسجل مسبقاً!"); return; }
+
+                    // إنشاء الحساب في Firebase Auth (آمن ومشفر)
+                    const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
+                    await userCredential.user.sendEmailVerification();
+                    
+                    // تخزين البيانات العامة فقط
+                    await database.ref('users/' + id).set({
+                        name: name,
+                        email: email,
+                        id: id,
+                        createdAt: new Date().toISOString()
+                    });
+
+                    notify("تم التسجيل! تفقد بريدك الإلكتروني لتفعيل الحساب ✅");
+                    auth.signOut();
+                    toggleMode();
+                } catch (err) { notify("خطأ: " + err.message); }
+            } 
+            else {
+                try {
+                    // جلب الإيميل المرتبط برقم الطالب المسجل
+                    const snap = await database.ref('users/' + id).once('value');
+                    if (!snap.exists()) { notify("رقم الطالب غير موجود"); return; }
+                    
+                    const userData = snap.val();
+                    const userCredential = await auth.signInWithEmailAndPassword(userData.email, pass);
+                    
+                    if (userCredential.user.emailVerified) {
+                        localStorage.setItem("userName", userData.name);
+                        localStorage.setItem("userID", id);
+                        notify("جاري الدخول...");
+                        setTimeout(() => { window.location.href = "dashboard.html"; }, 1000);
+                    } else {
+                        notify("يرجى تفعيل الحساب من الإيميل أولاً 📧");
+                        auth.signOut();
+                    }
+                } catch (err) { notify("خطأ في البيانات أو كلمة المرور"); }
+            }
+        }
+
+        function forgotPassword() {
+            const email = prompt("أدخل بريدك الإلكتروني المسجل (Gmail):");
+            if (email) {
+                auth.sendPasswordResetEmail(email)
+                .then(() => notify("تم إرسال رابط إعادة تعيين كلمة المرور لإيميلك"))
+                .catch(err => notify("خطأ: " + err.message));
+            }
+        }
+    </script>
 </body>
 </html>
