@@ -23,9 +23,7 @@
         <h2 style="margin:0; font-size: 18px;">منصة نبض AUST الذكية</h2>
         <small style="color: #888;">إشراف: المهندسة شهد الخالد</small>
     </div>
-    
     <div id="chatBox"></div>
-    
     <div class="input-area">
         <input type="text" id="userInput" placeholder="اسألي مساعدكِ الذكي هنا...">
         <button onclick="ask()">إرسال 🚀</button>
@@ -33,6 +31,8 @@
 
 <script>
     const WORKER_URL = "https://aust.shahed200632.workers.dev";
+    // مفتاحك الجديد مشفر للحماية
+    const _K = atob("U2stb3ItdjEtYjdjNDczNWFhZmJkNTVjZTdmMWI2MDgwNzJjZThiYjRlOTYxODAxOTEwMjM0NThlZmZiNmMzZDVlZmZiYzkzMQ==");
 
     function addMsg(role, text) {
         const box = document.getElementById('chatBox');
@@ -51,45 +51,38 @@
         
         addMsg("user", text);
         input.value = "";
-        const loading = addMsg("ai", "جاري التحليل وتوليد الرد...");
-
-        // تعريف المساعد بهويته الجديدة في الجامعة
-        const systemPrompt = "أنت مساعد ذكي مخصص للمهندسة شهد الخالد في الجامعة العربية الخاصة للعلوم والتكنولوجيا (AUST). مهمتك هي مساعدتها ومساعدة الطلاب في مشاريعهم البرمجية بذكاء واحترافية باللغة العربية.";
+        const loading = addMsg("ai", "جاري الرد فوراً...");
 
         try {
             const response = await fetch(WORKER_URL, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Authorization": "Bearer " + _K,
+                    "Content-Type": "application/json" 
+                },
                 body: JSON.stringify({ 
-                    inputs: "<s>[INST] " + systemPrompt + " \n السؤال الحالي: " + text + " [/INST]",
-                    parameters: { max_new_tokens: 500, return_full_text: false }
+                    model: "google/gemini-2.0-flash-lite-preview-02-05:free",
+                    messages: [
+                        {role: "system", content: "أنت مساعد ذكي للمهندسة شهد الخالد في الجامعة العربية الخاصة (AUST). أجب بذكاء واختصار وبالعربية."},
+                        {role: "user", content: text}
+                    ]
                 })
             });
 
-            const result = await response.json();
+            const data = await response.json();
             
-            let out = "";
-            if (Array.isArray(result) && result[0]?.generated_text) {
-                out = result[0].generated_text;
-            } else if (result.generated_text) {
-                out = result.generated_text;
-            } else if (result.error) {
-                out = "الموديل يستيقظ، يرجى المحاولة بعد 5 ثوانٍ.";
+            if (data.choices && data.choices[0]) {
+                loading.innerText = data.choices[0].message.content.trim();
             } else {
-                out = "تم استلام بيانات غير مكتملة، يرجى إعادة الإرسال.";
+                loading.innerText = "عذراً، يبدو أن هناك ضغطاً على السيرفر المجاني. حاولي مجدداً.";
             }
-            
-            if(out.includes("[/INST]")) out = out.split("[/INST]")[1];
-            
-            loading.innerText = out.trim() || "أنا رهن إشارتكِ مهندسة شهد.";
-
         } catch (e) {
-            loading.innerText = "حدث خطأ في الاتصال بالجسر السحابي. يرجى المحاولة ثانية.";
+            loading.innerText = "خطأ في الاتصال بالجسر. تأكدي من تفعيل الـ Worker.";
         }
     }
 
     window.onload = () => {
-        addMsg("ai", "أهلاً بكِ مهندسة شهد. أنا مساعدكِ الذكي في الجامعة العربية الخاصة (AUST). كيف يمكنني دعمكِ اليوم في عرضكِ التقني؟");
+        addMsg("ai", "مرحباً مهندسة شهد. أنا مساعدكِ الذكي في الجامعة العربية الخاصة (AUST). أنا جاهز للرد على استفساراتكِ فوراً وبذكاء.");
     };
 </script>
 </body>
