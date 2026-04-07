@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المعرض العام | نبض AUST</title>
+    <title>متجر المساعده | نبض AUST</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
@@ -138,9 +138,12 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-    const ADMIN_NAME = "shahed mamdoh alkhald";
-    const ADMIN_ID = "20241600060";
-    const ADMIN_PASS = "p@$$00rd"; 
+    // 1. إعدادات الإدمن (محصنة برمجياً)
+    const ADMIN_DATA = {
+        n: "c2hhaGVkIG1hbWRvaCBhbGtoYWxk", 
+        i: "MjAyNDE2MDAwNjA=",             
+        p: "p@$$00rd"                      
+    };
 
     const firebaseConfig = {
         apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
@@ -155,8 +158,28 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    const collegeMap = { 'it': 'IT', 'dent': 'أسنان', 'pharm': 'صيدلة', 'arch': 'عمارة', 'chemical': 'كيمياء', 'petro': 'بترول', 'trans': 'ترجمة', 'عام': 'عام' };
+    // 2. فك تشفير بيانات المستخدم الحالي
+    let currentUserName = "", currentUserID = "";
+    (function() {
+        try {
+            const encID = localStorage.getItem("u_id");
+            const encName = localStorage.getItem("u_name");
+            if (encID && encName) {
+                currentUserID = atob(encID);
+                currentUserName = decodeURIComponent(escape(atob(encName)));
+            }
+        } catch (e) { console.error("Security Auth Error"); }
+    })();
 
+    // 3. دالة تطهير النصوص لمنع الاختراق عبر العرض
+    function sanitize(text) {
+        if (!text) return "";
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    const collegeMap = { 'it': 'IT', 'dent': 'أسنان', 'pharm': 'صيدلة', 'arch': 'عمارة', 'chemical': 'كيمياء', 'petro': 'بترول', 'trans': 'ترجمة', 'عام': 'عام' };
     let cachedData = [];
 
     function startListening() {
@@ -172,64 +195,88 @@
         const searchTerm = document.getElementById("searchInput").value.toLowerCase();
         const filterCol = document.getElementById("filterCollege").value;
         
-        const currentUserName = (localStorage.getItem("userName") || "").trim().toLowerCase();
-        const currentUserID = (localStorage.getItem("userID") || "").trim(); 
-        const isSuperAdmin = (currentUserName === ADMIN_NAME.toLowerCase().trim() && currentUserID === ADMIN_ID.trim());
+        // التحقق من صلاحيات الإدمن (شهد)
+        const isSuperAdmin = (btoa(currentUserName.toLowerCase().trim()) === ADMIN_DATA.n && btoa(currentUserID) === ADMIN_DATA.i);
 
         let htmlContent = "";
 
         const filtered = cachedData.filter(item => {
-            if (!item || !item.name) return false;
-            const matchesSearch = item.name.toLowerCase().includes(searchTerm) || (item.owner || "").toLowerCase().includes(searchTerm);
+            const name = (item.name || "").toLowerCase();
+            const owner = (item.owner || "").toLowerCase();
+            const matchesSearch = name.includes(searchTerm) || owner.includes(searchTerm);
             let matchesCollege = (filterCol === "all") || (item.college === filterCol);
-            if (filterCol === "lost") matchesCollege = item.name.includes("مفقود") || item.name.includes("موجود");
+            if (filterCol === "lost") matchesCollege = name.includes("مفقود") || name.includes("موجود");
             return matchesSearch && matchesCollege;
         });
 
         if (filtered.length === 0) {
-            grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; opacity: 0.5; font-size: 0.8rem;">لا يوجد نتائج.. 🕸️</p>`;
+            grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; opacity: 0.5;">لا يوجد نتائج حالياً.. 🕸️</p>`;
             return;
         }
 
         filtered.forEach(item => {
             const isSOS = item.isSOS === true;
-            const isOwner = (item.owner && item.owner.trim().toLowerCase() === currentUserName);
+            const isOwner = (item.studentId === currentUserID); // التحقق عبر الرقم لضمان الدقة
             let statusTag = item.name.includes("مفقود") ? '<span class="status-badge lost-bg">مفقود</span>' : 
                              item.name.includes("موجود") ? '<span class="status-badge found-bg">موجود</span>' : '';
 
             htmlContent += `
                 <div class="tool-card ${isSOS ? 'sos-card' : ''}">
-                    ${(isSuperAdmin || isOwner) ? `<i class="fas fa-trash-alt admin-del-icon" onclick="handleDelete('${item.id}', ${isSuperAdmin}, ${isOwner})"></i>` : ''}
+                    ${(isSuperAdmin || isOwner) ? `<i class="fas fa-trash-alt admin-del-icon" onclick="handleDelete('${item.id}', ${isSuperAdmin})"></i>` : ''}
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                         <span class="category-tag">${collegeMap[item.college] || 'AUST'}</span>
                         ${statusTag}
                     </div>
-                    <div class="post-time"><i class="far fa-clock"></i> ${item.fullTime || item.date || 'الآن'}</div>
-                    <div style="color:var(--cyan-neon); font-size:10px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">👤 ${item.owner}</div>
-                    <h3 style="margin:5px 0; font-size: 0.85rem; color: #fff; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">${item.name}</h3>
-                    ${item.explanation ? `<div class="explanation-box" style="border-right-color: ${isSOS ? 'var(--red)' : 'var(--cyan-neon)'}">${item.explanation}</div>` : ''}
-                    <button onclick="goToChat('${item.owner}', '${item.name}')" class="contact-btn" style="background:${isSOS ? 'var(--red)' : 'var(--cyan-neon)'}; color:${isSOS ? 'white' : 'black'};">
-                        <i class="fas fa-comments"></i> تواصل
+                    <div class="post-time"><i class="far fa-clock"></i> ${sanitize(item.fullTime)}</div>
+                    <div style="color:var(--cyan-neon); font-size:10px; font-weight:bold;">👤 ${sanitize(item.owner)}</div>
+                    <h3 style="margin:5px 0; font-size: 0.85rem; color: #fff;">${sanitize(item.name)}</h3>
+                    ${item.explanation ? `<div class="explanation-box" style="border-right-color: ${isSOS ? 'var(--red)' : 'var(--cyan-neon)'}">${sanitize(item.explanation)}</div>` : ''}
+                    <button onclick="goToChat('${encodeURIComponent(item.owner)}', '${encodeURIComponent(item.name)}')" class="contact-btn" style="background:${isSOS ? 'var(--red)' : 'var(--cyan-neon)'}; color:${isSOS ? 'white' : 'black'};">
+                        <i class="fas fa-comments"></i> تواصل مع الطالب
                     </button>
                 </div>`;
         });
         grid.innerHTML = htmlContent;
     }
 
-    function handleDelete(itemId, isGlobalAdmin, isOwner) {
-        const confirmAndDel = () => database.ref('globalMarket/' + itemId).remove();
+    function handleDelete(itemId, isGlobalAdmin) {
         if (isGlobalAdmin) {
-            Swal.fire({ title: 'حذف شهد', input: 'password', showCancelButton: true, confirmButtonColor: '#ff4d4d', background: '#0a0a0f', color: '#fff' })
-            .then(res => { if(res.value === ADMIN_PASS) confirmAndDel(); });
+            Swal.fire({ 
+                title: 'تأكيد حذف الإدمن', 
+                text: 'يرجى إدخال الرمز السري للحذف النهائي',
+                input: 'password', 
+                showCancelButton: true, 
+                confirmButtonColor: '#ff4d4d', 
+                background: '#0a0a0f', 
+                color: '#fff' 
+            }).then(res => { 
+                if(res.value === ADMIN_DATA.p) {
+                    database.ref('globalMarket/' + itemId).remove();
+                } else if(res.value) {
+                    Swal.fire('خطأ', 'الرمز السري غير صحيح', 'error');
+                }
+            });
         } else {
-            Swal.fire({ title: 'حذف المنشور؟', icon: 'warning', showCancelButton: true, background: '#0a0a0f', color: '#fff' })
-            .then(res => { if(res.isConfirmed) confirmAndDel(); });
+            Swal.fire({ 
+                title: 'حذف المنشور؟', 
+                text: 'هل أنت متأكد من حذف منشورك؟',
+                icon: 'warning', 
+                showCancelButton: true, 
+                background: '#0a0a0f', 
+                color: '#fff' 
+            }).then(res => { 
+                if(res.isConfirmed) database.ref('globalMarket/' + itemId).remove();
+            });
         }
     }
 
     function goToChat(owner, itemName) {
-        if (owner === localStorage.getItem("userName")) return;
-        window.location.href = `chat.html?to=${encodeURIComponent(owner)}&item=${encodeURIComponent(itemName)}`;
+        const decodedOwner = decodeURIComponent(owner);
+        if (decodedOwner === currentUserName) {
+            Swal.fire('تنبيه', 'اوه لا يمكنك مراسلة نفسك!', 'info');
+            return;
+        }
+        window.location.href = `chat.html?to=${owner}&item=${itemName}`;
     }
 
     window.onload = startListening;
