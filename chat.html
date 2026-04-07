@@ -110,7 +110,6 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script>
-    // 1. إعدادات الفايربيس المؤمنة
     const firebaseConfig = {
         apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
         databaseURL: "https://nabd-aust-default-rtdb.europe-west1.firebasedatabase.app",
@@ -119,31 +118,41 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    // 2. فك تشفير بيانات المستخدم الحالي (أنتِ)
+    // دالة آمنة للتشفير تدعم اللغة العربية والرموز
+    function safeBtoa(str) {
+        return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => {
+            return String.fromCharCode('0x' + p1);
+        }));
+    }
+
+    // دالة آمنة لفك التشفير
+    function safeAtob(str) {
+        return decodeURIComponent(Array.prototype.map.call(atob(str), (c) => {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+    }
+
     let myID = "", myName = "";
     try {
         const encID = localStorage.getItem("u_id");
         const encName = localStorage.getItem("u_name");
-        if (!encID || !encName) window.location.href = "index.html";
+        if (!encID || !encName) { window.location.href = "index.html"; }
         
         myID = atob(encID);
-        myName = decodeURIComponent(escape(atob(encName)));
+        myName = safeAtob(encName);
     } catch (e) { window.location.href = "index.html"; }
 
-    // 3. جلب بيانات الطرف الآخر وتأمينها
     const urlParams = new URLSearchParams(window.location.search);
-    const targetName = decodeURIComponent(urlParams.get('to') || "زميل");
-    const itemName = decodeURIComponent(urlParams.get('item') || "موضوع عام");
+    const targetName = urlParams.get('to') || "زميل";
+    const itemName = urlParams.get('item') || "موضوع عام";
     
-    // توليد معرف محادثة فريد ومعمّى (Obfuscated)
-    // نستخدم الأرقام الجامعية لإنشاء مسار فريد في قاعدة البيانات لا يعرفه إلا الطرفين
+    // توليد معرف المحادثة بشكل آمن
     const rawChatId = [myID, targetName].sort().join("_").replace(/\s/g, '');
-    const secureChatId = btoa(rawChatId).replace(/=/g, ''); // تحويل المسار لصيغة غير مفهومة في Firebase
+    const secureChatId = safeBtoa(rawChatId).replace(/=/g, ''); 
 
     document.getElementById('chatWith').innerText = `دردشة مع ${targetName}`;
     document.getElementById('itemContext').innerText = `بخصوص: ${itemName}`;
 
-    // دالة تنظيف النصوص (حماية من الاختراق)
     function sanitize(text) {
         const div = document.createElement('div');
         div.textContent = text;
@@ -156,16 +165,16 @@
         if (!text) return;
 
         const payload = {
-            sN: btoa(unescape(encodeURIComponent(myName))), // اسم المرسل مشفر
-            sI: btoa(myID), // رقم المرسل مشفر
-            m: sanitize(text), // الرسالة منظفة
+            sN: safeBtoa(myName),
+            sI: btoa(myID),
+            m: sanitize(text),
             t: new Date().toLocaleTimeString('ar-SY', {hour: '2-digit', minute:'2-digit'}),
             ts: firebase.database.ServerValue.TIMESTAMP
         };
 
         database.ref('chats/' + secureChatId).push(payload)
         .then(() => { input.value = ""; })
-        .catch(() => { Swal.fire('خطأ', 'فشل الإرسال، تأكد من الاتصال', 'error'); });
+        .catch((err) => { console.error(err); });
     }
 
     function listen() {
@@ -175,38 +184,20 @@
             snap.forEach(child => {
                 const data = child.val();
                 let senderID, senderName;
-                
                 try {
                     senderID = atob(data.sI);
-                    senderName = decodeURIComponent(escape(atob(data.sN)));
+                    senderName = safeAtob(data.sN);
                 } catch(e) { return; }
 
                 const isMe = senderID === myID;
-
                 chatBox.innerHTML += `
                     <div class="msg ${isMe ? 'my-msg' : 'other-msg'}">
                         <span class="user-tag" style="color:${isMe ? '#111' : 'var(--cyan)'}">${isMe ? 'أنا' : senderName}</span>
-                        <div style="word-break: break-word;">${data.m}</div>
-                        <span class="time" style="display:block; text-align:left; margin-top:5px;">${data.t}</span>
+                        <div>${data.m}</div>
+                        <span class="time">${data.t}</span>
                     </div>`;
             });
             chatBox.scrollTop = chatBox.scrollHeight;
-        });
-    }
-
-    function clearChat() {
-        Swal.fire({
-            title: 'حذف المحادثة؟',
-            text: "سيتم حذف الرسائل من عندك وعند الطرف الآخر نهائياً!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ff4d4d',
-            cancelButtonText: 'إلغاء',
-            confirmButtonText: 'نعم، احذف'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                database.ref('chats/' + secureChatId).remove();
-            }
         });
     }
 
