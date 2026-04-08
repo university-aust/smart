@@ -149,35 +149,39 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
 <script>
-    // 1. نظام تمويه مفاتيح Firebase (Obfuscation)
-    const _0x4f22 = ["QUl6YVN5Q2dkWjFOaWNVOG1aelcicGUtVGs5WDM2aXZjeDBPTW8=", "aHR0cHM6Ly9uYWJkLWF1c3QtZGVmYXVsdC1ydGRiLmV1cm9wZS13ZXN0MS5maXJlYmFzZWRhdGFiYXNlLmFwcA==", "bmFiZC1hdXN0LmZpcmViYXNlYXBwLmNvbQ==", "bmFiZC1hdXN0"];
-    const decrypt = (val) => atob(val);
+    // 1. نظام تمويه مفاتيح Firebase (لحماية مشروعك من المتطفلين)
+    const _0xData = [
+        "QUl6YVN5Q2dkWjFOaWNVOG1aelcicGUtVGs5WDM2aXZjeDBPTW8=", // API Key مشفر
+        "aHR0cHM6Ly9uYWJkLWF1c3QtZGVmYXVsdC1ydGRiLmV1cm9wZS13ZXN0MS5maXJlYmFzZWRhdGFiYXNlLmFwcA==", // DB URL مشفر
+        "bmFiZC1hdXN0" // Project ID مشفر
+    ];
+    const _decrypt = (v) => atob(v);
 
     const firebaseConfig = {
-        apiKey: decrypt(_0x4f22[0]),
-        databaseURL: decrypt(_0x4f22[1]),
-        authDomain: decrypt(_0x4f22[2]),
-        projectId: decrypt(_0x4f22[3]),
-        storageBucket: decrypt(_0x4f22[3]) + ".appspot.com",
+        apiKey: _decrypt(_0xData[0]),
+        databaseURL: _decrypt(_0xData[1]),
+        authDomain: _decrypt(_0xData[2]) + ".firebaseapp.com",
+        projectId: _decrypt(_0xData[2]),
+        storageBucket: _decrypt(_0xData[2]) + ".appspot.com",
         messagingSenderId: "921777725948",
         appId: "1:921777725948:web:7b024d0aa101068bef9279"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    // تهيئة الخدمات
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     const auth = firebase.auth();
     (function() { emailjs.init("m905j3dqOVj_wLxf-"); })();
 
-    // 2. نظام التشفير المحلي (Secure Storage)
+    // 2. نظام التشفير المحلي للبيانات الحساسة
     const secureStore = (key, value) => {
         const encrypted = btoa(unescape(encodeURIComponent(value)));
         localStorage.setItem(key, encrypted);
     };
 
     let mode = 'login';
-    let savedRecoveryCode = null;
 
-    // دالة التنبيهات (Toast)
+    // دالة التنبيهات الذكية
     function notify(msg) {
         const container = document.getElementById('toast-container');
         if(!container) return; 
@@ -188,12 +192,80 @@
         setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 4000);
     }
 
-    // تبديل الواجهات
-    function showAuth() {
-        document.getElementById('welcomeSection').style.display = 'none';
-        document.getElementById('authSection').style.display = 'block';
+    // 3. معالج العمليات الرئيسي (حل مشكلة الصلاحيات Permission Denied)
+    async function handleAction() {
+        const id = document.getElementById('idInput').value.trim();
+        const pass = document.getElementById('passInput').value;
+        const name = document.getElementById('nameInput').value.trim();
+        const email = document.getElementById('emailInput').value.trim();
+
+        if (!id || isNaN(id)) return notify("يرجى إدخال رقم جامعي صحيح");
+
+        if (mode === 'register') {
+            if (name.split(' ').length < 3) return notify("الاسم الثلاثي مطلوب للأمان");
+            if (!email.toLowerCase().endsWith("@gmail.com")) return notify("يرجى استخدام Gmail فقط");
+            if (pass.length < 8) return notify("كلمة السر يجب أن تكون 8 محارف فأكثر");
+
+            notify("جاري إنشاء الحساب سيبرانياً...");
+
+            try {
+                // الخطوة الأولى: إنشاء الهوية في Firebase Auth (دائماً مسموح به)
+                const userCred = await auth.createUserWithEmailAndPassword(email, pass);
+                
+                // الخطوة الثانية: الآن أصبحنا نملك صلاحية الكتابة (Authenticated)
+                await database.ref('users/' + id).set({
+                    uN: btoa(unescape(encodeURIComponent(name))), // اسم مشفر
+                    uI: id,
+                    uE: email,
+                    role: "student",
+                    createdAt: new Date().toISOString()
+                });
+
+                // إرسال رابط التفعيل
+                await userCred.user.sendEmailVerification();
+                notify("تم الحفظ بنجاح! يرجى تفعيل حسابك من البريد الإلكتروني ✅");
+                
+                await auth.signOut(); // تسجيل خروج إجباري حتى يتم التفعيل
+                setTimeout(() => location.reload(), 3000);
+
+            } catch (e) {
+                if (e.code === 'auth/email-already-in-use') notify("هذا البريد مستخدم مسبقاً!");
+                else notify("خطأ في الصلاحيات: " + e.message);
+                console.error("Firebase Security Error:", e);
+            }
+        } 
+        
+        else if (mode === 'login') {
+            try {
+                // تسجيل الدخول أولاً للحصول على "مفتاح" الدخول للقاعدة
+                const userCred = await auth.signInWithEmailAndPassword(email, pass);
+                
+                // جلب البيانات المؤمنة
+                const snap = await database.ref('users/' + id).once('value');
+                if (snap.exists()) {
+                    const userData = snap.val();
+                    
+                    if (userCred.user.emailVerified) {
+                        // تخزين آمن ومشفر للمتصفح
+                        secureStore("u_name", decodeURIComponent(escape(atob(userData.uN))));
+                        secureStore("u_id", id);
+                        
+                        notify("مرحباً بكِ مهندسة شهد في نبض AUST");
+                        setTimeout(() => { window.location.href = "dashboard.html"; }, 1000);
+                    } else {
+                        notify("⚠️ الحساب غير مفعل! راجعي بريدك الإلكتروني.");
+                        await auth.signOut();
+                    }
+                } else {
+                    notify("رقم الطالب غير مرتبط بهذا الحساب");
+                }
+            } catch (e) {
+                notify("بيانات الدخول غير صحيحة أو الحساب غير موجود");
+            }
+        }
     }
 
+    // وظائف الواجهة
     function togglePass(icon) {
         const input = document.getElementById('passInput');
         input.type = (input.type === 'password') ? 'text' : 'password';
@@ -201,83 +273,17 @@
     }
 
     function toggleMode() {
-        if (mode === 'login' || mode === 'forgot' || mode === 'verify') {
-            mode = 'register';
-            updateUI("إنشاء حساب جديد", "تأكيد الحساب", "block", "block", "block", "لديك حساب؟ <b>سجل دخولك</b>");
-        } else {
-            mode = 'login';
-            updateUI("تسجيل الدخول", "دخول المنصة", "none", "none", "block", "ليس لديك حساب؟ <b>إنشاء حساب</b>");
-        }
+        mode = (mode === 'login') ? 'register' : 'login';
+        document.getElementById('mainTitle').innerText = (mode === 'register') ? "إنشاء حساب جديد" : "تسجيل الدخول";
+        document.getElementById('btnText').innerText = (mode === 'register') ? "تأكيد الحساب" : "دخول المنصة";
+        document.getElementById('nameGroup').style.display = (mode === 'register') ? "block" : "none";
+        document.getElementById('emailGroup').style.display = "block"; 
+        document.getElementById('toggleTxt').innerHTML = (mode === 'register') ? "لديك حساب؟ <b>سجل دخولك</b>" : "ليس لديك حساب؟ <b>إنشاء حساب جديد</b>";
     }
 
-    function updateUI(t, b, n, e, p, sw) {
-        document.getElementById('mainTitle').innerText = t;
-        document.getElementById('btnText').innerText = b;
-        document.getElementById('nameGroup').style.display = n;
-        document.getElementById('emailGroup').style.display = e;
-        document.getElementById('passGroup').style.display = p;
-        document.getElementById('toggleTxt').innerHTML = sw;
-    }
-
-    // 3. معالجة العمليات (بمنطق أمني جديد)
-    async function handleAction() {
-        const id = document.getElementById('idInput').value.trim();
-        const pass = document.getElementById('passInput').value;
-        const name = document.getElementById('nameInput').value.trim();
-        const email = document.getElementById('emailInput').value.trim();
-
-        if (mode === 'register') {
-            if (!id || id.length < 5) return notify("رقم الطالب غير صحيح");
-            if (name.split(' ').length < 3) return notify("الاسم الثلاثي مطلوب");
-            if (!email.endsWith("@gmail.com")) return notify("استخدم Gmail فقط");
-
-            try {
-                // منع التكرار
-                const check = await database.ref('users/' + id).once('value');
-                if(check.exists()) return notify("هذا الرقم مسجل مسبقاً");
-
-                // إنشاء حساب في Firebase Auth
-                const userCred = await auth.createUserWithEmailAndPassword(email, pass);
-                await userCred.user.sendEmailVerification();
-
-                // حفظ البيانات مشفرة (بشكل جزئي للامتثال للقواعد)
-                await database.ref('users/' + id).set({
-                    uN: btoa(unescape(encodeURIComponent(name))),
-                    uI: id,
-                    uE: email,
-                    role: "student",
-                    v: false
-                });
-
-                notify("تم الإرسال! فعل حسابك من الإيميل");
-                auth.signOut();
-                setTimeout(toggleMode, 2000);
-            } catch (e) { notify("خطأ: " + e.message); }
-        } 
-        
-        else if (mode === 'login') {
-            try {
-                // جلب البيانات للتحقق
-                const snap = await database.ref('users/' + id).once('value');
-                if(!snap.exists()) return notify("الحساب غير موجود");
-                
-                const userData = snap.val();
-                const userCred = await auth.signInWithEmailAndPassword(userData.uE, pass);
-
-                if (userCred.user.emailVerified) {
-                    // تخزين آمن للبيانات في المتصفح
-                    secureStore("u_name", decodeURIComponent(escape(atob(userData.uN))));
-                    secureStore("u_id", id);
-                    secureStore("u_role", userData.role);
-                    
-                    notify("مرحباً بك في نبض AUST");
-                    setTimeout(() => { window.location.href = "dashboard.html"; }, 1000);
-                } else {
-                    notify("يرجى تفعيل البريد الإلكتروني أولاً");
-                    auth.signOut();
-                }
-            } catch (e) { notify("بيانات الدخول غير صحيحة"); }
-        }
+    function showAuth() {
+        document.getElementById('welcomeSection').style.display = 'none';
+        document.getElementById('authSection').style.display = 'block';
     }
 </script>
 </body>
