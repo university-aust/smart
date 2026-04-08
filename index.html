@@ -143,89 +143,40 @@
         <div style="margin-top:10px; font-size:0.8rem; color:var(--gold); cursor:pointer; text-decoration:underline;" id="forgotLink" onclick="showForgot()">نسيت كلمة المرور؟</div>
     </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
 <script>
-    // =====================================================
-    // 🔥 الأمان: Firebase Config (غيّر القيم الحقيقية)
-    // =====================================================
+    (function() { emailjs.init("m905j3dqOVj_wLxf-"); })();
+
     const firebaseConfig = {
-        apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo", // غيّر لجديد من Firebase Console
+        apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
         authDomain: "nabd-aust.firebaseapp.com",
         databaseURL: "https://nabd-aust-default-rtdb.europe-west1.firebasedatabase.app",
         projectId: "nabd-aust",
         storageBucket: "nabd-aust.firebasestorage.app",
         messagingSenderId: "921777725948",
-        appId: "1:921777725948:web:7b024d0aa101068bef9279"
+        appId: "1:921777725948:web:7b024d0aa101068bef9279",
+        measurementId: "G-HC2TSQ70V2"
     };
 
-    // تهيئة Firebase مع error handling
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-    const auth = firebase.auth();
+    const auth = firebase.auth(); 
 
-    // =====================================================
-    // 🔥 الأمان: Rate Limiting (3 محاولات/5 دقائق)
-    // =====================================================
-    let loginAttempts = parseInt(localStorage.getItem('loginAttempts') || '0');
-    let lastAttempt = parseInt(localStorage.getItem('lastAttempt') || '0');
-    const RATE_LIMIT_TIME = 5 * 60 * 1000; // 5 دقائق
-
-    function checkRateLimit() {
-        const now = Date.now();
-        if (now - lastAttempt < RATE_LIMIT_TIME && loginAttempts >= 3) {
-            notify("🚫 تم تجاوز الحد! انتظر 5 دقائق");
-            return false;
-        }
-        if (now - lastAttempt > RATE_LIMIT_TIME) {
-            loginAttempts = 0;
-            localStorage.setItem('loginAttempts', '0');
-            localStorage.setItem('lastAttempt', '0');
-        }
-        return true;
-    }
-
-    // =====================================================
-    // 🔥 الأمان: Input Sanitization (منع XSS)
-    // =====================================================
-    function sanitizeInput(input) {
-        const div = document.createElement('div');
-        div.textContent = input || '';
-        return div.innerHTML.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-    }
-
-    // =====================================================
-    // 🔥 الأمان: Password Hashing
-    // =====================================================
-    function hashPassword(password) {
-        // SHA-256 بسيط + salt
-        let hash = 0;
-        for (let i = 0; i < password.length; i++) {
-            const char = password.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash = hash & hash;
-        }
-        return btoa(Math.abs(hash).toString(36) + 'AUST_SALT_2026_v2');
-    }
-
-    // =====================================================
-    // 🔥 الدوال الأساسية (محسنة)
-    // =====================================================
     let mode = 'login';
     let savedRecoveryCode = null;
 
-    function notify(msg, type = 'info') {
+    function notify(msg) {
         const container = document.getElementById('toast-container');
+        if(!container) return; 
         const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'}"></i> ${msg}`;
+        toast.className = 'toast';
+        toast.innerText = msg;
         container.appendChild(toast);
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            setTimeout(() => toast.remove(), 500);
-        }, 5000);
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 4000);
     }
 
     function showAuth() {
@@ -235,8 +186,7 @@
 
     function togglePass(icon) {
         const input = document.getElementById('passInput');
-        input.type = input.type === 'password' ? 'text' : 'password';
-        icon.classList.toggle('fa-eye');
+        input.type = (input.type === 'password') ? 'text' : 'password';
         icon.classList.toggle('fa-eye-slash');
     }
 
@@ -250,7 +200,7 @@
             document.getElementById('forgotLink').style.display = 'none';
         } else {
             mode = 'login';
-            updateUI("تسجيل الدخول", "دخول المنصة", "none", "none", "block", "ليس لديك حساب؟ <b>إنشاء حساب جديد</b>");
+            updateUI("تسجيل الدخول", "دخول المنصة", "none", "none", "block", "إنشاء حساب جديد");
             document.getElementById('forgotLink').style.display = 'block';
         }
     }
@@ -261,180 +211,129 @@
         document.getElementById('verifyCodeGroup').style.display = 'none';
     }
 
-    function updateUI(title, btnText, nameDisplay, emailDisplay, passDisplay, switchText) {
-        document.getElementById('mainTitle').innerText = title;
-        document.getElementById('btnText').innerText = btnText;
-        document.getElementById('nameGroup').style.display = nameDisplay;
-        document.getElementById('emailGroup').style.display = emailDisplay;
-        document.getElementById('passGroup').style.display = passDisplay;
-        document.getElementById('toggleTxt').innerHTML = switchText;
+    function updateUI(t, b, n, e, p, sw) {
+        document.getElementById('mainTitle').innerText = t;
+        document.getElementById('btnText').innerText = b;
+        document.getElementById('nameGroup').style.display = n;
+        document.getElementById('emailGroup').style.display = e;
+        document.getElementById('passGroup').style.display = p;
+        document.getElementById('toggleTxt').innerHTML = sw;
     }
 
-    // =====================================================
-    // 🔥 الدالة الرئيسية المحسنة أمنياً
-    // =====================================================
     async function handleAction() {
-        if (!checkRateLimit()) return;
-
-        const id = sanitizeInput(document.getElementById('idInput').value.trim());
+        const id = document.getElementById('idInput').value.trim();
         const pass = document.getElementById('passInput').value;
-        const name = sanitizeInput(document.getElementById('nameInput').value.trim());
-        const email = sanitizeInput(document.getElementById('emailInput').value.trim().toLowerCase());
-        const userEnteredCode = sanitizeInput(document.getElementById('verifyCodeInput').value.trim());
+        const name = document.getElementById('nameInput').value.trim();
+        const email = document.getElementById('emailInput').value.trim();
+        const userEnteredCode = document.getElementById('verifyCodeInput').value.trim();
 
-        // =====================================================
-        // 🔥 التحقق من صحة البيانات
-        // =====================================================
-        if (!/^\d{8}$/.test(id)) {
-            notify("رقم الطالب 8 أرقام فقط", 'error');
-            return;
-        }
-        if (pass.length < 8) {
-            notify("الرمز السري 8 محارف على الأقل", 'error');
-            return;
-        }
-        if (mode === 'register' && !email.endsWith('@gmail.com')) {
-            notify("البريد Gmail فقط!", 'error');
-            return;
-        }
+        if (!id || isNaN(id)) { notify("رقم الطالب يجب أن يكون أرقاماً"); return; }
+
         if (mode === 'register') {
             const nameParts = name.split(/\s+/).filter(p => p.length > 0);
-            if (nameParts.length < 3) {
-                notify("أدخل الاسم الثلاثي كاملاً", 'error');
-                return;
-            }
-        }
+            if (nameParts.length < 3) { notify("يرجى إدخال الاسم الثلاثي"); return; }
+            if (pass.length < 8) { notify("الرمز 8 محارف على الأقل"); return; }
+            if (!email.toLowerCase().endsWith("@gmail.com")) { notify("Gmail فقط!"); return; }
 
-        try {
-            notify("جاري المعالجة...", 'info');
-
-            if (mode === 'register') {
-                // 1. تحقق من عدم وجود المستخدم
+            notify("جاري إنشاء الحساب...");
+            
+            try {
                 const snapshot = await database.ref('users/' + id).once('value');
                 if (snapshot.exists()) {
-                    throw new Error("رقم الطالب مسجل مسبقاً!");
+                    notify("رقم الطالب مسجل مسبقاً!");
+                    return;
                 }
 
-                // 2. إنشاء Firebase Auth user
                 const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
-                await userCredential.user.sendEmailVerification();
+                const user = userCredential.user;
 
-                // 3. حفظ البيانات المشفرة
-                await database.ref('users/' + id).set({
-                    id: id,
-                    name: name,
-                    email: email,
-                    passwordHash: hashPassword(pass),
-                    major: "هندسة البرمجيات",
-                    createdAt: firebase.database.ServerValue.TIMESTAMP,
-                    emailVerified: false,
-                    lastLogin: null
+                await user.sendEmailVerification();
+                notify("تم إرسال رابط تفعيل لإيميلك ✅");
+
+                await database.ref('users/' + id).set({ 
+                    id, pass, name, email, 
+                    major: "هندسة البرمجيات", 
+                    createdAt: new Date().toISOString()
                 });
 
-                notify("✅ تم إرسال رابط التفعيل لإيميلك", 'success');
+                notify("حسابك جاهز! يرجى تفعيل الإيميل قبل الدخول.");
+                
                 await auth.signOut();
-                setTimeout(() => toggleMode(), 2000);
-
-            } else if (mode === 'login') {
-                // 1. جلب بيانات المستخدم
-                const snapshot = await database.ref('users/' + id).once('value');
-                const data = snapshot.val();
-
-                if (!data || hashPassword(pass) !== data.passwordHash) {
-                    loginAttempts++;
-                    lastAttempt = Date.now();
-                    localStorage.setItem('loginAttempts', loginAttempts.toString());
-                    localStorage.setItem('lastAttempt', lastAttempt.toString());
-                    throw new Error("رقم الطالب أو الرمز خاطئ");
-                }
-
-                // 2. تسجيل دخول Firebase Auth
-                const userCredential = await auth.signInWithEmailAndPassword(data.email, pass);
                 
-                if (!userCredential.user.emailVerified) {
-                    await auth.signOut();
-                    throw new Error("⚠️ الحساب غير مفعل! تحقق من إيميلك");
-                }
+                setTimeout(toggleMode, 2000);
 
-                // 3. حفظ الجلسة آمنة
-                localStorage.setItem("userName", data.name);
-                localStorage.setItem("userID", data.id);
-                localStorage.setItem("userMajor", data.major || "هندسة البرمجيات");
-                localStorage.setItem("sessionToken", btoa(Date.now() + data.id)); // token مؤقت
-
-                // 4. تحديث آخر دخول
-                await database.ref('users/' + id).update({
-                    lastLogin: firebase.database.ServerValue.TIMESTAMP
-                });
-
-                notify(`✅ مرحباً بك يا ${data.name}`, 'success');
-                setTimeout(() => {
-                    window.location.href = "dashboard.html";
-                }, 1500);
-
-            } else if (mode === 'forgot') {
-                const snapshot = await database.ref('users/' + id).once('value');
-                const data = snapshot.val();
-                
-                if (data && data.email.toLowerCase() === email) {
-                    savedRecoveryCode = Math.floor(100000 + Math.random() * 900000);
-                    // EmailJS مع validation
-                    emailjs.send("service_cgm7d0c", "template_xi6oxl7", {
-                        to_name: data.name,
-                        to_email: email,
-                        recovery_code: savedRecoveryCode
-                    }).then(() => {
-                        notify("✅ تم إرسال كود الاستعادة", 'success');
-                        mode = 'verify';
-                        updateUI("تأكيد الرمز", "تحديث الرمز السري", "none", "none", "block", "العودة");
-                        document.getElementById('verifyCodeGroup').style.display = 'block';
-                        document.getElementById('passLabel').innerText = "الرمز السري الجديد";
-                        document.getElementById('btnText').innerText = "تحديث الرمز";
-                    }).catch(() => notify("خطأ في الإيميل", 'error'));
-                } else {
-                    throw new Error("البيانات غير متطابقة");
-                }
-
-            } else if (mode === 'verify') {
-                if (parseInt(userEnteredCode) === savedRecoveryCode) {
-                    if (pass.length < 8) {
-                        notify("الرمز الجديد قصير جداً", 'error');
-                        return;
-                    }
-                    await database.ref('users/' + id).update({
-                        passwordHash: hashPassword(pass)
-                    });
-                    notify("✅ تم تحديث الرمز السري", 'success');
-                    setTimeout(() => location.reload(), 2000);
-                } else {
-                    notify("❌ كود التحقق خاطئ", 'error');
-                }
+            } catch (error) {
+                if (error.code === 'auth/email-already-in-use') notify("هذا البريد مستخدم بالفعل!");
+                else notify("خطأ: " + error.message);
+                console.error(error);
             }
+        } 
+        else if (mode === 'login') {
+            try {
+                const snapshot = await database.ref('users/' + id).once('value');
+                const data = snapshot.val();
 
-        } catch (error) {
-            notify(error.message, 'error');
-            console.error('Auth Error:', error);
+                if (data && data.pass === pass) {
+                    const userCredential = await auth.signInWithEmailAndPassword(data.email, pass);
+                    const user = userCredential.user;
+
+                    if (user.emailVerified) {
+                        // --- الجزء المعدل للربط مع المكتبة ---
+                        localStorage.setItem("userName", data.name.trim());
+                        localStorage.setItem("userID", data.id.trim());
+                        localStorage.setItem("universityID", data.id.trim()); // مضاف للربط
+                        localStorage.setItem("securityKey", data.pass); // مضاف للربط
+                        localStorage.setItem("userMajor", data.major || "هندسة البرمجيات");
+                        // ------------------------------------
+                        
+                        notify("مرحباً بك يا " + data.name);
+                        setTimeout(() => { window.location.href = "dashboard.html"; }, 1200);
+                    } else {
+                        notify("⚠️ حسابك غير مفعل! اضغط على الرابط في إيميلك.");
+                        await auth.signOut();
+                    }
+                } else {
+                    notify("رقم الطالب أو كلمة المرور خطأ");
+                }
+            } catch (error) {
+                notify("خطأ في الدخول: تأكد من التفعيل أو صحة البيانات");
+            }
+        }
+        else if (mode === 'forgot') {
+            if (!id || !email) { notify("أدخل الرقم والإيميل"); return; }
+            database.ref('users/' + id).once('value').then((snapshot) => {
+                const data = snapshot.val();
+                if (data && data.email.toLowerCase() === email.toLowerCase()) {
+                    savedRecoveryCode = Math.floor(100000 + Math.random() * 900000);
+                    emailjs.send("service_cgm7d0c", "template_xi6oxl7", { to_name: data.name, to_email: email, recovery_code: savedRecoveryCode })
+                    .then(() => {
+                        notify("تم إرسال كود الاستعادة ✅");
+                        mode = 'verify';
+                        document.getElementById('mainTitle').innerText = "تأكيد الرمز الجديد";
+                        document.getElementById('emailGroup').style.display = 'none';
+                        document.getElementById('verifyCodeGroup').style.display = 'block';
+                        document.getElementById('passGroup').style.display = 'block';
+                        document.getElementById('passLabel').innerText = "أدخل الرمز السري الجديد";
+                        document.getElementById('btnText').innerText = "تحديث كلمة المرور";
+                    });
+                } else { notify("البيانات غير متطابقة"); }
+            });
+        }
+        else if (mode === 'verify') {
+            if (userEnteredCode == savedRecoveryCode) {
+                if (pass.length < 8) { notify("الرمز الجديد قصير جداً"); return; }
+                try {
+                    await database.ref('users/' + id).update({pass: pass});
+                    notify("تم التحديث! يرجى الانتظار...");
+                    setTimeout(() => location.reload(), 1500);
+                } catch(e) { notify("حدث خطأ أثناء التحديث"); }
+            } else { notify("كود التحقق خاطئ ❌"); }
         }
     }
 
-    // =====================================================
-    // 🔥 Event Listeners آمنة
-    // =====================================================
     document.getElementById('idInput').addEventListener('input', function() {
-        this.value = this.value.replace(/[^0-9]/g, '').slice(0, 8);
+        this.value = this.value.replace(/[^0-9]/g, '');
     });
-
-    document.getElementById('authForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        handleAction();
-    });
-
-    // 🔥 تنظيف localStorage عند الخروج
-    window.addEventListener('beforeunload', () => {
-        if (mode === 'login') localStorage.clear();
-    });
-
-    console.log("🔒 AUST Smart Pulse - Secure Mode Active");
 </script>
 </body>
 </html>
