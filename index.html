@@ -101,7 +101,7 @@
         <div class="wisdom-container">
             <p class="wisdom-text">"الطريق طويل، لكن كل خطوة تخطوها اليوم تجعل القمة أقرب."</p>
         </div>
-        <button class="main-btn" onclick="showAuth()">اكمل شغفك</button>
+        <button class="main-btn" onclick="showAuth()">انطلق نحو مستقبلك</button>
         <div class="footer">تطوير المهندسة <b>شهد الخالد</b> & المهندسة<b> ضياء ملائكه</b></div>
     </div>
 
@@ -147,41 +147,31 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
 <script>
-    // 1. نظام تمويه المفاتيح الأمنية
-    const _sec = {
-        a: "QUl6YVN5Q2dkWjFOaWNVOG1aelcicGUtVGs5WDM2aXZjeDBPTW8=",
-        b: "aHR0cHM6Ly9uYWJkLWF1c3QtZGVmYXVsdC1ydGRiLmV1cm9wZS13ZXN0MS5maXJlYmFzZWRhdGFiYXNlLmFwcA==",
-        c: "bmFiZC1hdXN0"
-    };
-    const _dec = (v) => atob(v);
-
-    const firebaseConfig = {
-        apiKey: _dec(_sec.a),
-        databaseURL: _dec(_sec.b),
-        authDomain: _dec(_sec.c) + ".firebaseapp.com",
-        projectId: _dec(_sec.c)
-    };
-
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-    const auth = firebase.auth();
     (function() { emailjs.init("m905j3dqOVj_wLxf-"); })();
 
-    // 2. دوال التشفير والحماية المحلية
-    const vault = {
-        save: (key, val) => {
-            const enc = btoa(unescape(encodeURIComponent(val)));
-            localStorage.setItem(key, enc);
-        },
-        clear: () => localStorage.clear()
+    const firebaseConfig = {
+        apiKey: "AIzaSyCgdZ1NicU8mZzW-pe1-Tk9X36ivcx0OMo",
+        authDomain: "nabd-aust.firebaseapp.com",
+        databaseURL: "https://nabd-aust-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "nabd-aust",
+        storageBucket: "nabd-aust.firebasestorage.app",
+        messagingSenderId: "921777725948",
+        appId: "1:921777725948:web:7b024d0aa101068bef9279",
+        measurementId: "G-HC2TSQ70V2"
     };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const auth = firebase.auth(); 
 
     let mode = 'login';
     let savedRecoveryCode = null;
 
     function notify(msg) {
         const container = document.getElementById('toast-container');
+        if(!container) return; 
         const toast = document.createElement('div');
         toast.className = 'toast';
         toast.innerText = msg;
@@ -189,73 +179,161 @@
         setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 4000);
     }
 
-    // 3. معالج العمليات (سد ثغرات التسجيل والدخول)
+    function showAuth() {
+        document.getElementById('welcomeSection').style.display = 'none';
+        document.getElementById('authSection').style.display = 'block';
+    }
+
+    function togglePass(icon) {
+        const input = document.getElementById('passInput');
+        input.type = (input.type === 'password') ? 'text' : 'password';
+        icon.classList.toggle('fa-eye-slash');
+    }
+
+    function toggleMode() {
+        document.getElementById('verifyCodeGroup').style.display = 'none';
+        document.getElementById('passGroup').style.display = 'block';
+
+        if (mode === 'login' || mode === 'forgot' || mode === 'verify') {
+            mode = 'register';
+            updateUI("إنشاء حساب", "تأكيد الحساب", "block", "block", "block", "لديك حساب؟ <b>سجل دخولك</b>");
+            document.getElementById('forgotLink').style.display = 'none';
+        } else {
+            mode = 'login';
+            updateUI("تسجيل الدخول", "دخول المنصة", "none", "none", "block", "إنشاء حساب جديد");
+            document.getElementById('forgotLink').style.display = 'block';
+        }
+    }
+
+    function showForgot() {
+        mode = 'forgot';
+        updateUI("استعادة الرمز", "إرسال كود التحقق", "none", "block", "none", "العودة للدخول");
+        document.getElementById('verifyCodeGroup').style.display = 'none';
+    }
+
+    function updateUI(t, b, n, e, p, sw) {
+        document.getElementById('mainTitle').innerText = t;
+        document.getElementById('btnText').innerText = b;
+        document.getElementById('nameGroup').style.display = n;
+        document.getElementById('emailGroup').style.display = e;
+        document.getElementById('passGroup').style.display = p;
+        document.getElementById('toggleTxt').innerHTML = sw;
+    }
+
     async function handleAction() {
         const id = document.getElementById('idInput').value.trim();
         const pass = document.getElementById('passInput').value;
         const name = document.getElementById('nameInput').value.trim();
         const email = document.getElementById('emailInput').value.trim();
+        const userEnteredCode = document.getElementById('verifyCodeInput').value.trim();
+
+        if (!id || isNaN(id)) { notify("رقم الطالب يجب أن يكون أرقاماً"); return; }
 
         if (mode === 'register') {
-            if (name.split(/\s+/).length < 3) return notify("الاسم الثلاثي مطلوب");
-            if (pass.length < 8) return notify("الرمز ضعيف (أقل من 8 محارف)");
-            if (!email.toLowerCase().endsWith("@gmail.com")) return notify("Gmail فقط مسموح به");
+            const nameParts = name.split(/\s+/).filter(p => p.length > 0);
+            if (nameParts.length < 3) { notify("يرجى إدخال الاسم الثلاثي"); return; }
+            if (pass.length < 8) { notify("الرمز 8 محارف على الأقل"); return; }
+            if (!email.toLowerCase().endsWith("@gmail.com")) { notify("Gmail فقط!"); return; }
 
-            notify("جاري تأمين حسابك...");
+            notify("جاري إنشاء الحساب...");
+            
             try {
-                // إنشاء الهوية في Auth (تشفير تلقائي من جوجل)
-                const userCred = await auth.createUserWithEmailAndPassword(email, pass);
-                
-                // حفظ البيانات غير الحساسة فقط في القاعدة
-                await database.ref('users/' + id).set({
-                    uN: btoa(unescape(encodeURIComponent(name))), // الاسم مشفر
-                    uE: email,
-                    uI: id,
-                    uM: "هندسة البرمجيات",
-                    uV: false 
+                const snapshot = await database.ref('users/' + id).once('value');
+                if (snapshot.exists()) {
+                    notify("رقم الطالب مسجل مسبقاً!");
+                    return;
+                }
+
+                const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
+                const user = userCredential.user;
+
+                await user.sendEmailVerification();
+                notify("تم إرسال رابط تفعيل لإيميلك ✅");
+
+                await database.ref('users/' + id).set({ 
+                    id, pass, name, email, 
+                    major: "هندسة البرمجيات", 
+                    createdAt: new Date().toISOString()
                 });
 
-                await userCred.user.sendEmailVerification();
-                notify("تم! فعل حسابك من الإيميل الآن ✅");
+                notify("حسابك جاهز! يرجى تفعيل الإيميل قبل الدخول.");
+                
                 await auth.signOut();
-                setTimeout(() => location.reload(), 2000);
-            } catch (e) { notify("فشل التسجيل: " + e.message); }
+                
+                setTimeout(toggleMode, 2000);
+
+            } catch (error) {
+                if (error.code === 'auth/email-already-in-use') notify("هذا البريد مستخدم بالفعل!");
+                else notify("خطأ: " + error.message);
+                console.error(error);
+            }
         } 
         else if (mode === 'login') {
             try {
-                // الدخول عبر البريد (أكثر أماناً من الـ ID الصريح)
-                const userCred = await auth.signInWithEmailAndPassword(email || (id + "@temp.com"), pass);
-                
-                const snap = await database.ref('users/' + id).once('value');
-                if (snap.exists() && userCred.user.emailVerified) {
-                    const data = snap.val();
-                    vault.save("userName", decodeURIComponent(escape(atob(data.uN))));
-                    vault.save("userID", id);
-                    vault.save("userMajor", data.uM);
-                    
-                    notify("مرحباً بكِ مهندسة " + vault.save.userName);
-                    setTimeout(() => window.location.href = "dashboard.html", 1000);
+                const snapshot = await database.ref('users/' + id).once('value');
+                const data = snapshot.val();
+
+                if (data && data.pass === pass) {
+                    const userCredential = await auth.signInWithEmailAndPassword(data.email, pass);
+                    const user = userCredential.user;
+
+                    if (user.emailVerified) {
+                        // --- الجزء المعدل للربط مع المكتبة ---
+                        localStorage.setItem("userName", data.name.trim());
+                        localStorage.setItem("userID", data.id.trim());
+                        localStorage.setItem("universityID", data.id.trim()); // مضاف للربط
+                        localStorage.setItem("securityKey", data.pass); // مضاف للربط
+                        localStorage.setItem("userMajor", data.major || "هندسة البرمجيات");
+                        // ------------------------------------
+                        
+                        notify("مرحباً بك يا " + data.name);
+                        setTimeout(() => { window.location.href = "dashboard.html"; }, 1200);
+                    } else {
+                        notify("⚠️ حسابك غير مفعل! اضغط على الرابط في إيميلك.");
+                        await auth.signOut();
+                    }
                 } else {
-                    notify("يرجى تفعيل الإيميل أو التأكد من الرقم الجامعي");
-                    await auth.signOut();
+                    notify("رقم الطالب أو كلمة المرور خطأ");
                 }
-            } catch (e) { notify("خطأ في البيانات أو التفعيل"); }
+            } catch (error) {
+                notify("خطأ في الدخول: تأكد من التفعيل أو صحة البيانات");
+            }
+        }
+        else if (mode === 'forgot') {
+            if (!id || !email) { notify("أدخل الرقم والإيميل"); return; }
+            database.ref('users/' + id).once('value').then((snapshot) => {
+                const data = snapshot.val();
+                if (data && data.email.toLowerCase() === email.toLowerCase()) {
+                    savedRecoveryCode = Math.floor(100000 + Math.random() * 900000);
+                    emailjs.send("service_cgm7d0c", "template_xi6oxl7", { to_name: data.name, to_email: email, recovery_code: savedRecoveryCode })
+                    .then(() => {
+                        notify("تم إرسال كود الاستعادة ✅");
+                        mode = 'verify';
+                        document.getElementById('mainTitle').innerText = "تأكيد الرمز الجديد";
+                        document.getElementById('emailGroup').style.display = 'none';
+                        document.getElementById('verifyCodeGroup').style.display = 'block';
+                        document.getElementById('passGroup').style.display = 'block';
+                        document.getElementById('passLabel').innerText = "أدخل الرمز السري الجديد";
+                        document.getElementById('btnText').innerText = "تحديث كلمة المرور";
+                    });
+                } else { notify("البيانات غير متطابقة"); }
+            });
+        }
+        else if (mode === 'verify') {
+            if (userEnteredCode == savedRecoveryCode) {
+                if (pass.length < 8) { notify("الرمز الجديد قصير جداً"); return; }
+                try {
+                    await database.ref('users/' + id).update({pass: pass});
+                    notify("تم التحديث! يرجى الانتظار...");
+                    setTimeout(() => location.reload(), 1500);
+                } catch(e) { notify("حدث خطأ أثناء التحديث"); }
+            } else { notify("كود التحقق خاطئ ❌"); }
         }
     }
 
-    // دوال الواجهة
-    function toggleMode() {
-        mode = (mode === 'login') ? 'register' : 'login';
-        document.getElementById('mainTitle').innerText = (mode === 'register') ? "إنشاء حساب جديد" : "تسجيل الدخول";
-        document.getElementById('nameGroup').style.display = (mode === 'register') ? "block" : "none";
-        document.getElementById('emailGroup').style.display = "block"; // جعل الإيميل مطلوباً دائماً للأمان
-        document.getElementById('toggleTxt').innerHTML = (mode === 'register') ? "لديك حساب؟ <b>سجل دخولك</b>" : "ليس لديك حساب؟ <b>إنشاء حساب جديد</b>";
-    }
-
-    function showAuth() {
-        document.getElementById('welcomeSection').style.display = 'none';
-        document.getElementById('authSection').style.display = 'block';
-    }
+    document.getElementById('idInput').addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
 </script>
 </body>
 </html>
